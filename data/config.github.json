@@ -13,6 +13,13 @@
     "enrichment_concurrency": 5
   },
   "sources": {
+    "github": [
+      {"type": "user_events", "username": "torvalds", "enabled": true, "category": "oss"},
+      {"type": "user_events", "username": "karpathy", "enabled": true, "category": "ai-ml"},
+      {"type": "repo_releases", "owner": "vllm-project", "repo": "vllm", "enabled": true, "category": "ai-ml"},
+      {"type": "repo_releases", "owner": "openai", "repo": "openai-python", "enabled": true, "category": "ai-ml"},
+      {"type": "repo_releases", "owner": "deepseek-ai", "repo": "DeepSeek-V3", "enabled": true, "category": "ai-ml"}
+    ],
     "hackernews": {
       "enabled": true,
       "fetch_top_stories": 30,
@@ -33,15 +40,21 @@
       "fetch_comments": 5
     },
     "rss": [
-      {"name": "GitHub Trending - Daily", "url": "https://mshibanami.github.io/GitHubTrendingRSS/daily/all.xml", "enabled": true, "category": "github-trending"},
-      {"name": "Simon Willison", "url": "https://simonwillison.net/atom/everything/", "enabled": true, "category": "ai-tools"}
+      {"name": "GitHub Trending - Daily", "url": "https://mshibanami.github.io/GitHubTrendingRSS/daily/all.xml", "enabled": true, "category": "oss-trending"},
+      {"name": "Simon Willison", "url": "https://simonwillison.net/atom/everything/", "enabled": true, "category": "ai-tools"},
+      {"name": "Ars Technica", "url": "https://feeds.arstechnica.com/arstechnica/index", "enabled": true, "category": "tech"},
+      {"name": "TechCrunch", "url": "https://techcrunch.com/feed/", "enabled": true, "category": "tech"},
+      {"name": "Hacker News RSS", "url": "https://hnrss.org/frontpage", "enabled": true, "category": "tech"},
+      {"name": "The Guardian - World", "url": "https://www.theguardian.com/world/rss", "enabled": true, "category": "worldnews"},
+      {"name": "Reuters - World", "url": "https://www.reutersagency.com/feed/", "enabled": true, "category": "worldnews"},
+      {"name": "Semianalysis", "url": "https://newsletter.semianalysis.com/feed", "enabled": true, "category": "semiconductors"}
     ],
     "google_news": {
       "enabled": true,
-      "query": "world news technology business",
+      "query": "world news technology AI business finance science",
       "language": "en",
       "country": "US",
-      "max_results": 50,
+      "max_results": 60,
       "category": "news"
     },
     "ossinsight": {
@@ -50,8 +63,35 @@
       "languages": ["All", "Python", "TypeScript", "Rust"],
       "keywords": [],
       "min_stars": 20,
-      "max_items": 20,
+      "max_items": 30,
       "category": "oss-trending"
+    },
+    "telegram": {
+      "enabled": true,
+      "channels": [
+        {"channel": "zaihuapd", "enabled": true, "fetch_limit": 20, "category": "ai-news"},
+        {"channel": "solidot", "enabled": true, "fetch_limit": 20, "category": "tech"},
+        {"channel": "fengswx", "enabled": true, "fetch_limit": 20, "category": "ai-news"}
+      ]
+    },
+    "twitter": {
+      "enabled": true,
+      "users": ["karpathy", "ylecun", "fchollet", "sama", "elonmusk"],
+      "fetch_limit": 10,
+      "category": "social",
+      "fetch_reply_text": false,
+      "max_replies_per_tweet": 2,
+      "max_tweets_to_expand": 5,
+      "reply_min_likes": 10
+    },
+    "gdelt": {
+      "enabled": true,
+      "query": "artificial intelligence technology economy climate",
+      "mode": "ArtList",
+      "max_records": 40,
+      "timespan": "24h",
+      "language": "English",
+      "category": "news"
     }
   },
   "filtering": {
@@ -60,12 +100,13 @@
     "max_items": 20,
     "category_groups": {
       "tech": {"name": "科技", "limit": 6, "categories": ["tech", "technology", "ai-tools", "ai-ml", "machine-learning", "llm", "github-trending", "oss-trending"]},
-      "world": {"name": "国际", "limit": 5, "categories": ["news", "world", "worldnews"]},
-      "science": {"name": "科学", "limit": 4, "categories": ["science", "semiconductors", "linux-kernel"]},
-      "finance": {"name": "财经", "limit": 4, "categories": ["finance", "economics", "business", "equities"]}
+      "world": {"name": "国际", "limit": 5, "categories": ["news", "world", "worldnews", "worldnews"]},
+      "science": {"name": "科学", "limit": 3, "categories": ["science", "semiconductors", "linux-kernel"]},
+      "finance": {"name": "财经", "limit": 4, "categories": ["finance", "economics", "business", "equities"]},
+      "social": {"name": "社交热点", "limit": 2, "categories": ["social", "ai-news"]}
     },
     "default_group": "other",
-    "default_group_limit": 3
+    "default_group_limit": 2
   },
   "webhook": {
     "enabled": false
