@@ -42,7 +42,11 @@
       {"name": "TechCrunch", "url": "https://techcrunch.com/feed/", "enabled": true, "category": "tech"},
       {"name": "The Guardian - World", "url": "https://www.theguardian.com/world/rss", "enabled": true},
       {"name": "Reuters - World", "url": "https://www.reutersagency.com/feed/", "enabled": true},
-      {"name": "Semianalysis", "url": "https://newsletter.semianalysis.com/feed", "enabled": true, "category": "tech"}
+      {"name": "Semianalysis", "url": "https://newsletter.semianalysis.com/feed", "enabled": true, "category": "tech"},
+      {"name": "36氪", "url": "https://www.36kr.com/feed", "enabled": true, "category": "tech"},
+      {"name": "虎嗅", "url": "https://rsshub.app/huxiu/article", "enabled": true, "category": "tech"},
+      {"name": "华尔街见闻", "url": "https://rsshub.app/wallstreetcn/news", "enabled": true, "category": "finance"},
+      {"name": "联合早报", "url": "https://rsshub.app/zaobao/realtime", "enabled": true}
     ],
     "google_news": {
       "enabled": true,
