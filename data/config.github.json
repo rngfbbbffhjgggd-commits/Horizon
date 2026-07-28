@@ -8,143 +8,66 @@
     "temperature": 0.3,
     "max_tokens": 8192,
     "throttle_sec": 1,
-    "languages": [
-      "zh",
-      "en"
-    ],
+    "languages": ["zh"],
     "analysis_concurrency": 5,
     "enrichment_concurrency": 5
   },
   "sources": {
-    "github": [
-      {
-        "type": "user_events",
-        "username": "karpathy",
-        "enabled": true
-      },
-      {
-        "type": "repo_releases",
-        "owner": "vllm-project",
-        "repo": "vllm",
-        "enabled": true
-      },
-      {
-        "type": "repo_releases",
-        "owner": "sgl-project",
-        "repo": "sglang",
-        "enabled": true
-      },
-      {
-        "type": "repo_releases",
-        "owner": "triton-lang",
-        "repo": "triton",
-        "enabled": true
-      }
-    ],
     "hackernews": {
       "enabled": true,
       "fetch_top_stories": 30,
-      "min_score": 150
+      "min_score": 80
     },
-    "rss": [
-      {
-        "name": "Simon Willison",
-        "url": "https://simonwillison.net/atom/everything/",
-        "enabled": true,
-        "category": "ai-tools"
-      },
-      {
-        "name": "GitHub Trending - Daily",
-        "url": "https://mshibanami.github.io/GitHubTrendingRSS/daily/all.xml",
-        "enabled": true,
-        "category": "github-trending"
-      },
-      {
-        "name": "Semianalysis",
-        "url": "https://newsletter.semianalysis.com/feed",
-        "enabled": true,
-        "category": "semiconductors"
-      },
-      {
-        "name": "LWN.net",
-        "url": "https://lwn.net/headlines/full_text?key=${LWN_KEY}",
-        "enabled": true,
-        "category": "linux-kernel"
-      }
-    ],
     "reddit": {
       "enabled": true,
       "subreddits": [
-        {
-          "subreddit": "MachineLearning",
-          "enabled": true,
-          "sort": "hot",
-          "time_filter": "day",
-          "fetch_limit": 10,
-          "min_score": 60
-        },
-        {
-          "subreddit": "LocalLLaMA",
-          "enabled": true,
-          "sort": "hot",
-          "time_filter": "day",
-          "fetch_limit": 10,
-          "min_score": 60
-        }
+        {"subreddit": "worldnews", "enabled": true, "sort": "hot", "time_filter": "day", "fetch_limit": 15, "min_score": 100},
+        {"subreddit": "technology", "enabled": true, "sort": "hot", "time_filter": "day", "fetch_limit": 15, "min_score": 50},
+        {"subreddit": "science", "enabled": true, "sort": "hot", "time_filter": "day", "fetch_limit": 10, "min_score": 50},
+        {"subreddit": "MachineLearning", "enabled": true, "sort": "hot", "time_filter": "day", "fetch_limit": 10, "min_score": 30},
+        {"subreddit": "LocalLLaMA", "enabled": true, "sort": "hot", "time_filter": "day", "fetch_limit": 10, "min_score": 30},
+        {"subreddit": "finance", "enabled": true, "sort": "hot", "time_filter": "day", "fetch_limit": 10, "min_score": 50},
+        {"subreddit": "Economics", "enabled": true, "sort": "hot", "time_filter": "day", "fetch_limit": 10, "min_score": 50}
       ],
       "users": [],
-      "fetch_comments": 10
+      "fetch_comments": 5
     },
-    "telegram": {
+    "rss": [
+      {"name": "GitHub Trending - Daily", "url": "https://mshibanami.github.io/GitHubTrendingRSS/daily/all.xml", "enabled": true, "category": "github-trending"},
+      {"name": "Simon Willison", "url": "https://simonwillison.net/atom/everything/", "enabled": true, "category": "ai-tools"}
+    ],
+    "google_news": {
       "enabled": true,
-      "channels": [
-        {
-          "channel": "zaihuapd",
-          "enabled": true,
-          "fetch_limit": 20
-        }
-      ]
+      "query": "world news technology business",
+      "language": "en",
+      "country": "US",
+      "max_results": 50,
+      "category": "news"
+    },
+    "ossinsight": {
+      "enabled": true,
+      "period": "past_24_hours",
+      "languages": ["All", "Python", "TypeScript", "Rust"],
+      "keywords": [],
+      "min_stars": 20,
+      "max_items": 20,
+      "category": "oss-trending"
     }
   },
   "filtering": {
-    "ai_score_threshold": 8.0,
-    "time_window_hours": 24
+    "ai_score_threshold": 6.5,
+    "time_window_hours": 24,
+    "max_items": 20,
+    "category_groups": {
+      "tech": {"name": "科技", "limit": 6, "categories": ["tech", "technology", "ai-tools", "ai-ml", "machine-learning", "llm", "github-trending", "oss-trending"]},
+      "world": {"name": "国际", "limit": 5, "categories": ["news", "world", "worldnews"]},
+      "science": {"name": "科学", "limit": 4, "categories": ["science", "semiconductors", "linux-kernel"]},
+      "finance": {"name": "财经", "limit": 4, "categories": ["finance", "economics", "business", "equities"]}
+    },
+    "default_group": "other",
+    "default_group_limit": 3
   },
   "webhook": {
-    "enabled": true,
-    "url_env": "HORIZON_WEBHOOK_URL",
-    "delivery": "summary_and_items",
-    "overview_position": "last",
-    "platform": "feishu",
-    "layout": "collapsible",
-    "fallback_layout": "markdown",
-    "languages": [
-      "zh"
-    ],
-    "request_body": {
-      "msg_type": "interactive",
-      "card": {
-        "schema": "2.0",
-        "config": {
-          "wide_screen_mode": true
-        },
-        "header": {
-          "title": {
-            "tag": "plain_text",
-            "content": "#{message_title}"
-          },
-          "template": "blue"
-        },
-        "body": {
-          "elements": [
-            {
-              "tag": "markdown",
-              "content": "#{summary}"
-            }
-          ]
-        }
-      }
-    },
-    "headers": ""
+    "enabled": false
   }
 }
