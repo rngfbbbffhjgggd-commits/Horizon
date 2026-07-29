@@ -8,52 +8,229 @@
     "temperature": 0.3,
     "max_tokens": 8192,
     "throttle_sec": 1,
-    "languages": ["zh"],
+    "languages": [
+      "zh"
+    ],
     "analysis_concurrency": 5,
     "enrichment_concurrency": 5
   },
   "sources": {
     "github": [
-      {"type": "user_events", "username": "torvalds", "enabled": true},
-      {"type": "user_events", "username": "karpathy", "enabled": true, "category": "tech"},
-      {"type": "repo_releases", "owner": "vllm-project", "repo": "vllm", "enabled": true, "category": "tech"},
-      {"type": "repo_releases", "owner": "openai", "repo": "openai-python", "enabled": true, "category": "tech"},
-      {"type": "repo_releases", "owner": "deepseek-ai", "repo": "DeepSeek-V3", "enabled": true, "category": "tech"}
+      {
+        "type": "user_events",
+        "username": "torvalds",
+        "enabled": true
+      },
+      {
+        "type": "user_events",
+        "username": "karpathy",
+        "enabled": true,
+        "category": "tech"
+      },
+      {
+        "type": "repo_releases",
+        "owner": "vllm-project",
+        "repo": "vllm",
+        "enabled": true,
+        "category": "tech"
+      },
+      {
+        "type": "repo_releases",
+        "owner": "openai",
+        "repo": "openai-python",
+        "enabled": true,
+        "category": "tech"
+      },
+      {
+        "type": "repo_releases",
+        "owner": "deepseek-ai",
+        "repo": "DeepSeek-V3",
+        "enabled": true,
+        "category": "tech"
+      }
     ],
-    "hackernews": {"enabled": true, "fetch_top_stories": 30, "min_score": 80},
+    "hackernews": {
+      "enabled": true,
+      "fetch_top_stories": 30,
+      "min_score": 80
+    },
     "reddit": {
       "enabled": true,
       "subreddits": [
-        {"subreddit": "worldnews", "enabled": true, "sort": "hot", "time_filter": "day", "fetch_limit": 15, "min_score": 100},
-        {"subreddit": "technology", "enabled": true, "sort": "hot", "time_filter": "day", "fetch_limit": 10, "min_score": 50, "category": "tech"},
-        {"subreddit": "science", "enabled": true, "sort": "hot", "time_filter": "day", "fetch_limit": 10, "min_score": 50},
-        {"subreddit": "MachineLearning", "enabled": true, "sort": "hot", "time_filter": "day", "fetch_limit": 8, "min_score": 30, "category": "tech"},
-        {"subreddit": "LocalLLaMA", "enabled": true, "sort": "hot", "time_filter": "day", "fetch_limit": 8, "min_score": 30, "category": "tech"},
-        {"subreddit": "finance", "enabled": true, "sort": "hot", "time_filter": "day", "fetch_limit": 10, "min_score": 50, "category": "finance"},
-        {"subreddit": "Economics", "enabled": true, "sort": "hot", "time_filter": "day", "fetch_limit": 10, "min_score": 50, "category": "finance"}
+        {
+          "subreddit": "worldnews",
+          "enabled": true,
+          "sort": "hot",
+          "time_filter": "day",
+          "fetch_limit": 15,
+          "min_score": 100
+        },
+        {
+          "subreddit": "technology",
+          "enabled": true,
+          "sort": "hot",
+          "time_filter": "day",
+          "fetch_limit": 10,
+          "min_score": 50,
+          "category": "tech"
+        },
+        {
+          "subreddit": "science",
+          "enabled": true,
+          "sort": "hot",
+          "time_filter": "day",
+          "fetch_limit": 10,
+          "min_score": 50
+        },
+        {
+          "subreddit": "MachineLearning",
+          "enabled": true,
+          "sort": "hot",
+          "time_filter": "day",
+          "fetch_limit": 8,
+          "min_score": 30,
+          "category": "tech"
+        },
+        {
+          "subreddit": "LocalLLaMA",
+          "enabled": true,
+          "sort": "hot",
+          "time_filter": "day",
+          "fetch_limit": 8,
+          "min_score": 30,
+          "category": "tech"
+        },
+        {
+          "subreddit": "finance",
+          "enabled": true,
+          "sort": "hot",
+          "time_filter": "day",
+          "fetch_limit": 10,
+          "min_score": 50,
+          "category": "finance"
+        },
+        {
+          "subreddit": "Economics",
+          "enabled": true,
+          "sort": "hot",
+          "time_filter": "day",
+          "fetch_limit": 10,
+          "min_score": 50,
+          "category": "finance"
+        }
       ],
       "users": [],
       "fetch_comments": 5
     },
     "rss": [
-      {"name": "GitHub Trending - Daily", "url": "https://mshibanami.github.io/GitHubTrendingRSS/daily/all.xml", "enabled": true, "category": "tech"},
-      {"name": "Simon Willison", "url": "https://simonwillison.net/atom/everything/", "enabled": true, "category": "tech"},
-      {"name": "Ars Technica", "url": "https://feeds.arstechnica.com/arstechnica/index", "enabled": true, "category": "tech"},
-      {"name": "TechCrunch", "url": "https://techcrunch.com/feed/", "enabled": true, "category": "tech"},
-      {"name": "The Guardian - World", "url": "https://www.theguardian.com/world/rss", "enabled": true},
-      {"name": "Reuters - World", "url": "https://www.reutersagency.com/feed/", "enabled": true},
-      {"name": "Semianalysis", "url": "https://newsletter.semianalysis.com/feed", "enabled": true, "category": "tech"},
-      {"name": "36氪", "url": "https://www.36kr.com/feed", "enabled": true, "category": "tech"},
-      {"name": "澎湃新闻", "url": "https://feedx.net/rss/thepaper.xml", "enabled": true},
-      {"name": "路透中文网", "url": "https://feedx.net/rss/reuters.xml", "enabled": true, "category": "finance"},
-      {"name": "BBC中文", "url": "https://feedx.net/rss/bbc.xml", "enabled": true},
-      {"name": "FT中文网", "url": "https://feedx.net/rss/ft.xml", "enabled": true, "category": "finance"},
-      {"name": "联合早报", "url": "https://feedx.net/rss/zaobaotoday.xml", "enabled": true},
-      {"name": "日经中文网", "url": "https://feedx.net/rss/nikkei.xml", "enabled": true, "category": "finance"},
-      {"name": "华尔街日报", "url": "https://feedx.net/rss/wsj.xml", "enabled": true, "category": "finance"},
-      {"name": "界面新闻", "url": "https://feedx.net/rss/jiemian.xml", "enabled": true, "category": "finance"},
-      {"name": "虎嗅", "url": "https://feedx.net/rss/huxiu.xml", "enabled": true, "category": "tech"},
-      {"name": "南方周末", "url": "https://feedx.net/rss/infzm.xml", "enabled": true}
+      {
+        "name": "GitHub Trending - Daily",
+        "url": "https://mshibanami.github.io/GitHubTrendingRSS/daily/all.xml",
+        "enabled": true,
+        "category": "tech"
+      },
+      {
+        "name": "Simon Willison",
+        "url": "https://simonwillison.net/atom/everything/",
+        "enabled": true,
+        "category": "tech"
+      },
+      {
+        "name": "Ars Technica",
+        "url": "https://feeds.arstechnica.com/arstechnica/index",
+        "enabled": true,
+        "category": "tech"
+      },
+      {
+        "name": "TechCrunch",
+        "url": "https://techcrunch.com/feed/",
+        "enabled": true,
+        "category": "tech"
+      },
+      {
+        "name": "The Guardian - World",
+        "url": "https://www.theguardian.com/world/rss",
+        "enabled": true
+      },
+      {
+        "name": "Reuters - World",
+        "url": "https://www.reutersagency.com/feed/",
+        "enabled": true
+      },
+      {
+        "name": "Semianalysis",
+        "url": "https://newsletter.semianalysis.com/feed",
+        "enabled": true,
+        "category": "tech"
+      },
+      {
+        "name": "36氪",
+        "url": "https://www.36kr.com/feed",
+        "enabled": true,
+        "category": "tech"
+      },
+      {
+        "name": "澎湃新闻",
+        "url": "https://feedx.net/rss/thepaper.xml",
+        "enabled": true
+      },
+      {
+        "name": "路透中文网",
+        "url": "https://feedx.net/rss/reuters.xml",
+        "enabled": true,
+        "category": "finance"
+      },
+      {
+        "name": "BBC中文",
+        "url": "https://feedx.net/rss/bbc.xml",
+        "enabled": true
+      },
+      {
+        "name": "FT中文网",
+        "url": "https://feedx.net/rss/ft.xml",
+        "enabled": true,
+        "category": "finance"
+      },
+      {
+        "name": "联合早报",
+        "url": "https://feedx.net/rss/zaobaotoday.xml",
+        "enabled": true
+      },
+      {
+        "name": "日经中文网",
+        "url": "https://feedx.net/rss/nikkei.xml",
+        "enabled": true,
+        "category": "finance"
+      },
+      {
+        "name": "华尔街日报",
+        "url": "https://feedx.net/rss/wsj.xml",
+        "enabled": true,
+        "category": "finance"
+      },
+      {
+        "name": "界面新闻",
+        "url": "https://feedx.net/rss/jiemian.xml",
+        "enabled": true,
+        "category": "finance"
+      },
+      {
+        "name": "虎嗅",
+        "url": "https://feedx.net/rss/huxiu.xml",
+        "enabled": true,
+        "category": "tech"
+      },
+      {
+        "name": "南方周末",
+        "url": "https://feedx.net/rss/infzm.xml",
+        "enabled": true
+      },
+      {
+        "name": "经济日报",
+        "url": "https://feedx.net/rss/jingjiribao.xml",
+        "enabled": true,
+        "category": "finance"
+      }
     ],
     "google_news": {
       "enabled": true,
@@ -66,7 +243,12 @@
     "ossinsight": {
       "enabled": true,
       "period": "past_24_hours",
-      "languages": ["All", "Python", "TypeScript", "Rust"],
+      "languages": [
+        "All",
+        "Python",
+        "TypeScript",
+        "Rust"
+      ],
       "keywords": [],
       "min_stars": 20,
       "max_items": 30,
@@ -75,14 +257,33 @@
     "telegram": {
       "enabled": true,
       "channels": [
-        {"channel": "zaihuapd", "enabled": true, "fetch_limit": 20, "category": "tech"},
-        {"channel": "solidot", "enabled": true, "fetch_limit": 20},
-        {"channel": "fengswx", "enabled": true, "fetch_limit": 20, "category": "tech"}
+        {
+          "channel": "zaihuapd",
+          "enabled": true,
+          "fetch_limit": 20,
+          "category": "tech"
+        },
+        {
+          "channel": "solidot",
+          "enabled": true,
+          "fetch_limit": 20
+        },
+        {
+          "channel": "fengswx",
+          "enabled": true,
+          "fetch_limit": 20,
+          "category": "tech"
+        }
       ]
     },
     "twitter": {
       "enabled": true,
-      "users": ["karpathy", "ylecun", "fchollet", "sama"],
+      "users": [
+        "karpathy",
+        "ylecun",
+        "fchollet",
+        "sama"
+      ],
       "fetch_limit": 10,
       "category": "tech",
       "fetch_reply_text": false,
@@ -105,8 +306,20 @@
     "time_window_hours": 24,
     "max_items": 30,
     "category_groups": {
-      "tech": {"name": "科技", "limit": 5, "categories": ["tech"]},
-      "finance": {"name": "财经", "limit": 5, "categories": ["finance"]}
+      "tech": {
+        "name": "科技",
+        "limit": 5,
+        "categories": [
+          "tech"
+        ]
+      },
+      "finance": {
+        "name": "财经",
+        "limit": 6,
+        "categories": [
+          "finance"
+        ]
+      }
     },
     "default_group": "全球要闻",
     "default_group_limit": 20
