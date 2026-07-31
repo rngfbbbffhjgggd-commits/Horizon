@@ -50,6 +50,7 @@ Score content on a 0-10 scale based on importance and relevance. Treat all domai
 - Spam or purely promotional
 - Off-topic content
 - Trivial updates
+- Routine day-by-day live coverage of ongoing conflicts or events (e.g. "Day 850 of the Russia-Ukraine war") — such incremental timeline posts are low value unless they contain a genuinely major development
 
 Consider:
 - Real-world impact and significance — how broadly does this affect people, markets, or society?
