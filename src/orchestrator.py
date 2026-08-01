@@ -606,13 +606,29 @@ class HorizonOrchestrator:
         # Build a set of indices to drop (all non-primary duplicates)
         drop_indices: set[int] = set()
         for group in duplicate_groups:
-            if not isinstance(group, list) or len(group) < 2:
+            if not isinstance(group, (list, dict)):
                 continue
-            primary_idx = group[0]
-            if primary_idx < 0 or primary_idx >= len(items):
+
+            # Support both new format (dict with primary/duplicates/distinct_points)
+            # and old format (list where first index is primary).
+            if isinstance(group, dict):
+                primary_idx = group.get("primary")
+                dup_idxs = group.get("duplicates", [])
+                distinct_points = group.get("distinct_points", "") or ""
+            else:
+                primary_idx = group[0] if group else None
+                dup_idxs = group[1:] if len(group) > 1 else []
+                distinct_points = ""
+
+            if not isinstance(primary_idx, int) or primary_idx < 0 or primary_idx >= len(items):
                 continue
             primary = items[primary_idx]
-            for dup_idx in group[1:]:
+
+            # Store the distinct points (unique info from duplicates) for rendering.
+            if distinct_points and primary.metadata:
+                primary.metadata["distinct_points"] = distinct_points
+
+            for dup_idx in dup_idxs:
                 if not isinstance(dup_idx, int) or dup_idx < 0 or dup_idx >= len(items):
                     continue
                 if dup_idx == primary_idx:
