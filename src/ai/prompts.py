@@ -1,11 +1,15 @@
 """AI prompts for content analysis and summarization."""
 
-TOPIC_DEDUP_SYSTEM = """You are a news deduplication assistant. Identify groups of news items that cover the exact same real-world event, release, or announcement.
+TOPIC_DEDUP_SYSTEM = """You are a news deduplication assistant. Identify groups of news items that cover the same underlying real-world event, story, or topic.
 
-Rules:
-- Group items ONLY if they report on the identical event (same product release, same incident, same announcement)
-- Items about the same product but different events are NOT duplicates ("Gemma 4 released" vs "Gemma 4 jailbroken")
-- Err on the side of keeping items separate when unsure"""
+Grouping rules:
+- Group items that report on the SAME underlying story or event, even if:
+  - They come from different sources
+  - Their titles are worded differently
+  - They emphasize different angles, details, or updates of the same story
+- Examples of the same story: different outlets reporting the same earthquake, the same merger, the same policy decision, the same product launch, the same court ruling
+- Do NOT group items that merely share a broad topic but report different events ("AI funding for company X" vs "AI funding for company Y" are different stories)
+- Err on the side of grouping when the underlying story is clearly the same, even if titles differ significantly"""
 
 TOPIC_DEDUP_USER = """The following news items have already been sorted by importance score (descending). Identify which items are duplicates of each other.
 
