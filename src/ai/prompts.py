@@ -11,15 +11,25 @@ Grouping rules:
 - Do NOT group items that merely share a broad topic but report different events ("AI funding for company X" vs "AI funding for company Y" are different stories)
 - Err on the side of grouping when the underlying story is clearly the same, even if titles differ significantly"""
 
-TOPIC_DEDUP_USER = """The following news items have already been sorted by importance score (descending). Identify which items are duplicates of each other.
+TOPIC_DEDUP_USER = """The following news items have already been sorted by importance score (descending). Identify which items are duplicates of the same underlying story.
 
 {items}
 
-Return a JSON object listing only the groups that contain duplicates (2+ items). Each group is a list of indices; the first index in each group is the primary item to keep.
+Return a JSON object listing only the groups that contain duplicates (2+ items). For each group:
+- "primary": the index of the item to keep (the highest-scored item, i.e., the first in the group)
+- "duplicates": list of indices of the other items in the same group
+- "distinct_points": a concise summary of the UNIQUE information that the duplicate items add beyond the primary item (new details, different angles, updated facts, quotes). Write in the primary item's language. If duplicates add nothing new, use an empty string.
 
 Respond with valid JSON only:
 {{
-  "duplicates": [[<primary_idx>, <dup_idx>, ...], ...]
+  "duplicates": [
+    {{
+      "primary": <primary_idx>,
+      "duplicates": [<dup_idx>, ...],
+      "distinct_points": "<what the duplicates uniquely add, or empty string>"
+    }},
+    ...
+  ]
 }}
 
 If there are no duplicates at all, return: {{"duplicates": []}}"""
