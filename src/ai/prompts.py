@@ -143,6 +143,7 @@ Field definitions:
 **CRITICAL — Language rules (MUST follow):**
 - All *_en fields MUST be written in English.
 - All *_zh fields MUST be written in Simplified Chinese (简体中文). 绝对不能用英文写 _zh 字段的内容。Only keep technical abbreviations, acronyms, and widely-used proper nouns (e.g. "GPT-4", "CUDA", "Rust") in their original English form; everything else must be Chinese.
+- **Acronym annotation rule**: In every *_zh field (especially titles, whats_new_zh, why_it_matters_zh, key_details_zh, background_zh), the FIRST time an English abbreviation, acronym, or organization code appears, annotate it with its Chinese full name or a brief explanation in parentheses, e.g. "BP（英国石油公司）", "USAID（美国国际开发署）", "FCC（美国联邦通信委员会）", "ASML（阿斯麦，荷兰光刻机巨头）". Exception: universally known abbreviations such as AI, CEO, GDP, WTO, UN, NATO may stay unannotated. If the same abbreviation appears again later, do NOT repeat the annotation.
 
 Guidelines:
 - EVERY field (except community_discussion when no comments exist) must contain at least one complete sentence — no field may be empty or contain just a phrase
@@ -170,7 +171,7 @@ CONTENT_ENRICHMENT_USER = """Provide a structured bilingual analysis for the fol
 **Web Search Results (for grounding):**
 {web_context}
 
-Respond with valid JSON only. Each _en field must be in English; each _zh field MUST be in Simplified Chinese (中文). Every field MUST be at least one complete sentence (except community_discussion fields when no comments exist):
+Respond with valid JSON only. Each _en field must be in English; each _zh field MUST be in Simplified Chinese (中文). In _zh fields, annotate the first occurrence of English abbreviations with their Chinese full names in parentheses (e.g. "BP（英国石油公司）"); commonly known ones like AI/CEO/GDP can stay unannotated. Every field MUST be at least one complete sentence (except community_discussion fields when no comments exist):
 {{
   "title_en": "<short headline in English, ≤15 words>",
   "title_zh": "<用中文写一个简短标题，不超过15个词>",
