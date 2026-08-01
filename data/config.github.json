@@ -153,8 +153,8 @@
         "enabled": true
       },
       {
-        "name": "Reuters - World",
-        "url": "https://www.reutersagency.com/feed/",
+        "name": "Reuters (English)",
+        "url": "https://feedx.net/rss/reutersen.xml",
         "enabled": true
       },
       {
@@ -175,25 +175,19 @@
         "enabled": true
       },
       {
-        "name": "路透中文网",
-        "url": "https://feedx.net/rss/reuters.xml",
-        "enabled": true,
-        "category": "finance"
-      },
-      {
         "name": "BBC中文",
         "url": "https://feedx.net/rss/bbc.xml",
         "enabled": true
       },
       {
         "name": "FT中文网",
-        "url": "https://feedx.net/rss/ft.xml",
+        "url": "https://www.ftchinese.com/rss/news",
         "enabled": true,
         "category": "finance"
       },
       {
         "name": "联合早报",
-        "url": "https://feedx.net/rss/zaobaotoday.xml",
+        "url": "https://feedx.net/rss/zaobao.xml",
         "enabled": true
       },
       {
