@@ -53,6 +53,7 @@ LABELS = {
         "discussion": "Discussion",
         "references": "References",
         "tags": "Tags",
+        "distinct_points": "Additional details from other sources",
         "selected_items": "From {total} items, {selected} important content pieces were selected",
         "empty_analyzed": "Analyzed {total} items, but none met the importance threshold.",
         "empty_body": (
@@ -73,6 +74,7 @@ LABELS = {
         "discussion": "社区讨论",
         "references": "参考链接",
         "tags": "标签",
+        "distinct_points": "其他来源补充",
         "selected_items": "从 {total} 条内容中筛选出 {selected} 条重要资讯。",
         "empty_analyzed": "已分析 {total} 条内容，但没有达到重要性阈值的条目。",
         "empty_body": (
@@ -282,6 +284,14 @@ class DailySummarizer:
         if discussion:
             lines.append("")
             lines.append(f"**{labels['discussion']}**: {discussion}")
+
+        distinct_points = meta.get("distinct_points") or ""
+        if distinct_points:
+            distinct_points = _escape_markdown(distinct_points)
+            if language == "zh":
+                distinct_points = _pangu(distinct_points)
+            lines.append("")
+            lines.append(f"**{labels['distinct_points']}**: {distinct_points}")
 
         if item.ai_tags:
             tags_str = ", ".join([f"`#{_escape_markdown(t)}`" for t in item.ai_tags])
