@@ -572,9 +572,13 @@ class HorizonOrchestrator:
         exceed the model's output-token limit and return truncated JSON, which
         fails to parse and silently disables deduplication.
 
-        Falls back to returning items unchanged if all AI calls fail.
+        To catch duplicates that fall on batch boundaries, up to
+        ``_DEDUP_ROUNDS`` passes run over the remaining items. Each pass uses a
+        slightly larger batch size so the batch boundaries shift and pairs that
+        were split across batches in an earlier pass get a chance to be grouped
+        together. Fall back to returning items unchanged if all AI calls fail.
         """
-        _DEDUP_BATCH_SIZE = 40
+        _DEDUP_BATCH_SIZES = (40, 55)
 
         if len(items) <= 1:
             return items
@@ -595,7 +599,7 @@ class HorizonOrchestrator:
             batch_items: List[ContentItem],
             offset: int,
         ) -> List[dict]:
-            """Run dedup on one batch; returns groups with GLOBAL indices."""
+            """Run dedup on one batch; returns groups with LOCAL indices."""
             try:
                 response = await ai_client.complete(
                     system=TOPIC_DEDUP_SYSTEM,
@@ -618,73 +622,96 @@ class HorizonOrchestrator:
                     )
                 return []
 
-        # Split into batches and run them concurrently.
-        batches = [
-            items[i : i + _DEDUP_BATCH_SIZE]
-            for i in range(0, len(items), _DEDUP_BATCH_SIZE)
-        ]
-        offsets = [i for i in range(0, len(items), _DEDUP_BATCH_SIZE)]
+        async def _dedup_pass(
+            ai_client,
+            pass_items: List[ContentItem],
+            batch_size: int,
+            pass_label: str,
+        ) -> List[ContentItem]:
+            """Run one dedup pass over pass_items; returns surviving items."""
+            if len(pass_items) <= 1:
+                return pass_items
+
+            batches = [
+                pass_items[i : i + batch_size]
+                for i in range(0, len(pass_items), batch_size)
+            ]
+            offsets = [i for i in range(0, len(pass_items), batch_size)]
+
+            batch_results = await asyncio.gather(
+                *[
+                    _dedup_batch(ai_client, batch, offset)
+                    for batch, offset in zip(batches, offsets)
+                ]
+            )
+
+            # Flatten groups and remap batch-local indices to global indices.
+            duplicate_groups: List[tuple] = []
+            for offset, groups in zip(offsets, batch_results):
+                for group in groups:
+                    if not isinstance(group, (list, dict)):
+                        continue
+                    if isinstance(group, dict):
+                        primary = group.get("primary")
+                        dups = group.get("duplicates", [])
+                        distinct = group.get("distinct_points", "") or ""
+                    else:
+                        primary = group[0] if group else None
+                        dups = group[1:] if len(group) > 1 else []
+                        distinct = ""
+                    if not isinstance(primary, int):
+                        continue
+                    duplicate_groups.append(
+                        (offset + primary, [offset + d for d in dups if isinstance(d, int)], distinct)
+                    )
+
+            if not duplicate_groups:
+                return pass_items
+
+            drop_indices: set[int] = set()
+            for primary_idx, dup_idxs, distinct_points in duplicate_groups:
+                if primary_idx < 0 or primary_idx >= len(pass_items):
+                    continue
+                primary = pass_items[primary_idx]
+
+                # Store the distinct points (unique info from duplicates) for rendering.
+                if distinct_points and primary.metadata:
+                    existing = primary.metadata.get("distinct_points", "") or ""
+                    if existing:
+                        primary.metadata["distinct_points"] = existing + " " + distinct_points
+                    else:
+                        primary.metadata["distinct_points"] = distinct_points
+
+                for dup_idx in dup_idxs:
+                    if dup_idx < 0 or dup_idx >= len(pass_items):
+                        continue
+                    if dup_idx == primary_idx:
+                        continue
+                    dup = pass_items[dup_idx]
+                    # Merge comments/content from the duplicate into the primary
+                    if dup.content:
+                        if not primary.content or dup.content not in primary.content:
+                            label = dup.source_type.value
+                            primary.content = (primary.content or "") + f"\n\n--- From {label} ---\n{dup.content}"
+                    if log:
+                        self.console.print(
+                            f"   [dim]dedup: keep [{primary_idx}] {primary.title}[/dim]\n"
+                            f"   [dim]       drop [{dup_idx}] {dup.title}[/dim]"
+                        )
+                    drop_indices.add(dup_idx)
+
+            return [it for i, it in enumerate(pass_items) if i not in drop_indices]
 
         ai_client = create_ai_client(self.config.ai)
-        batch_results = await asyncio.gather(
-            *[
-                _dedup_batch(ai_client, batch, offset)
-                for batch, offset in zip(batches, offsets)
-            ]
-        )
 
-        # Flatten groups and remap batch-local indices to global indices.
-        duplicate_groups: List[tuple] = []
-        for offset, groups in zip(offsets, batch_results):
-            for group in groups:
-                if not isinstance(group, (list, dict)):
-                    continue
-                if isinstance(group, dict):
-                    primary = group.get("primary")
-                    dups = group.get("duplicates", [])
-                    distinct = group.get("distinct_points", "") or ""
-                else:
-                    primary = group[0] if group else None
-                    dups = group[1:] if len(group) > 1 else []
-                    distinct = ""
-                if not isinstance(primary, int):
-                    continue
-                duplicate_groups.append((offset + primary, [offset + d for d in dups if isinstance(d, int)], distinct))
+        # Pass 1 with the default batch size.
+        working = await _dedup_pass(ai_client, items, _DEDUP_BATCH_SIZES[0], "pass1")
 
-        if not duplicate_groups:
-            return items
+        # Pass 2 with a different batch size to catch cross-batch duplicates.
+        if len(working) > _DEDUP_BATCH_SIZES[0] and len(_DEDUP_BATCH_SIZES) > 1:
+            working = await _dedup_pass(ai_client, working, _DEDUP_BATCH_SIZES[1], "pass2")
 
-        # Build a set of indices to drop (all non-primary duplicates)
-        drop_indices: set[int] = set()
-        for primary_idx, dup_idxs, distinct_points in duplicate_groups:
-            if primary_idx < 0 or primary_idx >= len(items):
-                continue
-            primary = items[primary_idx]
-
-            # Store the distinct points (unique info from duplicates) for rendering.
-            if distinct_points and primary.metadata:
-                primary.metadata["distinct_points"] = distinct_points
-
-            for dup_idx in dup_idxs:
-                if dup_idx < 0 or dup_idx >= len(items):
-                    continue
-                if dup_idx == primary_idx:
-                    continue
-                dup = items[dup_idx]
-                # Merge comments/content from the duplicate into the primary
-                if dup.content:
-                    if not primary.content or dup.content not in primary.content:
-                        label = dup.source_type.value
-                        primary.content = (primary.content or "") + f"\n\n--- From {label} ---\n{dup.content}"
-                if log:
-                    self.console.print(
-                        f"   [dim]dedup: keep [{primary_idx}] {primary.title}[/dim]\n"
-                        f"   [dim]       drop [{dup_idx}] {dup.title}[/dim]"
-                    )
-                drop_indices.add(dup_idx)
-
-        return [item for i, item in enumerate(items) if i not in drop_indices]
-
+        return working
     async def filter_items(
         self,
         items: List[ContentItem],
@@ -958,3 +985,4 @@ class HorizonOrchestrator:
         summarizer = DailySummarizer()
 
         return await summarizer.generate_summary(items, date, total_fetched, language=language)
+
