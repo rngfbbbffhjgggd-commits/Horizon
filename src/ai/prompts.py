@@ -9,7 +9,8 @@ Grouping rules:
   - They emphasize different angles, details, or updates of the same story
 - Examples of the same story: different outlets reporting the same earthquake, the same merger, the same policy decision, the same product launch, the same court ruling
 - Do NOT group items that merely share a broad topic but report different events ("AI funding for company X" vs "AI funding for company Y" are different stories)
-- Err on the side of grouping when the underlying story is clearly the same, even if titles differ significantly"""
+- Err on the side of grouping when the underlying story is clearly the same, even if titles differ significantly
+- The final output language for "distinct_points" must always be Simplified Chinese (简体中文), because the daily digest is rendered in Chinese."""
 
 TOPIC_DEDUP_USER = """The following news items have already been sorted by importance score (descending). Identify which items are duplicates of the same underlying story.
 
@@ -18,7 +19,7 @@ TOPIC_DEDUP_USER = """The following news items have already been sorted by impor
 Return a JSON object listing only the groups that contain duplicates (2+ items). For each group:
 - "primary": the index of the item to keep (the highest-scored item, i.e., the first in the group)
 - "duplicates": list of indices of the other items in the same group
-- "distinct_points": a concise summary of the UNIQUE information that the duplicate items add beyond the primary item (new details, different angles, updated facts, quotes). Write in the primary item's language. If duplicates add nothing new, use an empty string.
+- "distinct_points": a concise summary of the UNIQUE information that the duplicate items add beyond the primary item (new details, different angles, updated facts, quotes). **Write in Simplified Chinese (简体中文)**, regardless of the language of the item titles. If duplicates add nothing new, use an empty string.
 
 Respond with valid JSON only:
 {{
@@ -187,3 +188,4 @@ Respond with valid JSON only. Each _en field must be in English; each _zh field 
   "community_discussion_zh": "<用中文写1-3句话，或空字符串>",
   "sources": ["<url from search results>", "..."]
 }}"""
+
