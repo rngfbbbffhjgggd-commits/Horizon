@@ -88,9 +88,13 @@ class RSSScraper(BaseScraper):
             feed = feedparser.parse(response.text)
 
             for entry in feed.entries:
-                # Parse published date
+                # Parse published date. Feeds without any date field (e.g. the
+                # GitHub Trending RSS mirror) fall back to "now" so their items
+                # are not silently dropped by the freshness filter.
                 published_at = self._parse_date(entry)
-                if not published_at or published_at < since:
+                if published_at is None:
+                    published_at = datetime.now(timezone.utc)
+                if published_at < since:
                     continue
 
                 # Generate unique ID from feed URL and entry ID

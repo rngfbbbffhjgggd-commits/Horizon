@@ -561,66 +561,103 @@ class HorizonOrchestrator:
 
         This is a stable stage helper for integrations such as MCP.
 
-        Sends all item titles, tags, and summaries to AI in a single call.
-        Items must already be sorted by ai_score descending so that the first
-        item in each duplicate group is always the highest-scored one.
-        Content (comments) from duplicate items is merged into the primary.
+        Sends item titles, tags, and summaries to AI in batches. Items must
+        already be sorted by ai_score descending so that the first item in each
+        duplicate group is always the highest-scored one. Content (comments)
+        from duplicate items is merged into the primary.
 
-        Falls back to returning items unchanged if the AI call fails.
+        Batching: the full item list is split into batches of at most
+        ``_DEDUP_BATCH_SIZE`` items and each batch is sent to the AI in a
+        separate request (run concurrently). A single oversized request can
+        exceed the model's output-token limit and return truncated JSON, which
+        fails to parse and silently disables deduplication.
+
+        Falls back to returning items unchanged if all AI calls fail.
         """
+        _DEDUP_BATCH_SIZE = 40
+
         if len(items) <= 1:
             return items
 
         from .ai.prompts import TOPIC_DEDUP_SYSTEM, TOPIC_DEDUP_USER
         from .ai.utils import parse_json_response
 
-        # Build the item list for the prompt
-        lines = []
-        for i, item in enumerate(items):
-            tags = ", ".join(item.ai_tags) if item.ai_tags else "—"
-            summary = item.ai_summary or "—"
-            lines.append(f"[{i}] {item.title}\n    Tags: {tags}\n    Summary: {summary}")
-        items_text = "\n\n".join(lines)
+        def _format_batch(batch_items: List[ContentItem]) -> str:
+            lines = []
+            for i, item in enumerate(batch_items):
+                tags = ", ".join(item.ai_tags) if item.ai_tags else "—"
+                summary = item.ai_summary or "—"
+                lines.append(f"[{i}] {item.title}\n    Tags: {tags}\n    Summary: {summary}")
+            return "\n\n".join(lines)
 
-        try:
-            ai_client = create_ai_client(self.config.ai)
-            response = await ai_client.complete(
-                system=TOPIC_DEDUP_SYSTEM,
-                user=TOPIC_DEDUP_USER.format(items=items_text),
-            )
-            result = parse_json_response(response)
-            if result is None:
+        async def _dedup_batch(
+            ai_client,
+            batch_items: List[ContentItem],
+            offset: int,
+        ) -> List[dict]:
+            """Run dedup on one batch; returns groups with GLOBAL indices."""
+            try:
+                response = await ai_client.complete(
+                    system=TOPIC_DEDUP_SYSTEM,
+                    user=TOPIC_DEDUP_USER.format(items=_format_batch(batch_items)),
+                )
+                result = parse_json_response(response)
+                if result is None:
+                    if log:
+                        self.console.print(
+                            f"[yellow]  dedup: could not parse AI response for batch "
+                            f"@{offset}, skipping batch[/yellow]"
+                        )
+                    return []
+                return result.get("duplicates", [])
+            except Exception as e:
                 if log:
-                    self.console.print("[yellow]  dedup: could not parse AI response, skipping[/yellow]")
-                return items
+                    self.console.print(
+                        f"[yellow]  dedup: AI call failed for batch @{offset} ({e}), "
+                        f"skipping batch[/yellow]"
+                    )
+                return []
 
-            duplicate_groups = result.get("duplicates", [])
-        except Exception as e:
-            if log:
-                self.console.print(f"[yellow]  dedup: AI call failed ({e}), skipping[/yellow]")
-            return items
+        # Split into batches and run them concurrently.
+        batches = [
+            items[i : i + _DEDUP_BATCH_SIZE]
+            for i in range(0, len(items), _DEDUP_BATCH_SIZE)
+        ]
+        offsets = [i for i in range(0, len(items), _DEDUP_BATCH_SIZE)]
+
+        ai_client = create_ai_client(self.config.ai)
+        batch_results = await asyncio.gather(
+            *[
+                _dedup_batch(ai_client, batch, offset)
+                for batch, offset in zip(batches, offsets)
+            ]
+        )
+
+        # Flatten groups and remap batch-local indices to global indices.
+        duplicate_groups: List[tuple] = []
+        for offset, groups in zip(offsets, batch_results):
+            for group in groups:
+                if not isinstance(group, (list, dict)):
+                    continue
+                if isinstance(group, dict):
+                    primary = group.get("primary")
+                    dups = group.get("duplicates", [])
+                    distinct = group.get("distinct_points", "") or ""
+                else:
+                    primary = group[0] if group else None
+                    dups = group[1:] if len(group) > 1 else []
+                    distinct = ""
+                if not isinstance(primary, int):
+                    continue
+                duplicate_groups.append((offset + primary, [offset + d for d in dups if isinstance(d, int)], distinct))
 
         if not duplicate_groups:
             return items
 
         # Build a set of indices to drop (all non-primary duplicates)
         drop_indices: set[int] = set()
-        for group in duplicate_groups:
-            if not isinstance(group, (list, dict)):
-                continue
-
-            # Support both new format (dict with primary/duplicates/distinct_points)
-            # and old format (list where first index is primary).
-            if isinstance(group, dict):
-                primary_idx = group.get("primary")
-                dup_idxs = group.get("duplicates", [])
-                distinct_points = group.get("distinct_points", "") or ""
-            else:
-                primary_idx = group[0] if group else None
-                dup_idxs = group[1:] if len(group) > 1 else []
-                distinct_points = ""
-
-            if not isinstance(primary_idx, int) or primary_idx < 0 or primary_idx >= len(items):
+        for primary_idx, dup_idxs, distinct_points in duplicate_groups:
+            if primary_idx < 0 or primary_idx >= len(items):
                 continue
             primary = items[primary_idx]
 
@@ -629,7 +666,7 @@ class HorizonOrchestrator:
                 primary.metadata["distinct_points"] = distinct_points
 
             for dup_idx in dup_idxs:
-                if not isinstance(dup_idx, int) or dup_idx < 0 or dup_idx >= len(items):
+                if dup_idx < 0 or dup_idx >= len(items):
                     continue
                 if dup_idx == primary_idx:
                     continue
