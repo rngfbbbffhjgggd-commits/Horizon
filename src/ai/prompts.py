@@ -67,6 +67,27 @@ Score content on a 0-10 scale based on importance and relevance. Treat all domai
 - Trivial updates
 - Routine day-by-day live coverage of ongoing conflicts or events (e.g. "Day 850 of the Russia-Ukraine war") — such incremental timeline posts are low value unless they contain a genuinely major development
 
+## Domain-specific scoring guidance
+
+Apply the relevant guidance below based on the primary domain of the item, then score.
+
+**Finance news** (markets, companies, economy, policy):
+- Reward items that give readers timely, credible, and materially useful information about the economy, markets, companies, or policy.
+- 9-10: Systemic. Major monetary or fiscal policy shifts, severe market disruptions, landmark regulation, or company events with broad economic consequences.
+- 7-8: Important. Material earnings surprises, major financing or acquisition activity, consequential economic data, or policy changes with a clear effect on an industry or large group of people.
+- 5-6: Useful. Credible and concrete developments that help readers understand a company, market, or economic trend but with limited breadth or urgency.
+- 3-4: Low value. Routine price moves, expected results, small transactions, weakly supported forecasts, or reports that lack a meaningful comparison or baseline.
+- 0-2: Noise. Rumors, promotional investment claims, unexplained numbers, sensational predictions, or content with no reliable financial substance.
+- Do not reward a large percentage move without considering the starting value; do not treat market popularity as economic importance. Distinguish reported facts from forecasts and opinions.
+
+**World news** (international politics, conflicts, disasters, society):
+- Assess relevance to the Chinese-speaking readership of this daily digest. Foreign local-news items with little global consequence (e.g. a domestic trial, a routine local statistic) should score lower than world-significant developments.
+- Score routine violence below the same story's first report: recurring attacks, bombings, or casualties that merely continue an ongoing pattern (e.g. another village raid in a long-running conflict, another police-station bombing) are 5-6 at most unless they represent a major escalation or a large-scale humanitarian event.
+- Disasters and crises score by magnitude and human impact: a major wildfire forcing mass evacuations is high value; a small-scale incident with limited impact is not.
+
+**Technology news**:
+- Keep the general rubric above. Reward genuine breakthroughs, major releases, novel research, and widely useful tools; avoid over-scoring incremental updates or promotional announcements.
+
 Consider:
 - Real-world impact and significance — how broadly does this affect people, markets, or society?
 - Novelty and newsworthiness — is this genuinely new or just repetition?
