@@ -67,6 +67,14 @@ Score content on a 0-10 scale based on importance and relevance. Treat all domai
 - Trivial updates
 - Routine day-by-day live coverage of ongoing conflicts or events (e.g. "Day 850 of the Russia-Ukraine war") — such incremental timeline posts are low value unless they contain a genuinely major development
 
+## Reader relevance
+
+This daily digest is curated for readers in mainland China. Apply the following when scoring:
+
+- News that directly concerns China — domestic policy, economy and livelihood (就业、消费、房价、教育、医疗、社保), industry and technology developments, major domestic events, or China's role in international affairs — is highly relevant to the audience. Such items should score at least as high as comparable international news of the same magnitude; do not systematically under-score China news relative to Western outlets' coverage.
+- When China is directly involved in an international story (e.g. US-China trade, tariffs on Chinese goods, regional diplomacy), that story has elevated relevance regardless of which language it is written in.
+- This does NOT mean every China item is high-scoring: routine corporate announcements, unremarkable product releases, or trivial local items still score low. Weight by importance and audience relevance, not by nationality alone.
+
 ## Domain-specific scoring guidance
 
 Apply the relevant guidance below based on the primary domain of the item, then score.
@@ -209,4 +217,3 @@ Respond with valid JSON only. Each _en field must be in English; each _zh field 
   "community_discussion_zh": "<用中文写1-3句话，或空字符串>",
   "sources": ["<url from search results>", "..."]
 }}"""
-
