@@ -551,6 +551,88 @@ class HorizonOrchestrator:
 
         return merged
 
+    def merge_title_similar_duplicates(
+        self,
+        items: List[ContentItem],
+        *,
+        similarity_threshold: float = 0.5,
+        log: bool = True,
+    ) -> List[ContentItem]:
+        """Merge items whose titles are near-duplicates using a deterministic
+        similarity measure (max of normalized edit distance and character
+        bigram Jaccard). This is a cheap, stable pre-filter that runs before
+        AI semantic dedup and catches near-identical headlines (syndicated
+        copies, lightly rewritten titles) without an AI call.
+
+        Unlike the AI pass, each comparison is deterministic: it never skips a
+        whole batch. It cannot catch heavy rewrites or cross-language
+        duplicates, which the AI pass still handles.
+        """
+        if len(items) <= 1:
+            return items
+
+        def _normalize(text: str) -> str:
+            import re as _re
+            return _re.sub(r"[^\w]+", "", text.lower())
+
+        def _edit_ratio(a: str, b: str) -> float:
+            A, B = _normalize(a), _normalize(b)
+            if not A or not B:
+                return 0.0
+            m, n = len(A), len(B)
+            dp = [list(range(n + 1))]
+            dp += [[0] * (n + 1) for _ in range(m)]
+            for i in range(1, m + 1):
+                dp[i][0] = i
+                for j in range(1, n + 1):
+                    if A[i - 1] == B[j - 1]:
+                        dp[i][j] = dp[i - 1][j - 1]
+                    else:
+                        dp[i][j] = 1 + min(dp[i - 1][j], dp[i][j - 1], dp[i - 1][j - 1])
+            return 1 - dp[m][n] / max(m, n)
+
+        def _bigram_sim(a: str, b: str) -> float:
+            A, B = _normalize(a), _normalize(b)
+            if not A or not B:
+                return 0.0
+            ga = {A[i:i + 2] for i in range(len(A) - 1)}
+            gb = {B[i:i + 2] for i in range(len(B) - 1)}
+            union = ga | gb
+            return len(ga & gb) / len(union) if union else 0.0
+
+        def _similar(a: str, b: str) -> bool:
+            return max(_edit_ratio(a, b), _bigram_sim(a, b)) >= similarity_threshold
+
+        drop: set[int] = set()
+        for i in range(len(items)):
+            if i in drop:
+                continue
+            title_i = items[i].title or ""
+            for j in range(i + 1, len(items)):
+                if j in drop:
+                    continue
+                if not _similar(title_i, items[j].title or ""):
+                    continue
+                # Keep the higher-scored item (list is score-sorted).
+                primary, dup = (i, j) if (items[i].ai_score or 0) >= (items[j].ai_score or 0) else (j, i)
+                dup_item = items[dup]
+                if dup_item.content:
+                    if not items[primary].content or dup_item.content not in items[primary].content:
+                        label = dup_item.source_type.value
+                        items[primary].content = (items[primary].content or "") + "\n\n--- From " + label + " ---\n" + dup_item.content
+                if log:
+                    self.console.print(
+                        "   [dim]dedup: keep [" + str(primary) + "] " + items[primary].title + "[/dim]"
+                    )
+                    self.console.print(
+                        "   [dim]       drop [" + str(dup) + "] " + dup_item.title + "[/dim]"
+                    )
+                drop.add(dup)
+
+        if not drop:
+            return items
+        return [it for idx, it in enumerate(items) if idx not in drop]
+
     async def merge_topic_duplicates(
         self,
         items: List[ContentItem],
@@ -752,6 +834,15 @@ class HorizonOrchestrator:
 
         deduped_items = threshold_items
         if topic_dedup and deduped_items:
+            # Deterministic title-similarity pass first: cheap, catches
+            # near-duplicate headlines from different outlets without AI.
+            title_removed = len(deduped_items)
+            deduped_items = self.merge_title_similar_duplicates(deduped_items, log=log)
+            title_removed -= len(deduped_items)
+            if log and title_removed:
+                self.console.print(
+                    f"🔤 Merged {title_removed} title-similar duplicates\n"
+                )
             deduped_items = await self.merge_topic_duplicates(deduped_items, log=log)
         topic_dedup_removed = len(threshold_items) - len(deduped_items)
 
