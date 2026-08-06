@@ -578,7 +578,7 @@ class HorizonOrchestrator:
         were split across batches in an earlier pass get a chance to be grouped
         together. Fall back to returning items unchanged if all AI calls fail.
         """
-        _DEDUP_BATCH_SIZES = (40, 55)
+        _DEDUP_BATCH_SIZES = (35, 50)
 
         if len(items) <= 1:
             return items
@@ -599,28 +599,39 @@ class HorizonOrchestrator:
             batch_items: List[ContentItem],
             offset: int,
         ) -> List[dict]:
-            """Run dedup on one batch; returns groups with LOCAL indices."""
-            try:
-                response = await ai_client.complete(
-                    system=TOPIC_DEDUP_SYSTEM,
-                    user=TOPIC_DEDUP_USER.format(items=_format_batch(batch_items)),
-                )
-                result = parse_json_response(response)
-                if result is None:
+            """Run dedup on one batch; returns groups with LOCAL indices.
+
+            If the first AI response cannot be parsed (e.g. truncated output),
+            retry once before giving up on the batch, since dropping a batch
+            silently disables dedup for its items.
+            """
+            for attempt in range(2):
+                try:
+                    response = await ai_client.complete(
+                        system=TOPIC_DEDUP_SYSTEM,
+                        user=TOPIC_DEDUP_USER.format(items=_format_batch(batch_items)),
+                    )
+                    result = parse_json_response(response)
+                    if result is None:
+                        if log:
+                            self.console.print(
+                                f"[yellow]  dedup: could not parse AI response for batch "
+                                f"@{offset} (attempt {attempt + 1}/2), retrying[/yellow]"
+                            )
+                        continue
+                    return result.get("duplicates", [])
+                except Exception as e:
                     if log:
                         self.console.print(
-                            f"[yellow]  dedup: could not parse AI response for batch "
-                            f"@{offset}, skipping batch[/yellow]"
+                            f"[yellow]  dedup: AI call failed for batch @{offset} "
+                            f"({e}) (attempt {attempt + 1}/2), retrying[/yellow]"
                         )
-                    return []
-                return result.get("duplicates", [])
-            except Exception as e:
-                if log:
-                    self.console.print(
-                        f"[yellow]  dedup: AI call failed for batch @{offset} ({e}), "
-                        f"skipping batch[/yellow]"
-                    )
-                return []
+            if log:
+                self.console.print(
+                    f"[yellow]  dedup: could not parse AI response for batch "
+                    f"@{offset}, skipping batch[/yellow]"
+                )
+            return []
 
         async def _dedup_pass(
             ai_client,
