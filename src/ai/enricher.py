@@ -185,13 +185,20 @@ class ContentEnricher:
             web_context=web_context or "No web search results available.",
         )
 
-        response = await self.client.complete(
-            system=CONTENT_ENRICHMENT_SYSTEM,
-            user=user_prompt,
-        )
-
-        # Parse JSON response with robust fallback
-        result = self._parse_json_response(response)
+        result = None
+        for attempt in range(2):
+            response = await self.client.complete(
+                system=CONTENT_ENRICHMENT_SYSTEM,
+                user=user_prompt,
+            )
+            result = self._parse_json_response(response)
+            if result is not None:
+                break
+            if attempt == 0:
+                print(
+                    f"Warning: could not parse enrichment response for {item.id} "
+                    f"(attempt 1/2), retrying"
+                )
         if result is None:
             # Gracefully degrade: fall back to a lightweight translation
             # instead of dropping the item untranslated.
