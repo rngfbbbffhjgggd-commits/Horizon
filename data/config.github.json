@@ -238,7 +238,7 @@
         "Rust"
       ],
       "keywords": [],
-      "min_stars": 20,
+      "min_stars": 2,
       "max_items": 30,
       "category": "tech"
     },
@@ -285,7 +285,7 @@
       "mode": "ArtList",
       "max_records": 50,
       "timespan": "24h",
-      "language": "English",
+      "language": "eng",
       "category": "headlines"
     }
   },
