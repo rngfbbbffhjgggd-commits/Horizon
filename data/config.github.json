@@ -280,7 +280,7 @@
       "reply_min_likes": 10
     },
     "gdelt": {
-      "enabled": true,
+      "enabled": false,
       "query": "artificial intelligence technology economy climate politics",
       "mode": "ArtList",
       "max_records": 50,
