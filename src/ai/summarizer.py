@@ -2,6 +2,7 @@
 
 import html
 import re
+from datetime import datetime, timedelta, timezone
 from typing import Dict, List, Optional
 from urllib.parse import quote, urlsplit
 
@@ -234,14 +235,19 @@ class DailySummarizer:
         else:
             source_parts.append(_escape_markdown(item.author or "unknown"))
         if item.published_at:
+            # Convert stored time (UTC) to Beijing time (UTC+8) for display.
+            published = item.published_at
+            if published.tzinfo is None:
+                published = published.replace(tzinfo=timezone.utc)
+            published = published.astimezone(timezone(timedelta(hours=8)))
             if language == "zh":
                 source_parts.append(
-                    f"{item.published_at.month}月{item.published_at.day}日 "
-                    f"{item.published_at:%H:%M}"
+                    f"{published.month}月{published.day}日 "
+                    f"{published:%H:%M}"
                 )
             else:
-                day = item.published_at.strftime("%d").lstrip("0")
-                source_parts.append(item.published_at.strftime(f"%b {day}, %H:%M"))
+                day = published.strftime("%d").lstrip("0")
+                source_parts.append(published.strftime(f"%b {day}, %H:%M"))
         source_line = " \u00b7 ".join(source_parts)  # ·
 
         discussion_url = meta.get("discussion_url")
