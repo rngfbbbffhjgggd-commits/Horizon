@@ -2,8 +2,8 @@ name: Daily Horizon Summary
 
 on:
   schedule:
-    # UTC 17:00 = 北京时间 01:00, 提前生成保证早上起床前有日报
-    - cron: "0 17 * * *"
+    # UTC 19:00 = 北京时间 03:00, 提前生成保证早上起床前有日报
+    - cron: "0 19 * * *"
   workflow_dispatch:
 
 jobs:
