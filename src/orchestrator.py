@@ -254,7 +254,9 @@ class HorizonOrchestrator:
             await self._enrich_important_items(important_items)
 
             # 7. Generate and save daily summaries for each configured language
-            today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+            # Use Beijing time (UTC+8) for the summary filename so the date
+            # label matches the reader's calendar, not the runner's UTC clock.
+            today = (datetime.now(timezone.utc) + timedelta(hours=8)).strftime("%Y-%m-%d")
             for lang in self.config.ai.languages:
                 summarizer = DailySummarizer()
                 summary = await summarizer.generate_summary(important_items, today, len(all_items), language=lang)
