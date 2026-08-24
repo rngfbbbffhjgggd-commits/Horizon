@@ -299,6 +299,50 @@
         "url": "https://www.marketwatch.com/rss/topstories",
         "enabled": true,
         "category": "finance"
+      },
+      {
+        "name": "经济学人",
+        "url": "https://news.google.com/rss/search?q=site:economist.com&hl=en-US&gl=US&ceid=US:en",
+        "enabled": true
+      },
+      {
+        "name": "半岛电视台",
+        "url": "https://news.google.com/rss/search?q=site:aljazeera.com&hl=en-US&gl=US&ceid=US:en",
+        "enabled": true
+      },
+      {
+        "name": "Phys.org",
+        "url": "https://news.google.com/rss/search?q=site:phys.org&hl=en-US&gl=US&ceid=US:en",
+        "enabled": true
+      },
+      {
+        "name": "Nature",
+        "url": "https://news.google.com/rss/search?q=site:nature.com&hl=en-US&gl=US&ceid=US:en",
+        "enabled": true
+      },
+      {
+        "name": "量子位",
+        "url": "https://news.google.com/rss/search?q=site:qbitai.com&hl=zh-CN&gl=CN&ceid=CN:zh-Hans",
+        "enabled": true,
+        "category": "tech"
+      },
+      {
+        "name": "机器之心",
+        "url": "https://news.google.com/rss/search?q=site:jiqizhixin.com&hl=zh-CN&gl=CN&ceid=CN:zh-Hans",
+        "enabled": true,
+        "category": "tech"
+      },
+      {
+        "name": "财新",
+        "url": "https://news.google.com/rss/search?q=site:caixin.com&hl=zh-CN&gl=CN&ceid=CN:zh-Hans",
+        "enabled": true,
+        "category": "finance"
+      },
+      {
+        "name": "第一财经",
+        "url": "https://news.google.com/rss/search?q=site:yicai.com&hl=zh-CN&gl=CN&ceid=CN:zh-Hans",
+        "enabled": true,
+        "category": "finance"
       }
     ],
     "google_news": {
