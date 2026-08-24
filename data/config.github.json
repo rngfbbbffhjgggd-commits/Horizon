@@ -75,6 +75,27 @@
         "repo": "duckdb",
         "enabled": true,
         "category": "tech"
+      },
+      {
+        "type": "repo_releases",
+        "owner": "vercel-labs",
+        "repo": "agent-browser",
+        "enabled": true,
+        "category": "tech"
+      },
+      {
+        "type": "repo_releases",
+        "owner": "deepseek-ai",
+        "repo": "deepseek-harness",
+        "enabled": true,
+        "category": "tech"
+      },
+      {
+        "type": "repo_releases",
+        "owner": "Mintplex-Labs",
+        "repo": "anything-llm",
+        "enabled": true,
+        "category": "tech"
       }
     ],
     "hackernews": {
