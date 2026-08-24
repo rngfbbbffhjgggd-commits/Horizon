@@ -265,7 +265,7 @@
       ]
     },
     "twitter": {
-      "enabled": true,
+      "enabled": false,
       "users": [
         "karpathy",
         "ylecun",
