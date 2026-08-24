@@ -47,6 +47,34 @@
         "repo": "DeepSeek-V3",
         "enabled": true,
         "category": "tech"
+      },
+      {
+        "type": "repo_releases",
+        "owner": "huggingface",
+        "repo": "transformers",
+        "enabled": true,
+        "category": "tech"
+      },
+      {
+        "type": "repo_releases",
+        "owner": "ollama",
+        "repo": "ollama",
+        "enabled": true,
+        "category": "tech"
+      },
+      {
+        "type": "repo_releases",
+        "owner": "langchain-ai",
+        "repo": "langchain",
+        "enabled": true,
+        "category": "tech"
+      },
+      {
+        "type": "repo_releases",
+        "owner": "duckdb",
+        "repo": "duckdb",
+        "enabled": true,
+        "category": "tech"
       }
     ],
     "hackernews": {
@@ -216,6 +244,38 @@
       {
         "name": "经济日报",
         "url": "https://feedx.net/rss/jingjiribao.xml",
+        "enabled": true,
+        "category": "finance"
+      },
+      {
+        "name": "人民日报",
+        "url": "https://news.google.com/rss/search?q=site:people.com.cn&hl=zh-CN&gl=CN&ceid=CN:zh-Hans",
+        "enabled": true
+      },
+      {
+        "name": "央视",
+        "url": "https://news.google.com/rss/search?q=site:cctv.com&hl=zh-CN&gl=CN&ceid=CN:zh-Hans",
+        "enabled": true
+      },
+      {
+        "name": "中新网",
+        "url": "https://news.google.com/rss/search?q=site:chinanews.com&hl=zh-CN&gl=CN&ceid=CN:zh-Hans",
+        "enabled": true
+      },
+      {
+        "name": "美联社",
+        "url": "https://news.google.com/rss/search?q=site:apnews.com&hl=en-US&gl=US&ceid=US:en",
+        "enabled": true
+      },
+      {
+        "name": "快科技",
+        "url": "https://news.google.com/rss/search?q=site:cls.cn&hl=zh-CN&gl=CN&ceid=CN:zh-Hans",
+        "enabled": true,
+        "category": "finance"
+      },
+      {
+        "name": "市场观察",
+        "url": "https://www.marketwatch.com/rss/topstories",
         "enabled": true,
         "category": "finance"
       }
