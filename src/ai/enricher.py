@@ -11,9 +11,9 @@ import re
 import sys
 import os
 from typing import List, Optional
-from tenacity import retry, stop_after_attempt, wait_exponential
 from rich.progress import Progress, SpinnerColumn, BarColumn, TextColumn, MofNCompleteColumn
 from ddgs import DDGS
+from openai import BadRequestError
 
 from .client import AIClient
 from .prompts import (
@@ -129,10 +129,6 @@ class ContentEnricher:
         except Exception:
             return []
 
-    @retry(
-        stop=stop_after_attempt(3),
-        wait=wait_exponential(min=2, max=10)
-    )
     async def _enrich_item(self, item: ContentItem) -> None:
         """Enrich a single item with background knowledge.
 
@@ -185,20 +181,37 @@ class ContentEnricher:
             web_context=web_context or "No web search results available.",
         )
 
+        # Request the AI to produce the enrichment, retrying once on transient
+        # failures (e.g. truncated output) but NOT on BadRequestError, which is
+        # a permanent problem with the request itself and would fail every retry.
         result = None
         for attempt in range(2):
-            response = await self.client.complete(
-                system=CONTENT_ENRICHMENT_SYSTEM,
-                user=user_prompt,
-            )
-            result = self._parse_json_response(response)
-            if result is not None:
-                break
-            if attempt == 0:
-                print(
-                    f"Warning: could not parse enrichment response for {item.id} "
-                    f"(attempt 1/2), retrying"
+            try:
+                response = await self.client.complete(
+                    system=CONTENT_ENRICHMENT_SYSTEM,
+                    user=user_prompt,
                 )
+                result = self._parse_json_response(response)
+                if result is not None:
+                    break
+                if attempt == 0:
+                    print(
+                        f"Warning: could not parse enrichment response for {item.id} "
+                        f"(attempt 1/2), retrying"
+                    )
+            except BadRequestError:
+                # Request is invalid; retrying is pointless. Fall back immediately.
+                print(
+                    f"Warning: enrichment request rejected for {item.id} "
+                    f"(BadRequestError), falling back to translation"
+                )
+                await self._translate_item(item)
+                return
+            except Exception as e:
+                if attempt == 0:
+                    print(
+                        f"Warning: enrichment call failed for {item.id} ({e}), retrying"
+                    )
         if result is None:
             # Gracefully degrade: fall back to a lightweight translation
             # instead of dropping the item untranslated.
