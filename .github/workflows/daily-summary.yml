@@ -32,12 +32,27 @@ jobs:
       - name: Prepare GitHub Actions config
         run: cp data/config.github.json data/config.json
 
+      - name: Determine fetch window from last digest
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          LAST_TS=$(gh api "repos/$GITHUB_REPOSITORY/commits?path=_posts&sha=gh-pages&per_page=1" --jq '.[0].commit.committer.date // empty' 2>/dev/null || true)
+          if [ -n "$LAST_TS" ]; then
+            echo "SINCE=$LAST_TS" >> "$GITHUB_ENV"
+          fi
+
       - name: Run Horizon
         env:
           DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
           APIFY_TOKEN: ${{ secrets.APIFY_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: uv run horizon --hours 24
+          SINCE: ${{ env.SINCE }}
+        run: |
+          if [ -n "$SINCE" ]; then
+            uv run horizon --since "$SINCE"
+          else
+            uv run horizon --hours 24
+          fi
 
       - name: Set current date as environment variable (Beijing time)
         run: echo "DATE=$(date -u -d '+8 hours' +'%Y-%m-%d')" >> $GITHUB_ENV
