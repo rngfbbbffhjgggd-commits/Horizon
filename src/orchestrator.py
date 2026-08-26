@@ -224,8 +224,16 @@ class HorizonOrchestrator:
                     f"→ {len(merged_items)} unique items\n"
                 )
 
+            # 3b. Free rule-based prefilter before the paid AI analysis pass
+            prefiltered_items = self._prefilter_for_analysis(merged_items)
+            if len(prefiltered_items) < len(merged_items):
+                self.console.print(
+                    f"🔽 Prefiltered {len(merged_items) - len(prefiltered_items)} low-value items "
+                    f"→ {len(prefiltered_items)} for AI analysis\n"
+                )
+
             # 4. Analyze with AI
-            analyzed_items = await self._analyze_content(merged_items)
+            analyzed_items = await self._analyze_content(prefiltered_items)
             self.console.print(f"🤖 Analyzed {len(analyzed_items)} items with AI\n")
 
             # 5. Filter, deduplicate, and balance the digest
@@ -1058,6 +1066,55 @@ class HorizonOrchestrator:
         enricher = ContentEnricher(ai_client)
         await enricher.enrich_batch(items)
         self.console.print(f"   Enriched {len(items)} items\n")
+
+    def _prefilter_for_analysis(self, items: List[ContentItem]) -> List[ContentItem]:
+        """Cheap rule-based prefilter that runs BEFORE the paid AI analysis.
+
+        Drops items with empty titles and merges near-identical titles within
+        the SAME feed (rolling coverage, syndicated copies) using a
+        conservative similarity threshold. Cross-source duplicates with
+        differently worded titles are intentionally left for the AI passes.
+        """
+        import re as _re
+
+        def _norm(t: str) -> str:
+            return _re.sub(r"[^\w]+", "", t.lower())
+
+        def _title_similarity(a: str, b: str) -> float:
+            A, B = _norm(a), _norm(b)
+            if not A or not B:
+                return 0.0
+            m, n = len(A), len(B)
+            dp = [list(range(n + 1))]
+            dp += [[0] * (n + 1) for _ in range(m)]
+            for i in range(1, m + 1):
+                dp[i][0] = i
+                for j in range(1, n + 1):
+                    if A[i - 1] == B[j - 1]:
+                        dp[i][j] = dp[i - 1][j - 1]
+                    else:
+                        dp[i][j] = 1 + min(dp[i - 1][j], dp[i][j - 1], dp[i - 1][j - 1])
+            edit = 1 - dp[m][n] / max(m, n)
+            ga = {A[i:i + 2] for i in range(len(A) - 1)}
+            gb = {B[i:i + 2] for i in range(len(B) - 1)}
+            union = ga | gb
+            bigram = len(ga & gb) / len(union) if union else 0.0
+            return max(edit, bigram)
+
+        kept = []
+        seen_titles: dict = {}
+        for item in items:
+            title = (item.title or "").strip()
+            if not title:
+                continue
+            meta = item.metadata or {}
+            feed_key = (item.source_type.value, str(meta.get("feed_name", "")))
+            bucket = seen_titles.setdefault(feed_key, [])
+            if any(_title_similarity(title, other) >= 0.75 for other in bucket):
+                continue
+            bucket.append(title)
+            kept.append(item)
+        return kept
 
     async def _analyze_content(self, items: List[ContentItem]) -> List[ContentItem]:
         """Analyze content items with AI.
