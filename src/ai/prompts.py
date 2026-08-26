@@ -89,11 +89,21 @@ Apply the relevant guidance below based on the primary domain of the item, then 
 - Do not reward a large percentage move without considering the starting value; do not treat market popularity as economic importance. Distinguish reported facts from forecasts and opinions.
 
 **World news** (international politics, conflicts, disasters, society):
+- 9-10: Systemic. Wars or major escalations, landmark diplomatic shifts, decisions reshaping global security or economy, large-scale disasters with mass impact, events that change a region's trajectory.
+- 7-8: Important. Significant developments in ongoing conflicts, major elections or policy shifts in key countries, meaningful geopolitical moves, notable disasters requiring broad response, developments directly affecting China's interests or major powers' relations.
+- 5-6: Useful. Concrete world developments with limited breadth: a country-level story with moderate impact, regional events, routine political news from major countries.
+- 3-4: Low value. Foreign local news with little global consequence, routine political procedures, small-scale incidents, generic commentary.
+- 0-2: Noise. Trivial updates, spam, or incremental day-by-day coverage of ongoing conflicts (e.g. "Day 850 of the war") without a genuinely major development.
 - Assess relevance to the Chinese-speaking readership of this daily digest. Foreign local-news items with little global consequence (e.g. a domestic trial, a routine local statistic) should score lower than world-significant developments.
 - Score routine violence below the same story's first report: recurring attacks, bombings, or casualties that merely continue an ongoing pattern (e.g. another village raid in a long-running conflict, another police-station bombing) are 5-6 at most unless they represent a major escalation or a large-scale humanitarian event.
 - Disasters and crises score by magnitude and human impact: a major wildfire forcing mass evacuations is high value; a small-scale incident with limited impact is not.
 
 **Technology news**:
+- 9-10: Systemic. Breakthroughs that reshape an industry or field - frontier model milestones, fundamental scientific results, major platform shifts, landmark regulation.
+- 7-8: Important. Significant product launches, notable research results, major funding or acquisitions, widely impactful tools, major open-source releases.
+- 5-6: Useful. Incremental but credible developments: version updates, new features, niche research, tools with a limited audience.
+- 3-4: Low value. Routine announcements, promotional launches, minor updates, common knowledge.
+- 0-2: Noise. Spam, purely promotional content, trivial updates.
 - Keep the general rubric above. Reward genuine breakthroughs, major releases, novel research, and widely useful tools; avoid over-scoring incremental updates or promotional announcements.
 
 Consider:
@@ -103,6 +113,7 @@ Consider:
 - Domain balance — remember that world affairs, finance, and society are as important as technology
 - Community discussion quality: insightful comments, diverse viewpoints, and debates increase value
 - Engagement signals: high upvotes/favorites with substantive discussion indicate community-validated importance
+- Score discrimination: use the full 0-10 scale. 8.0 means "genuinely important", not the default. Ordinary news scores 5-6; reserve 9+ for truly exceptional events. When analyzing multiple items together, scores must reflect meaningful differences in importance rather than clustering around one value.
 """
 
 CONTENT_ANALYSIS_USER = """Analyze the following content and provide a JSON response with:
