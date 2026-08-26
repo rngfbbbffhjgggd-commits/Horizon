@@ -1,4 +1,4 @@
-"""Main orchestrator coordinating the entire workflow."""
+﻿"""Main orchestrator coordinating the entire workflow."""
 
 import asyncio
 from collections import defaultdict
@@ -182,7 +182,7 @@ class HorizonOrchestrator:
         )
         self.last_fetch_report: Optional[FetchReport] = None
 
-    async def run(self, force_hours: int = None) -> None:
+    async def run(self, force_hours: int = None, since_str: str = None) -> None:
         """Execute the complete workflow.
 
         Args:
@@ -202,7 +202,7 @@ class HorizonOrchestrator:
 
         try:
             # 1. Determine time window
-            since = self._determine_time_window(force_hours)
+            since = self._determine_time_window(force_hours, since_str)
             self.console.print(f"📅 Fetching content since: {since.strftime('%Y-%m-%d %H:%M:%S')}\n")
 
             # 2. Fetch content from all sources
@@ -346,7 +346,16 @@ class HorizonOrchestrator:
 
             raise
 
-    def _determine_time_window(self, force_hours: int = None) -> datetime:
+    def _determine_time_window(
+        self, force_hours: int = None, since_str: str = None
+    ) -> datetime:
+        if since_str:
+            # Exact anchor: fetch content published since the last digest
+            # (overrides both --hours and the config time window)
+            since = datetime.fromisoformat(since_str.replace("Z", "+00:00"))
+            if since.tzinfo is None:
+                since = since.replace(tzinfo=timezone.utc)
+            return since
         if force_hours:
             since = datetime.now(timezone.utc) - timedelta(hours=force_hours)
         else:
