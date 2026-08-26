@@ -15,89 +15,6 @@
     "enrichment_concurrency": 5
   },
   "sources": {
-    "github": [
-      {
-        "type": "user_events",
-        "username": "torvalds",
-        "enabled": true
-      },
-      {
-        "type": "user_events",
-        "username": "karpathy",
-        "enabled": true,
-        "category": "tech"
-      },
-      {
-        "type": "repo_releases",
-        "owner": "vllm-project",
-        "repo": "vllm",
-        "enabled": true,
-        "category": "tech"
-      },
-      {
-        "type": "repo_releases",
-        "owner": "openai",
-        "repo": "openai-python",
-        "enabled": true,
-        "category": "tech"
-      },
-      {
-        "type": "repo_releases",
-        "owner": "deepseek-ai",
-        "repo": "DeepSeek-V3",
-        "enabled": true,
-        "category": "tech"
-      },
-      {
-        "type": "repo_releases",
-        "owner": "huggingface",
-        "repo": "transformers",
-        "enabled": true,
-        "category": "tech"
-      },
-      {
-        "type": "repo_releases",
-        "owner": "ollama",
-        "repo": "ollama",
-        "enabled": true,
-        "category": "tech"
-      },
-      {
-        "type": "repo_releases",
-        "owner": "langchain-ai",
-        "repo": "langchain",
-        "enabled": true,
-        "category": "tech"
-      },
-      {
-        "type": "repo_releases",
-        "owner": "duckdb",
-        "repo": "duckdb",
-        "enabled": true,
-        "category": "tech"
-      },
-      {
-        "type": "repo_releases",
-        "owner": "vercel-labs",
-        "repo": "agent-browser",
-        "enabled": true,
-        "category": "tech"
-      },
-      {
-        "type": "repo_releases",
-        "owner": "deepseek-ai",
-        "repo": "deepseek-harness",
-        "enabled": true,
-        "category": "tech"
-      },
-      {
-        "type": "repo_releases",
-        "owner": "Mintplex-Labs",
-        "repo": "anything-llm",
-        "enabled": true,
-        "category": "tech"
-      }
-    ],
     "hackernews": {
       "enabled": true,
       "fetch_top_stories": 30,
@@ -269,16 +186,6 @@
         "category": "finance"
       },
       {
-        "name": "人民日报",
-        "url": "https://news.google.com/rss/search?q=site:people.com.cn&hl=zh-CN&gl=CN&ceid=CN:zh-Hans",
-        "enabled": true
-      },
-      {
-        "name": "央视",
-        "url": "https://news.google.com/rss/search?q=site:cctv.com&hl=zh-CN&gl=CN&ceid=CN:zh-Hans",
-        "enabled": true
-      },
-      {
         "name": "中新网",
         "url": "https://news.google.com/rss/search?q=site:chinanews.com&hl=zh-CN&gl=CN&ceid=CN:zh-Hans",
         "enabled": true
@@ -335,12 +242,6 @@
       {
         "name": "财新",
         "url": "https://news.google.com/rss/search?q=site:caixin.com&hl=zh-CN&gl=CN&ceid=CN:zh-Hans",
-        "enabled": true,
-        "category": "finance"
-      },
-      {
-        "name": "第一财经",
-        "url": "https://news.google.com/rss/search?q=site:yicai.com&hl=zh-CN&gl=CN&ceid=CN:zh-Hans",
         "enabled": true,
         "category": "finance"
       }
