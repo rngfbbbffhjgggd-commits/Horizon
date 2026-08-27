@@ -1,4 +1,4 @@
-﻿"""AI prompts for content analysis and summarization."""
+"""AI prompts for content analysis and summarization."""
 
 TOPIC_DEDUP_SYSTEM = """You are a news deduplication assistant. Identify groups of news items that cover the same underlying real-world event, story, or topic.
 
@@ -151,8 +151,8 @@ Items:
 
 Respond with valid JSON only - a JSON array, e.g.:
 [
-  {"score": 7.5, "reason": "...", "summary": "...", "tags": ["..."]},
-  {"score": 6.0, "reason": "...", "summary": "...", "tags": ["..."]}
+  {{"score": 7.5, "reason": "...", "summary": "...", "tags": ["..."]}},
+  {{"score": 6.0, "reason": "...", "summary": "...", "tags": ["..."]}}
 ]"""
 
 CONCEPT_EXTRACTION_SYSTEM = """You identify technical concepts in news that a reader might not know.
