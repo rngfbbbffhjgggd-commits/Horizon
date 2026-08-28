@@ -17,13 +17,13 @@
   "email": {
     "enabled": true,
     "imap_enabled": false,
-    "imap_server": "imap.qq.com",
+    "imap_server": "imap.gmail.com",
     "imap_port": 993,
-    "smtp_server": "smtp.qq.com",
+    "smtp_server": "smtp.gmail.com",
     "smtp_port": 465,
     "smtp_username": null,
-    "email_address": "2337784157@qq.com",
-    "password_env": "EMAIL_PASSWORD",
+    "email_address": "rngfbbbffhjgggd@gmail.com",
+    "password_env": "GMAIL_APP_PASSWORD",
     "sender_name": "Horizon Daily",
     "subscribe_keyword": "SUBSCRIBE",
     "unsubscribe_keyword": "UNSUBSCRIBE"
