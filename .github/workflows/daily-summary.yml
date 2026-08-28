@@ -50,7 +50,7 @@ jobs:
         env:
           EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
         run: |
-          python - <<'EOF'
+          uv run python - <<'EOF'
           import os, sys, json, pathlib, logging
 
           # Make logger output visible
