@@ -59,20 +59,13 @@ jobs:
           sys.path.insert(0, ".")
 
           from src.models import EmailConfig
-          from src.services.email import EmailManager
-          from src.storage.manager import StorageManager
 
           # 1. Load email config from the real config file
           cfg = json.loads(pathlib.Path("data/config.github.json").read_text(encoding="utf-8"))
           email_cfg = EmailConfig(**cfg["email"])
           print("EMAIL_ENABLED:", email_cfg.enabled)
 
-          # 2. Load subscribers exactly like full runs do
-          storage = StorageManager(data_dir="data")
-          subs = storage.load_subscribers()
-          print("LOADED_SUBS:", subs)
-
-          # 3. Fetch today's REAL digest markdown and send it (full-size content)
+          # 2. Fetch today's REAL digest markdown
           real = subprocess.check_output(
               ["gh", "api", "repos/rngfbbbffhjgggd-commits/Horizon/contents/_posts/2026-08-28-summary-zh.md?ref=gh-pages",
                "-H", "Accept: application/vnd.github.raw"],
@@ -80,10 +73,23 @@ jobs:
           )
           print("REAL_DIGEST_LEN:", len(real))
 
-          manager = EmailManager(email_cfg)
-          manager.send_daily_summary(real, "Horizon Summary: REAL DIGEST TEST", subs)
-          print("REAL_DIGEST_TEST_DONE")
-          EOF
+          # 3. Send PLAIN-TEXT only version (no HTML) to test QQ content filter
+          import smtplib, ssl
+          from email.mime.text import MIMEText
+          from email.header import Header
+          try:
+              s = smtplib.SMTP_SSL("smtp.qq.com", 465, timeout=20, context=ssl.create_default_context())
+              s.login("2337784157@qq.com", os.environ["EMAIL_PASSWORD"])
+              msg = MIMEText(real, "plain", "utf-8")
+              msg["Subject"] = Header("Horizon Plain Test", "utf-8")
+              msg["From"] = "Horizon Daily <2337784157@qq.com>"
+              msg["To"] = "2337784157@qq.com"
+              s.send_message(msg)
+              print("PLAIN_MAIL_SENT_OK")
+              s.quit()
+          except Exception as e:
+              print(f"PLAIN_MAIL_FAIL: {type(e).__name__}: {e}")
+              raise
 
       - name: Run Horizon
         if: ${{ github.event.inputs.smtp_test_only != 'true' }}
