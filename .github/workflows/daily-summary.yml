@@ -5,6 +5,11 @@ on:
     # UTC 19:00 = 北京时间 03:00, 提前生成保证早上起床前有日报
     - cron: "0 19 * * *"
   workflow_dispatch:
+    inputs:
+      smtp_test_only:
+        description: "Only test SMTP connection, skip digest"
+        type: boolean
+        default: false
 
 jobs:
   daily-summary:
@@ -58,6 +63,7 @@ jobs:
           EOF
 
       - name: Run Horizon
+        if: ${{ github.event.inputs.smtp_test_only != 'true' }}
         env:
           DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
           APIFY_TOKEN: ${{ secrets.APIFY_TOKEN }}
@@ -72,9 +78,11 @@ jobs:
           fi
 
       - name: Set current date as environment variable (Beijing time)
+        if: ${{ github.event.inputs.smtp_test_only != 'true' }}
         run: echo "DATE=$(date -u -d '+8 hours' +'%Y-%m-%d')" >> $GITHUB_ENV
 
       - name: Deploy to GitHub Pages
+        if: ${{ github.event.inputs.smtp_test_only != 'true' }}
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
