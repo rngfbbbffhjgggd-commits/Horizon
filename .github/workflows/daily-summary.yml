@@ -49,9 +49,10 @@ jobs:
       - name: Test SMTP connection
         env:
           EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           uv run python - <<'EOF'
-          import os, sys, json, pathlib, logging
+          import os, sys, json, pathlib, logging, subprocess
 
           # Make logger output visible
           logging.basicConfig(level=logging.INFO, format="%(levelname)s %(name)s: %(message)s")
@@ -66,19 +67,22 @@ jobs:
           email_cfg = EmailConfig(**cfg["email"])
           print("EMAIL_ENABLED:", email_cfg.enabled)
 
-          # 2. Simulate the EXACT subscriber loading path used in full runs
+          # 2. Load subscribers exactly like full runs do
           storage = StorageManager(data_dir="data")
           subs = storage.load_subscribers()
           print("LOADED_SUBS:", subs)
 
-          # 3. Create EmailManager and send with the loaded subscribers
-          manager = EmailManager(email_cfg)
-          manager.send_daily_summary(
-              "这是完整调用链模拟测试（模拟完整运行的读取和发送路径）。",
-              "Horizon Chain Test",
-              subs,
+          # 3. Fetch today's REAL digest markdown and send it (full-size content)
+          real = subprocess.check_output(
+              ["gh", "api", "repos/rngfbbbffhjgggd-commits/Horizon/contents/_posts/2026-08-28-summary-zh.md?ref=gh-pages",
+               "-H", "Accept: application/vnd.github.raw"],
+              text=True,
           )
-          print("CHAIN_TEST_DONE")
+          print("REAL_DIGEST_LEN:", len(real))
+
+          manager = EmailManager(email_cfg)
+          manager.send_daily_summary(real, "Horizon Summary: REAL DIGEST TEST", subs)
+          print("REAL_DIGEST_TEST_DONE")
           EOF
 
       - name: Run Horizon
