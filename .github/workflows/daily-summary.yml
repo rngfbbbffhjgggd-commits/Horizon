@@ -74,16 +74,32 @@ jobs:
               print(f"SMTP_LOGIN_FAIL: {type(e).__name__}: {e}")
               raise
 
-          # 3. Send one real test email from Actions
+          # 3. Send long-HTML multipart test email (simulate daily digest format)
           try:
-              msg = MIMEText("This is a test email sent from GitHub Actions environment.", "plain", "utf-8")
-              msg["Subject"] = Header("Horizon Actions SMTP Test", "utf-8")
+              from email.mime.multipart import MIMEMultipart
+              # Build long Chinese content similar to the daily digest
+              item = (
+                  "1. 测试新闻标题：全球科技产业迎来重大变革，多家企业发布新一代产品，"
+                  "市场反应热烈，分析师预计未来数年将保持高速增长态势，各国政策也在积极跟进。\n"
+                  "2. 另一条重要新闻：国际经济形势复杂多变，主要央行调整货币政策，"
+                  "大宗商品价格波动加大，投资者需要密切关注市场动向。\n\n"
+              )
+              long_text = item * 15  # ~30 items worth of content
+              html_body = (
+                  "<html><body style='font-family:sans-serif;line-height:1.6'>"
+                  "<h1>Horizon Summary Test</h1><p>" + long_text.replace("\n", "<br>")
+                  + "</p></body></html>"
+              )
+              msg = MIMEMultipart("alternative")
+              msg.attach(MIMEText(long_text, "plain", "utf-8"))
+              msg.attach(MIMEText(html_body, "html", "utf-8"))
+              msg["Subject"] = Header("Horizon HTML Long Mail Test", "utf-8")
               msg["From"] = "Horizon Daily <2337784157@qq.com>"
               msg["To"] = "2337784157@qq.com"
               s.send_message(msg)
-              print("TEST_MAIL_SENT")
+              print("HTML_LONG_MAIL_SENT")
           except Exception as e:
-              print(f"TEST_MAIL_FAIL: {type(e).__name__}: {e}")
+              print(f"HTML_LONG_MAIL_FAIL: {type(e).__name__}: {e}")
               raise
           s.quit()
           EOF
