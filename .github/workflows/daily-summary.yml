@@ -48,7 +48,7 @@ jobs:
 
       - name: Test SMTP connection
         env:
-          EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           uv run python - <<'EOF'
@@ -73,17 +73,17 @@ jobs:
           )
           print("REAL_DIGEST_LEN:", len(real))
 
-          # 3. Send PLAIN-TEXT only version (no HTML) to test QQ content filter
+          # 3. Send PLAIN-TEXT only version (no HTML) to test Gmail SMTP
           import smtplib, ssl
           from email.mime.text import MIMEText
           from email.header import Header
           try:
-              s = smtplib.SMTP_SSL("smtp.qq.com", 465, timeout=20, context=ssl.create_default_context())
-              s.login("2337784157@qq.com", os.environ["EMAIL_PASSWORD"])
+              s = smtplib.SMTP_SSL("smtp.gmail.com", 465, timeout=20, context=ssl.create_default_context())
+              s.login("rngfbbbffhjgggd@gmail.com", os.environ["GMAIL_APP_PASSWORD"])
               msg = MIMEText(real, "plain", "utf-8")
               msg["Subject"] = Header("Horizon Plain Test", "utf-8")
-              msg["From"] = "Horizon Daily <2337784157@qq.com>"
-              msg["To"] = "2337784157@qq.com"
+              msg["From"] = "Horizon Daily <rngfbbbffhjgggd@gmail.com>"
+              msg["To"] = "rngfbbbffhjgggd@gmail.com"
               s.send_message(msg)
               print("PLAIN_MAIL_SENT_OK")
               s.quit()
@@ -97,7 +97,7 @@ jobs:
           DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
           APIFY_TOKEN: ${{ secrets.APIFY_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
           SINCE: ${{ env.SINCE }}
         run: |
           if [ -n "$SINCE" ]; then
