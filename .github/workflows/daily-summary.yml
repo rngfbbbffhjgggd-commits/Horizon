@@ -41,6 +41,22 @@ jobs:
             echo "SINCE=$LAST_TS" >> "$GITHUB_ENV"
           fi
 
+      - name: Test SMTP connection
+        env:
+          EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
+        run: |
+          python - <<'EOF'
+          import smtplib, os, ssl
+          try:
+              s = smtplib.SMTP_SSL("smtp.qq.com", 465, timeout=15, context=ssl.create_default_context())
+              s.login("2337784157@qq.com", os.environ["EMAIL_PASSWORD"])
+              print("SMTP_CONNECTION_OK")
+              s.quit()
+          except Exception as e:
+              print(f"SMTP_CONNECTION_FAIL: {type(e).__name__}: {e}")
+              raise
+          EOF
+
       - name: Run Horizon
         env:
           DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
