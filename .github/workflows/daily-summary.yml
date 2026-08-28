@@ -51,15 +51,41 @@ jobs:
           EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
         run: |
           python - <<'EOF'
-          import smtplib, os, ssl
+          import smtplib, os, ssl, json, pathlib
+          from email.mime.text import MIMEText
+          from email.header import Header
+
+          # 1. Check subscribers.json at runtime
+          p = pathlib.Path("data/subscribers.json")
+          print("SUBSCRIBERS_EXISTS:", p.exists())
+          if p.exists():
+              try:
+                  data = json.loads(p.read_text(encoding="utf-8"))
+                  print("SUBSCRIBERS_CONTENT:", data)
+              except Exception as e:
+                  print("SUBSCRIBERS_PARSE_ERROR:", e)
+
+          # 2. SMTP connect + login
           try:
               s = smtplib.SMTP_SSL("smtp.qq.com", 465, timeout=15, context=ssl.create_default_context())
               s.login("2337784157@qq.com", os.environ["EMAIL_PASSWORD"])
-              print("SMTP_CONNECTION_OK")
-              s.quit()
+              print("SMTP_LOGIN_OK")
           except Exception as e:
-              print(f"SMTP_CONNECTION_FAIL: {type(e).__name__}: {e}")
+              print(f"SMTP_LOGIN_FAIL: {type(e).__name__}: {e}")
               raise
+
+          # 3. Send one real test email from Actions
+          try:
+              msg = MIMEText("This is a test email sent from GitHub Actions environment.", "plain", "utf-8")
+              msg["Subject"] = Header("Horizon Actions SMTP Test", "utf-8")
+              msg["From"] = "Horizon Daily <2337784157@qq.com>"
+              msg["To"] = "2337784157@qq.com"
+              s.send_message(msg)
+              print("TEST_MAIL_SENT")
+          except Exception as e:
+              print(f"TEST_MAIL_FAIL: {type(e).__name__}: {e}")
+              raise
+          s.quit()
           EOF
 
       - name: Run Horizon
