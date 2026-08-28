@@ -59,23 +59,26 @@ jobs:
 
           from src.models import EmailConfig
           from src.services.email import EmailManager
+          from src.storage.manager import StorageManager
 
           # 1. Load email config from the real config file
           cfg = json.loads(pathlib.Path("data/config.github.json").read_text(encoding="utf-8"))
           email_cfg = EmailConfig(**cfg["email"])
-          print("EMAIL_CONFIG_LOADED, enabled =", email_cfg.enabled)
+          print("EMAIL_ENABLED:", email_cfg.enabled)
 
-          # 2. Create the real EmailManager (reads EMAIL_PASSWORD env)
+          # 2. Simulate the EXACT subscriber loading path used in full runs
+          storage = StorageManager(data_dir="data")
+          subs = storage.load_subscribers()
+          print("LOADED_SUBS:", subs)
+
+          # 3. Create EmailManager and send with the loaded subscribers
           manager = EmailManager(email_cfg)
-          print("EMAIL_MANAGER_CREATED")
-
-          # 3. Call the REAL send_daily_summary function
           manager.send_daily_summary(
-              "这是用项目真实发送函数发出的测试日报。\n\n1. 第一条新闻摘要内容。\n2. 第二条新闻摘要内容。",
-              "Horizon Real Function Test",
-              ["2337784157@qq.com"],
+              "这是完整调用链模拟测试（模拟完整运行的读取和发送路径）。",
+              "Horizon Chain Test",
+              subs,
           )
-          print("SEND_DAILY_SUMMARY_CALLED_DONE")
+          print("CHAIN_TEST_DONE")
           EOF
 
       - name: Run Horizon
