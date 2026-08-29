@@ -63,6 +63,24 @@
           "min_score": 50
         },
         {
+          "subreddit": "quant",
+          "enabled": true,
+          "sort": "hot",
+          "time_filter": "day",
+          "fetch_limit": 8,
+          "min_score": 30,
+          "category": "finance"
+        },
+        {
+          "subreddit": "algotrading",
+          "enabled": true,
+          "sort": "hot",
+          "time_filter": "day",
+          "fetch_limit": 8,
+          "min_score": 30,
+          "category": "finance"
+        },
+        {
           "subreddit": "finance",
           "enabled": true,
           "sort": "hot",
@@ -85,6 +103,12 @@
       "fetch_comments": 5
     },
     "rss": [
+      {
+        "name": "AlphaSignal",
+        "url": "https://alphasignal.ai/feed.xml",
+        "enabled": true,
+        "category": "tech"
+      },
       {
         "name": "Simon Willison",
         "url": "https://simonwillison.net/atom/everything/",
