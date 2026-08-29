@@ -133,7 +133,7 @@
     ],
     "google_news": {
       "enabled": true,
-      "query": "world news technology AI business finance science politics",
+      "query": "world news technology science politics",
       "language": "en",
       "country": "US",
       "max_results": 30,
