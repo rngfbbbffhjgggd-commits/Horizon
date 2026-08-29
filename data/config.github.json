@@ -61,42 +61,6 @@
           "time_filter": "day",
           "fetch_limit": 10,
           "min_score": 50
-        },
-        {
-          "subreddit": "quant",
-          "enabled": true,
-          "sort": "hot",
-          "time_filter": "day",
-          "fetch_limit": 8,
-          "min_score": 30,
-          "category": "finance"
-        },
-        {
-          "subreddit": "algotrading",
-          "enabled": true,
-          "sort": "hot",
-          "time_filter": "day",
-          "fetch_limit": 8,
-          "min_score": 30,
-          "category": "finance"
-        },
-        {
-          "subreddit": "finance",
-          "enabled": true,
-          "sort": "hot",
-          "time_filter": "day",
-          "fetch_limit": 10,
-          "min_score": 50,
-          "category": "finance"
-        },
-        {
-          "subreddit": "Economics",
-          "enabled": true,
-          "sort": "hot",
-          "time_filter": "day",
-          "fetch_limit": 10,
-          "min_score": 50,
-          "category": "finance"
         }
       ],
       "users": [],
@@ -126,11 +90,6 @@
         "enabled": true
       },
       {
-        "name": "FT英文 - World",
-        "url": "https://www.ft.com/world?format=rss",
-        "enabled": true
-      },
-      {
         "name": "36氪",
         "url": "https://www.36kr.com/feed",
         "enabled": true,
@@ -147,42 +106,13 @@
         "enabled": true
       },
       {
-        "name": "日经中文网",
-        "url": "https://news.google.com/rss/search?q=site:cn.nikkei.com&hl=zh-CN&gl=CN&ceid=CN:zh-Hans",
-        "enabled": true,
-        "category": "finance"
-      },
-      {
-        "name": "华尔街日报",
-        "url": "https://news.google.com/rss/search?q=site:wsj.com&hl=en-US&gl=US&ceid=US:en",
-        "enabled": true,
-        "category": "finance"
-      },
-      {
-        "name": "界面新闻",
-        "url": "https://feedx.net/rss/jiemian.xml",
-        "enabled": true,
-        "category": "finance"
-      },
-      {
         "name": "南方周末",
         "url": "https://feedx.net/rss/infzm.xml",
         "enabled": true
       },
       {
-        "name": "经济日报",
-        "url": "https://feedx.net/rss/jingjiribao.xml",
-        "enabled": true,
-        "category": "finance"
-      },
-      {
         "name": "美联社",
         "url": "https://news.google.com/rss/search?q=site:apnews.com&hl=en-US&gl=US&ceid=US:en",
-        "enabled": true
-      },
-      {
-        "name": "经济学人",
-        "url": "https://news.google.com/rss/search?q=site:economist.com&hl=en-US&gl=US&ceid=US:en",
         "enabled": true
       },
       {
@@ -199,12 +129,6 @@
         "name": "Nature",
         "url": "https://news.google.com/rss/search?q=site:nature.com&hl=en-US&gl=US&ceid=US:en",
         "enabled": true
-      },
-      {
-        "name": "财新",
-        "url": "https://news.google.com/rss/search?q=site:caixin.com&hl=zh-CN&gl=CN&ceid=CN:zh-Hans",
-        "enabled": true,
-        "category": "finance"
       }
     ],
     "google_news": {
@@ -259,7 +183,7 @@
   "filtering": {
     "ai_score_threshold": 6.0,
     "time_window_hours": 24,
-    "max_items": 30,
+    "max_items": 20,
     "category_groups": {
       "tech": {
         "name": "科技",
@@ -267,17 +191,10 @@
         "categories": [
           "tech"
         ]
-      },
-      "finance": {
-        "name": "财经",
-        "limit": 5,
-        "categories": [
-          "finance"
-        ]
       }
     },
     "default_group": "全球要闻",
-    "default_group_limit": 20
+    "default_group_limit": 15
   },
   "webhook": {
     "enabled": false
