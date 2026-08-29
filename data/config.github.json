@@ -104,18 +104,6 @@
     },
     "rss": [
       {
-        "name": "AlphaSignal",
-        "url": "https://alphasignal.ai/feed.xml",
-        "enabled": true,
-        "category": "tech"
-      },
-      {
-        "name": "Simon Willison",
-        "url": "https://simonwillison.net/atom/everything/",
-        "enabled": true,
-        "category": "tech"
-      },
-      {
         "name": "Ars Technica",
         "url": "https://feeds.arstechnica.com/arstechnica/index",
         "enabled": true,
