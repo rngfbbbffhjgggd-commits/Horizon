@@ -1,4 +1,4 @@
-﻿"""Main orchestrator coordinating the entire workflow."""
+"""Main orchestrator coordinating the entire workflow."""
 
 import asyncio
 from collections import defaultdict
@@ -259,7 +259,9 @@ class HorizonOrchestrator:
             self.console.print("")
 
             # 6. Search related stories + enrich with background knowledge (2nd AI pass)
-            await self._enrich_important_items(important_items)
+            # DISABLED 2026-08-31: digest simplified to scoring + summary + link only.
+            # Background enrichment cost too much output and GLM-4.7 rendered it poorly.
+            # await self._enrich_important_items(important_items)
 
             # 7. Generate and save daily summaries for each configured language
             # Use Beijing time (UTC+8) for the summary filename so the date
