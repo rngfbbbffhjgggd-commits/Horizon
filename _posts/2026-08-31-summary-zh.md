@@ -1,6 +1,6 @@
 ---
 layout: default
-title: "Horizon Summary: 2026-08-31 (ZH)"
+标题：“地平线摘要：2026-08-31（中文）”
 date: 2026-08-31
 lang: zh
 ---
@@ -11,10 +11,10 @@ lang: zh
 
 1. [委内瑞拉为与特朗普的石油协议辩护](#item-1) ⭐️ 9.0/10
 2. [尼泊尔-西藏山洪死亡人数升至 804 人，数千人失踪](#item-2) ⭐️ 9.0/10
-3. [European Commission Revives Push for Encryption Backdoors in ProtectEU Strategy](#item-3) ⭐️ 8.0/10
+3. [欧盟委员会在ProtectEU战略中重新推动加密后门](#item-3) ⭐️ 8.0/10
 4. [12TB Steam 泄露事件曝光 Valve 十余年内部历史](#item-4) ⭐️ 8.0/10
-5. [US strikes Iranian launchers in strait of Hormuz, sparking reprisal attack on airbases in Jordan](#item-5) ⭐️ 8.0/10
-6. [G20 countries should consider more trade barriers on China to cut imbalances, Bessent says - Reuters](#item-6) ⭐️ 8.0/10
+5. [美国打击霍尔木兹海峡的伊朗发射装置，引发对约旦空军基地的报复性袭击](#item-5) ⭐️ 8.0/10
+6. [贝森特称，G20国家应考虑对中国设置更多贸易壁垒以减少失衡](#item-6) ⭐️ 8.0/10
 7. [黄仁勋：AI 推动美国再工业化，半年融资 4000 亿美元](#item-7) ⭐️ 8.0/10
 8. [索尼华纳起诉 Anthropic 侵犯版权](#item-8) ⭐️ 8.0/10
 9. [双江口水电站一期三台机组全部投产发电](#item-9) ⭐️ 7.5/10
@@ -28,7 +28,7 @@ lang: zh
 17. [土耳其、沙特阿拉伯和巴基斯坦将举行首次防务协定会议](#item-17) ⭐️ 7.0/10
 18. [丰田将在中国率先生产下一代 EV（电动汽车）](#item-18) ⭐️ 7.0/10
 19. [每人次亏 5 元，上海地铁票价上调](#item-19) ⭐️ 7.0/10
-20. [Dozens of soldiers killed or arrested after an apparent mutiny in Niger’s capital, state TV reports - AP News](#item-20) ⭐️ 7.0/10
+20. [国家电视台报道，尼日尔首都发生明显兵变，数十名士兵被杀或被捕](#item-20) ⭐️ 7.0/10
 
 ---
 
@@ -63,9 +63,9 @@ rss · The Guardian - World · 8月31日 02:34
 ---
 
 <a id="item-3"></a>
-## [European Commission Revives Push for Encryption Backdoors in ProtectEU Strategy](https://reclaimthenet.org/eu-protecteu-strategy-encryption-backdoor-law-enforcement) ⭐️ 8.0/10
+## [欧洲委员会在ProtectEU战略中重新推动加密后门](https://reclaimthenet.org/eu-protecteu-strategy-encryption-backdoor-law-enforcement) ⭐️ 8.0/10
 
-The European Commission is reviving efforts to introduce encryption backdoors under the guise of the ProtectEU strategy, sparking privacy concerns.
+欧盟委员会正在以“保护欧盟”战略为名，重启引入加密后门的努力，引发隐私担忧。
 
 hackernews · nickslaughter02 · 8月30日 23:12 · [社区讨论](https://news.ycombinator.com/item?id=49499394)
 
@@ -87,9 +87,9 @@ rss · Ars Technica · 8月31日 05:40
 ---
 
 <a id="item-5"></a>
-## [US strikes Iranian launchers in strait of Hormuz, sparking reprisal attack on airbases in Jordan](https://www.theguardian.com/world/2026/aug/30/us-strikes-iranian-launchers-on-larak-island-amid-strait-of-hormuz-tensions) ⭐️ 8.0/10
+## [美国打击霍尔木兹海峡的伊朗发射装置，引发对约旦空军基地的报复性攻击](https://www.theguardian.com/world/2026/aug/30/us-strikes-iranian-launchers-on-larak-island-amid-strait-of-hormuz-tensions) ⭐️ 8.0/10
 
-US forces struck Iranian rocket launchers on Larak Island to prevent the deployment of sea mines, prompting retaliatory strikes by Iran&\#x27;s Revolutionary Guard on US airbases in Jordan.
+美军打击了拉拉克岛上的伊朗火箭发射器，以防止其部署水雷，这引发了伊朗革命卫队对约旦美军基地的报复性打击。
 
 rss · The Guardian - World · 8月31日 06:55
 
@@ -100,9 +100,9 @@ rss · The Guardian - World · 8月31日 06:55
 ---
 
 <a id="item-6"></a>
-## [G20 countries should consider more trade barriers on China to cut imbalances, Bessent says - Reuters](https://news.google.com/rss/articles/CBMiwAFBVV95cUxPenpidlpzUmlPS0hRbS1jaGotNFBZZHgxWVhlMER4NlRWYnh2d280dW1uMHYwZHlvZlgzNVJkNlZQNno1dndkQ1FZNTFNeTJ4eERKTkRlX29kUXhwX1lvTk5XLUZNWUhsdmwxUC04SU9RekVXUlBaRW5GWWhscWs4XzFVcmJlek5ULUFxdDh0ZzB6TlNqUDNYSUJSb2VJQ1RPVHJvS3hWNjY1UUlZaWhfMXI4RFAxaTQ0aldEZXBjbEk?oc=5) ⭐️ 8.0/10
+## [贝森特称G20国家应考虑对中国设置更多贸易壁垒以减少失衡](https://news.google.com/rss/articles/CBMiwAFBVV95cUxPenpidlpzUmlPS0hRbS1jaGotNFBZZHgxWVhlMER4NlRWYnh2d280dW1uMHYwZHlvZlgzNVJkNlZQNno1dndkQ1FZNTFNeTJ4eERKTkRlX29kUXhwX1lvTk5XLUZNWUhsdmwxUC04SU9RekVXUlBaRW5GWWhscWs4XzFVcmJlek5ULUFxdDh0ZzB6TlNqUDNYSUJSb2VJQ1RPVHJvS3hWNjY1UUlZaWhfMXI4RFAxaTQ0aldEZXBjbEk?oc=5) ⭐️ 8.0/10
 
-Scott Bessent urged G20 countries to consider implementing coordinated trade barriers against China to address global economic imbalances.
+斯科特·贝森特敦促二十国集团国家考虑对中国实施协调一致的贸易壁垒，以解决全球经济失衡问题。
 
 rss · Reuters \(English\) · 8月31日 07:07
 
@@ -137,7 +137,7 @@ telegram · solidot · 8月30日 21:25
 <a id="item-9"></a>
 ## [双江口水电站一期三台机组全部投产发电](https://36kr.com/newsflashes/3962805894495616?f=rss) ⭐️ 7.5/10
 
-The world&\#x27;s highest dam, Shuangjiangkou Hydropower Station, saw its first phase of three units fully put into operation.
+世界最高大坝双江口水电站首批三台机组全部投入运行。
 
 rss · 36氪 · 8月31日 10:24
 
@@ -148,7 +148,7 @@ rss · 36氪 · 8月31日 10:24
 <a id="item-10"></a>
 ## [陆上油气甲烷排放监测国家标准出台](https://36kr.com/newsflashes/3962796463701378?f=rss) ⭐️ 7.5/10
 
-China issued its first national standard for monitoring methane emissions in the onshore oil and gas industry, aiding green transition.
+中国发布了首项陆上油气行业甲烷排放监测国家标准，助力绿色转型。
 
 rss · 36氪 · 8月31日 10:05
 
@@ -159,7 +159,7 @@ rss · 36氪 · 8月31日 10:05
 <a id="item-11"></a>
 ## [美媒：新疆试飞基地大规模扩建 或为轰-20 测试做准备 - 联合早报](https://news.google.com/rss/articles/CBMiakFVX3lxTE1zQzZJS0U2bWhJNFJ1WHVyTEo1M2lFeU0yYWlzcUk0eE8wZENTUFNMSlNER1MwZEdVaWMxYW9fRFpmZ0tQQllydlRDVGVoQXFUNFdDS3FHX0p6S2R2ZGVuLXF1TkdKeWlPV0E?oc=5) ⭐️ 7.5/10
 
-US media reports indicate that the large-scale expansion of a test base in Xinjiang is likely preparation for the H-20 stealth bomber.
+美国媒体报道称，新疆一个试验基地的大规模扩建可能是为H-20隐身轰炸机做准备。
 
 rss · 联合早报 · 8月30日 09:04
 
@@ -170,7 +170,7 @@ rss · 联合早报 · 8月30日 09:04
 <a id="item-12"></a>
 ## [中国海警称加强黄岩岛领海及周边区域执法巡查 - 联合早报](https://news.google.com/rss/articles/CBMiakFVX3lxTE53RV84N3I0b3l6TDY3LTJqR3U0aHc5U0EtLVRFUURMbHFubmVGbHF1RF8yUXZwV1kxSXNtT1diZXVqa28yOWVETWtjWVZuNnh1ZExVZEx2RzIxem5JWXF5Rk5zR3JZWkNpTUE?oc=5) ⭐️ 7.5/10
 
-China Coast Guard announces strengthened law enforcement patrols in the territorial sea and surrounding areas of Huangyan Island.
+中国海警宣布加强在黄岩岛领海及其周边海域的执法巡逻。
 
 rss · 联合早报 · 8月30日 11:32
 
@@ -260,9 +260,9 @@ rss · 南方周末 · 8月30日 19:25
 ---
 
 <a id="item-20"></a>
-## [Dozens of soldiers killed or arrested after an apparent mutiny in Niger’s capital, state TV reports - AP News](https://news.google.com/rss/articles/CBMivgFBVV95cUxPVzZFaFJKU2dpTXV0MkluVEthajhsY2tVSDFqM0poUXpBOTNuRGUxZXRKZEpBam1DQWNBdWFzUnlHM3hmM21ZWkh5REZBM0R3YnlKTTVMQnZacFhWQ1c4YUFuQjFqZ095QnliMGNxSEE1TzZqQ1JOVTJlVVRJRlBWLUoybVVSbDg5MzNNd0pkQ1lCREx5aS1pdFRzTUptMTZWTHJ2TklBV0RjYVVnYlU0Q3hicWN0eXRHVDUzb0FR?oc=5) ⭐️ 7.0/10
+## [国家电视台报道，尼日尔首都发生明显兵变后数十名士兵被杀或被捕](https://news.google.com/rss/articles/CBMivgFBVV95cUxPVzZFaFJKU2dpTXV0MkluVEthajhsY2tVSDFqM0poUXpBOTNuRGUxZXRKZEpBam1DQWNBdWFzUnlHM3hmM21ZWkh5REZBM0R3YnlKTTVMQnZacFhWQ1c4YUFuQjFqZ095QnliMGNxSEE1TzZqQ1JOVTJlVVRJRlBWLUoybVVSbDg5MzNNd0pkQ1lCREx5aS1pdFRzTUptMTZWTHJ2TklBV0RjYVVnYlU0Q3hicWN0eXRHVDUzb0FR?oc=5) ⭐️ 7.0/10
 
-State media in Niger reports that dozens of soldiers have been killed or arrested during an apparent mutiny in the capital, Niamey.
+尼日尔国家媒体报道，首都尼亚美疑似发生兵变，数十名士兵被打死或被捕。
 
 rss · 美联社 · 8月30日 08:13
 
