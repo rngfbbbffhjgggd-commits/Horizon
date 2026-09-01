@@ -1,6 +1,6 @@
 ---
 layout: default
-title: "Horizon Summary: 2026-09-01 (ZH)"
+标题：地平线摘要：2026-09-01（中文）
 date: 2026-09-01
 lang: zh
 ---
@@ -9,33 +9,33 @@ lang: zh
 
 ---
 
-1. [Iran attacks Jordan, UAE after US bombs Larak Island: What’s the latest? - Al Jazeera](#item-1) ⭐️ 9.5/10
-2. [Apple’s top App Store exec, Phil Schiller, follows wave of exits as CEO Tim Cook steps down](#item-2) ⭐️ 9.0/10
-3. [Leaders of China, Russia and India are among heads of state meeting to counter US influence - AP News](#item-3) ⭐️ 9.0/10
-4. [China is concealing scale of flood disaster, say Tibet campaigners](#item-4) ⭐️ 8.5/10
-5. [Nvidia to invest $3.5 billion in chipmaker MediaTek, expand partnership - Reuters](#item-5) ⭐️ 8.5/10
+1. [伊朗袭击约旦和阿联酋，美国轰炸拉拉克岛后：最新情况如何？——半岛电视台](#item-1) ⭐️ 9.5/10
+2. [苹果App Store最高主管菲尔·席勒紧随离职潮，CEO蒂姆·库克下台](#item-2) ⭐️ 9.0/10
+3. [中国、俄罗斯和印度领导人与其他国家元首会晤，以对抗美国影响力——美联社](#item-3) ⭐️ 9.0/10
+4. [西藏活动人士称中国隐瞒洪灾规模](#item-4) ⭐️ 8.5/10
+5. [英伟达将向芯片制造商联发科投资35亿美元，扩大合作——路透社](#item-5) ⭐️ 8.5/10
 6. [韩国准备向所有民众提供免费 AI 服务](#item-6) ⭐️ 8.5/10
-7. [Google Has Removed MV2 Extensions from the Chrome Web Store, Including UBO](#item-7) ⭐️ 8.0/10
-8. [The Pentagon now has its own version of ChatGPT and Grok](#item-8) ⭐️ 8.0/10
-9. [‘Superhuman’ AI tool spots heart disease in less than 2 seconds](#item-9) ⭐️ 8.0/10
-10. [India&\#x27;s Modi tells Russia&\#x27;s Putin that the war in Ukraine must end for humanity&\#x27;s sake - Reuters](#item-10) ⭐️ 8.0/10
-11. [China&\#x27;s CXMT makes breakthrough in advanced memory chips, the Information reports - Reuters](#item-11) ⭐️ 8.0/10
-12. [China&\#x27;s Xi tells Putin that foundations of ties will be stronger - Reuters](#item-12) ⭐️ 8.0/10
-13. [Taiwan says &\#x27;unpredictable&\#x27; China strengthens air and sea control nearby - Reuters](#item-13) ⭐️ 8.0/10
-14. [Zelenskiy, Trump&\#x27;s envoys discuss Ukraine visit and peace efforts - Reuters](#item-14) ⭐️ 8.0/10
+7. [谷歌已从Chrome网上应用商店移除MV2扩展程序，包括uBlock Origin](#item-7) ⭐️ 8.0/10
+8. [五角大楼现在有了自己的ChatGPT和Grok版本](#item-8) ⭐️ 8.0/10
+9. [“超人”人工智能工具不到2秒识别心脏病](#item-9) ⭐️ 8.0/10
+10. [印度莫迪告诉俄罗斯普京：为了人类，乌克兰战争必须结束——路透社](#item-10) ⭐️ 8.0/10
+11. [据The Information报道，中国长鑫存储在先进存储芯片上取得突破——路透社](#item-11) ⭐️ 8.0/10
+12. [中国习近平告诉普京，两国关系基础将更加牢固——路透社](#item-12) ⭐️ 8.0/10
+13. [台湾称“不可预测”的中国加强附近海空控制——路透社](#item-13) ⭐️ 8.0/10
+14. [泽连斯基与特朗普特使讨论访问乌克兰及和平努力——路透社](#item-14) ⭐️ 8.0/10
 15. [“我就是个普通人”：出入境新规上路前，那些早已受困的中国民众](#item-15) ⭐️ 8.0/10
 16. [中国、美国和俄罗斯的太空攻防战：卫星如何成为现代战争的第一击？](#item-16) ⭐️ 8.0/10
 17. [特朗普关税：美国称数十国助中国避税](#item-17) ⭐️ 8.0/10
 18. [厄尔尼诺最迟 10 月达超级强度，全球粮食航运承压](#item-18) ⭐️ 8.0/10
-19. [ChatGPT and Reddit now face EU&\#x27;s toughest online safety rules](#item-19) ⭐️ 7.5/10
-20. [FTC accuses Amazon of running a ‘secret ad surcharge scheme’ in new lawsuit](#item-20) ⭐️ 7.5/10
+19. [ChatGPT和Reddit现在面临欧盟最严格的网络安全规则](#item-19) ⭐️ 7.5/10
+20. [FTC在新诉讼中指控亚马逊实施“秘密广告附加费计划”](#item-20) ⭐️ 7.5/10
 
 ---
 
 <a id="item-1"></a>
-## [Iran attacks Jordan, UAE after US bombs Larak Island: What’s the latest? - Al Jazeera](https://news.google.com/rss/articles/CBMirgFBVV95cUxPV292Z2dzblEzQnh6T3I3Tzl1RjlYSWFOX184blRSNHZOTk90Q2ZDUzRuaEVZekE3ZUFpa2NxRlowb1RBNUtSOS10Nk9CNndCUGZRMHBSR1BoQlpXVEo1aVdUZHM4Ym9rZ1YyeG5Nc2dVRjYxaVhsajMzUVhuUmUyT2V6UkhwQjNEcHltb0ZwVGpTd0VXSGhsdDdDZk5tel9wTUVUSHFnUFdOWWJjc2fSAbMBQVVfeXFMTVdzZV8za1RCTHhOU1VTZ0lvSVd3MHo3ZzRTV2ZuUjhDcHROMElJZV94bk9hMktUa3JRaXA3YkJEckd1Rkd4aFpTOUFmNXNMVjlfa3pUS3FIWWMzNXhpNk9QTVpSNk1lanprTUQ2S09VQnZOWnE5OFVsN3ItaUlqbGJUUUpLYmE4aTFpRWFUbTRxVDJlc1U1VlJfSkJUVW1DV2JnRDMtLVlEUVhLaFpOQkpEMEk?oc=5) ⭐️ 9.5/10
+## [伊朗在美军轰炸拉拉克岛后袭击约旦和阿联酋：最新情况如何？](https://news.google.com/rss/articles/CBMirgFBVV95cUxPV292Z2dzblEzQnh6T3I3Tzl1RjlYSWFOX184blRSNHZOTk90Q2ZDUzRuaEVZekE3ZUFpa2NxRlowb1RBNUtSOS10Nk9CNndCUGZRMHBSR1BoQlpXVEo1aVdUZHM4Ym9rZ1YyeG5Nc2dVRjYxaVhsajMzUVhuUmUyT2V6UkhwQjNEcHltb0ZwVGpTd0VXSGhsdDdDZk5tel9wTUVUSHFnUFdOWWJjc2fSAbMBQVVfeXFMTVdzZV8za1RCTHhOU1VTZ0lvSVd3MHo3ZzRTV2ZuUjhDcHROMElJZV94bk9hMktUa3JRaXA3YkJEckd1Rkd4aFpTOUFmNXNMVjlfa3pUS3FIWWMzNXhpNk9QTVpSNk1lanprTUQ2S09VQnZOWnE5OFVsN3ItaUlqbGJUUUpLYmE4aTFpRWFUbTRxVDJlc1U1VlJfSkJUVW1DV2JnRDMtLVlEUVhLaFpOQkpEMEk?oc=5) ⭐️ 9.5/10
 
-Iran has launched attacks on Jordan and the UAE following a US bombing of Larak Island, marking a severe escalation in regional hostilities.
+伊朗在美军轰炸拉拉克岛后对约旦和阿联酋发动了袭击，标志着地区敌对行动严重升级。
 
 rss · 半岛电视台 · 8月31日 17:21
 
@@ -46,9 +46,9 @@ rss · 半岛电视台 · 8月31日 17:21
 ---
 
 <a id="item-2"></a>
-## [Apple’s top App Store exec, Phil Schiller, follows wave of exits as CEO Tim Cook steps down](https://techcrunch.com/2026/08/31/apples-top-app-store-exec-phil-schiller-follows-wave-of-exits-as-ceo-tim-cook-steps-down/) ⭐️ 9.0/10
+## [苹果App Store高管菲尔·席勒在CEO蒂姆·库克辞职后跟随离职潮](https://techcrunch.com/2026/08/31/apples-top-app-store-exec-phil-schiller-follows-wave-of-exits-as-ceo-tim-cook-steps-down/) ⭐️ 9.0/10
 
-Apple CEO Tim Cook is stepping down, leading to a wave of executive exits including App Store chief Phil Schiller, who is also nearing retirement.
+苹果首席执行官蒂姆·库克即将卸任，引发包括App Store负责人菲尔·席勒在内的一波高管离职潮，席勒也临近退休。
 
 rss · TechCrunch · 9月1日 03:02
 
@@ -59,9 +59,9 @@ rss · TechCrunch · 9月1日 03:02
 ---
 
 <a id="item-3"></a>
-## [Leaders of China, Russia and India are among heads of state meeting to counter US influence - AP News](https://news.google.com/rss/articles/CBMisgFBVV95cUxQLVhWWGlhWk5tVjFtTjE5MWF1MU5sSkh0cFZld011VW9PM3d5Z2dPREh5cFM1MThGdF9Fb0lXTXE3OUdfMnRtUFBqd0VVN1BjN2dTY2tnQVFUelRwcFJHTU9VVTBiTmJUamtnejJfQnZLcWVaSjZNT1RTWkVnM09RTm13dks5bWt2QXlSdVI0WWQ2ajBXLW5mX3NNalo5YlhTQmR4cXA3aFVzdkRrMEFSZDBn?oc=5) ⭐️ 9.0/10
+## [中国、俄罗斯和印度领导人参加国家元首会议，以对抗美国影响力](https://news.google.com/rss/articles/CBMisgFBVV95cUxQLVhWWGlhWk5tVjFtTjE5MWF1MU5sSkh0cFZld011VW9PM3d5Z2dPREh5cFM1MThGdF9Fb0lXTXE3OUdfMnRtUFBqd0VVN1BjN2dTY2tnQVFUelRwcFJHTU9VVTBiTmJUamtnejJfQnZLcWVaSjZNT1RTWkVnM09RTm13dks5bWt2QXlSdVI0WWQ2ajBXLW5mX3NNalo5YlhTQmR4cXA3aFVzdkRrMEFSZDBn?oc=5) ⭐️ 9.0/10
 
-Leaders from China, Russia, and India are meeting with other heads of state to discuss strategies to counter US influence.
+中国、俄罗斯和印度领导人正与其他国家元首会晤，讨论应对美国影响力的策略。
 
 rss · 美联社 · 9月1日 00:30
 
@@ -70,9 +70,9 @@ rss · 美联社 · 9月1日 00:30
 ---
 
 <a id="item-4"></a>
-## [China is concealing scale of flood disaster, say Tibet campaigners](https://www.theguardian.com/world/2026/aug/31/china-concealing-scale-nepal-flood-disaster-say-tibet-campaigners) ⭐️ 8.5/10
+## [西藏活动人士称中国隐瞒洪灾规模](https://www.theguardian.com/world/2026/aug/31/china-concealing-scale-nepal-flood-disaster-say-tibet-campaigners) ⭐️ 8.5/10
 
-Tibetan advocacy groups claim China is concealing the true scale of destruction and the number of missing people from recent floods.
+藏人权益组织声称，中国隐瞒了近期洪灾造成的实际破坏规模和失踪人数。
 
 rss · The Guardian - World · 8月31日 17:18
 
@@ -83,9 +83,9 @@ rss · The Guardian - World · 8月31日 17:18
 ---
 
 <a id="item-5"></a>
-## [Nvidia to invest $3.5 billion in chipmaker MediaTek, expand partnership - Reuters](https://news.google.com/rss/articles/CBMiqwFBVV95cUxQNGg1el9MUWRYTnBSbW42NnllVGxRSmwxLUloa1ppa01jamtTRXhiMEo0cUd0dk5iMDVPZEpMdDFBbGMtd2FzSVJFRjRIM3BSVVU1RFhEaTB1TDhHQzVNb2VnLTZWXzhQMmthTG5VRzk1STBaRVlsNENZOHNnWTJ4TURjR2hPUDNlS1VtSDd4NlB0UUxBLXprTnRJM25XOXNLVWt4amprQ3YyeWM?oc=5) ⭐️ 8.5/10
+## [英伟达将向芯片制造商联发科投资35亿美元，扩大合作伙伴关系](https://news.google.com/rss/articles/CBMiqwFBVV95cUxQNGg1el9MUWRYTnBSbW42NnllVGxRSmwxLUloa1ppa01jamtTRXhiMEo0cUd0dk5iMDVPZEpMdDFBbGMtd2FzSVJFRjRIM3BSVVU1RFhEaTB1TDhHQzVNb2VnLTZWXzhQMmthTG5VRzk1STBaRVlsNENZOHNnWTJ4TURjR2hPUDNlS1VtSDd4NlB0UUxBLXprTnRJM25XOXNLVWt4amprQ3YyeWM?oc=5) ⭐️ 8.5/10
 
-Nvidia plans to invest $3.5 billion in chipmaker MediaTek to expand their existing partnership.
+Nvidia计划向芯片制造商联发科投资35亿美元，以扩大双方现有合作。
 
 rss · Reuters \(English\) · 8月31日 22:48
 
@@ -98,7 +98,7 @@ rss · Reuters \(English\) · 8月31日 22:48
 <a id="item-6"></a>
 ## [韩国准备向所有民众提供免费 AI 服务](https://www.solidot.org/story?sid=85238) ⭐️ 8.5/10
 
-South Korea announced a plan to provide all citizens with free, unlimited access to a government-supported AI service for daily life and public administration.
+韩国宣布计划为所有公民提供政府支持的AI服务的免费无限使用，用于日常生活和公共行政。
 
 telegram · solidot · 8月31日 16:30
 
@@ -107,9 +107,9 @@ telegram · solidot · 8月31日 16:30
 ---
 
 <a id="item-7"></a>
-## [Google Has Removed MV2 Extensions from the Chrome Web Store, Including UBO](https://webiterate.dev/google-removed-extensions-ublock-origin-108/) ⭐️ 8.0/10
+## [谷歌已从Chrome网上应用店移除MV2扩展，包括UBO](https://webiterate.dev/google-removed-extensions-ublock-origin-108/) ⭐️ 8.0/10
 
-Google has removed Manifest V2 extensions, including the popular uBlock Origin, from the Chrome Web Store, forcing users to migrate to Manifest V3 alternatives.
+谷歌已从Chrome网上应用店移除Manifest V2扩展程序，包括广受欢迎的uBlock Origin，迫使用户迁移到Manifest V3替代品。
 
 hackernews · twapi · 9月1日 05:10 · [社区讨论](https://news.ycombinator.com/item?id=49514878)
 
@@ -118,9 +118,9 @@ hackernews · twapi · 9月1日 05:10 · [社区讨论](https://news.ycombinator
 ---
 
 <a id="item-8"></a>
-## [The Pentagon now has its own version of ChatGPT and Grok](https://techcrunch.com/2026/08/31/the-pentagon-now-has-its-own-version-of-chatgpt-and-grok/) ⭐️ 8.0/10
+## [五角大楼现在拥有了自己的ChatGPT和Grok版本](https://techcrunch.com/2026/08/31/the-pentagon-now-has-its-own-version-of-chatgpt-and-grok/) ⭐️ 8.0/10
 
-The Pentagon has added versions of OpenAI&\#x27;s ChatGPT and SpaceXAI&\#x27;s Grok to its central AI portal, alongside Google&\#x27;s Gemini.
+五角大楼已在其中央AI门户中新增OpenAI的ChatGPT和SpaceXAI的Grok版本，与谷歌的Gemini并列。
 
 rss · TechCrunch · 9月1日 04:13
 
@@ -129,9 +129,9 @@ rss · TechCrunch · 9月1日 04:13
 ---
 
 <a id="item-9"></a>
-## [‘Superhuman’ AI tool spots heart disease in less than 2 seconds](https://www.theguardian.com/technology/2026/aug/31/superhuman-ai-tool-spots-heart-disease) ⭐️ 8.0/10
+## [“超人”AI工具在不到2秒内发现心脏病](https://www.theguardian.com/technology/2026/aug/31/superhuman-ai-tool-spots-heart-disease) ⭐️ 8.0/10
 
-Doctors have developed a &\#x27;superhuman&\#x27; AI tool that can detect heart disease in less than two seconds by analyzing routine ECGs.
+医生们开发出一种“超人”AI工具，通过分析常规心电图，可在不到两秒内检测出心脏病。
 
 rss · The Guardian - World · 9月1日 00:00
 
@@ -140,9 +140,9 @@ rss · The Guardian - World · 9月1日 00:00
 ---
 
 <a id="item-10"></a>
-## [India&\#x27;s Modi tells Russia&\#x27;s Putin that the war in Ukraine must end for humanity&\#x27;s sake - Reuters](https://news.google.com/rss/articles/CBMivgFBVV95cUxPX1JRSVpMMVp5U0JZRXJRaXk3TTBZSjZqcXNTSTN4QjFBT1RTNGwyZ0hWa216TW94TjNkdE1XZ2lMWnVNMDhsSzczaHRpeWItSDNKREdvdTRSTlBDR3NrUFI5VUJKUnd0N2RyOVdHWmwwM3lFQXNiQnBLUHJTNFFBaGZRNEZ6a2M3Ymh2OEk2VFYzalRISUJCSTM0Y0c4QjNDR2tmU291UzdQWm91V0NpUFZzU0FGYnNZS3hKUEhB?oc=5) ⭐️ 8.0/10
+## [印度莫迪告诉俄罗斯普京，为了人类，乌克兰战争必须结束](https://news.google.com/rss/articles/CBMivgFBVV95cUxPX1JRSVpMMVp5U0JZRXJRaXk3TTBZSjZqcXNTSTN4QjFBT1RTNGwyZ0hWa216TW94TjNkdE1XZ2lMWnVNMDhsSzczaHRpeWItSDNKREdvdTRSTlBDR3NrUFI5VUJKUnd0N2RyOVdHWmwwM3lFQXNiQnBLUHJTNFFBaGZRNEZ6a2M3Ymh2OEk2VFYzalRISUJCSTM0Y0c4QjNDR2tmU291UzdQWm91V0NpUFZzU0FGYnNZS3hKUEhB?oc=5) ⭐️ 8.0/10
 
-Indian Prime Minister Narendra Modi publicly told Vladimir Putin that the war in Ukraine must end, emphasizing the importance of peace for humanity.
+印度总理纳伦德拉·莫迪公开对弗拉基米尔·普京表示，乌克兰战争必须结束，并强调和平对人类的重要性。
 
 rss · Reuters \(English\) · 9月1日 00:56
 
@@ -151,9 +151,9 @@ rss · Reuters \(English\) · 9月1日 00:56
 ---
 
 <a id="item-11"></a>
-## [China&\#x27;s CXMT makes breakthrough in advanced memory chips, the Information reports - Reuters](https://news.google.com/rss/articles/CBMixgFBVV95cUxOc1BMUWFSSEdyQjI2ODZhaVVsSm5iRUZlUWRYSU1aUHFuNm5qZWhUWGxFWGdqR1ZDWmQxalpWSE94bUNNNUVoVW1renltMzlPdTlkOTgzb1NWWTJMa2hhMldSeGJZaUI0cDFiSXBwVVNCU1QtWEYyZFdqdlZEenJLTUgtSGtuZFZLRklfODh1c1pMbVRZV2VvaWlPNjMxeEVQaExLR3l6ek1OZU95OTlBLTFlM2VOTmtkc0NlZVpMcFItd0NGaXc?oc=5) ⭐️ 8.0/10
+## [据The Information报道，中国长鑫存储（CXMT）在先进存储芯片方面取得突破](https://news.google.com/rss/articles/CBMixgFBVV95cUxOc1BMUWFSSEdyQjI2ODZhaVVsSm5iRUZlUWRYSU1aUHFuNm5qZWhUWGxFWGdqR1ZDWmQxalpWSE94bUNNNUVoVW1renltMzlPdTlkOTgzb1NWWTJMa2hhMldSeGJZaUI0cDFiSXBwVVNCU1QtWEYyZFdqdlZEenJLTUgtSGtuZFZLRklfODh1c1pMbVRZV2VvaWlPNjMxeEVQaExLR3l6ek1OZU95OTlBLTFlM2VOTmtkc0NlZVpMcFItd0NGaXc?oc=5) ⭐️ 8.0/10
 
-Chinese memory chipmaker CXMT has reportedly achieved a breakthrough in advanced memory chip technology, according to The Information.
+据The Information报道，中国存储芯片制造商长鑫存储已在先进存储芯片技术上取得突破。
 
 rss · Reuters \(English\) · 8月31日 22:59
 
@@ -162,9 +162,9 @@ rss · Reuters \(English\) · 8月31日 22:59
 ---
 
 <a id="item-12"></a>
-## [China&\#x27;s Xi tells Putin that foundations of ties will be stronger - Reuters](https://news.google.com/rss/articles/CBMirAFBVV95cUxNZFdiczZaRlV1LVNlN2xMSDhZZzN3YUZVUF9nVmM3TnMta0xMZWpwS1BmZXpZazVXTU13Qm9kVHdQRUVKQTQ0SnE3S0MyMHZSQjh3VUVubzVCeTlaN2NDYnNSbXBkOWlwNmJuaTgzRWdaTno2QU5nSlBIU0ZZR0JBTXZBNmRmTVdad3Bvcm1Vczg5Y1NoUjcwOVhYWjJWQnJReGg5QjdiUzVkcVhj?oc=5) ⭐️ 8.0/10
+## [中国习近平告诉普京，两国关系基础将更加牢固](https://news.google.com/rss/articles/CBMirAFBVV95cUxNZFdiczZaRlV1LVNlN2xMSDhZZzN3YUZVUF9nVmM3TnMta0xMZWpwS1BmZXpZazVXTU13Qm9kVHdQRUVKQTQ0SnE3S0MyMHZSQjh3VUVubzVCeTlaN2NDYnNSbXBkOWlwNmJuaTgzRWdaTno2QU5nSlBIU0ZZR0JBTXZBNmRmTVdad3Bvcm1Vczg5Y1NoUjcwOVhYWjJWQnJReGg5QjdiUzVkcVhj?oc=5) ⭐️ 8.0/10
 
-Chinese President Xi Jinping told Vladimir Putin that the foundations of their countries&\#x27; ties will become stronger.
+中国国家主席习近平告诉弗拉基米尔·普京，两国关系的基础将更加牢固。
 
 rss · Reuters \(English\) · 8月31日 22:35
 
@@ -175,9 +175,9 @@ rss · Reuters \(English\) · 8月31日 22:35
 ---
 
 <a id="item-13"></a>
-## [Taiwan says &\#x27;unpredictable&\#x27; China strengthens air and sea control nearby - Reuters](https://news.google.com/rss/articles/CBMiyAFBVV95cUxNWGpQaG9aejdkNW53TDNqVW04YzBQZE55SlJVU3JZVzByZHlUWEp5bXEwdFU1S1hmZDROaHFUeUR1aThZaGg3WnJQMTRtWlkyWTF0RDZEUnFsYmxTUG5JMldvdEtMeHBJQmxscFZ5NXRqSWhXRXBmOVc1TmFkbDNROExFWlZuM0JESE5kVzVZYzVvV1d3SjhvZGhVNGE0c0VWUjQxeTZjLUlnLUVPNmFHUmd4VVJfMXE2RnFPcmZQZklad1kzWWYwaA?oc=5) ⭐️ 8.0/10
+## [台湾称“不可预测的”中国加强周边海空控制](https://news.google.com/rss/articles/CBMiyAFBVV95cUxNWGpQaG9aejdkNW53TDNqVW04YzBQZE55SlJVU3JZVzByZHlUWEp5bXEwdFU1S1hmZDROaHFUeUR1aThZaGg3WnJQMTRtWlkyWTF0RDZEUnFsYmxTUG5JMldvdEtMeHBJQmxscFZ5NXRqSWhXRXBmOVc1TmFkbDNROExFWlZuM0JESE5kVzVZYzVvV1d3SjhvZGhVNGE0c0VWUjQxeTZjLUlnLUVPNmFHUmd4VVJfMXE2RnFPcmZQZklad1kzWWYwaA?oc=5) ⭐️ 8.0/10
 
-Taiwan&\#x27;s government reported that China is strengthening its air and sea control in the vicinity, describing Beijing&\#x27;s actions as unpredictable.
+台湾政府报告称，中国正在加强周边空域和海上的控制，并形容北京的行动难以预测。
 
 rss · Reuters \(English\) · 8月31日 20:49
 
@@ -186,9 +186,9 @@ rss · Reuters \(English\) · 8月31日 20:49
 ---
 
 <a id="item-14"></a>
-## [Zelenskiy, Trump&\#x27;s envoys discuss Ukraine visit and peace efforts - Reuters](https://news.google.com/rss/articles/CBMirAFBVV95cUxPeDhEaVkxMnh3di1SOHNkV1RCZlpMUE5lZDA4RFMwSm9QVEE5bncxZTQ0XzJOMGdBWkFrd2RQZ3BIOTd5VG1NNTBDMXItdHAwOEZ6RlROUmkxbGhTdzhsY0dIOWVPRURVUXF6RWQyX3NuRVpfajFTcEtlNnhGUUkya2wxS09aaXFOZnA1bWxTcnl1YjRRajdEZjlFcHhMMjlqejlPdDNGTWdQVlBI?oc=5) ⭐️ 8.0/10
+## [泽连斯基与特朗普特使讨论访问乌克兰及和平努力](https://news.google.com/rss/articles/CBMirAFBVV95cUxPeDhEaVkxMnh3di1SOHNkV1RCZlpMUE5lZDA4RFMwSm9QVEE5bncxZTQ0XzJOMGdBWkFrd2RQZ3BIOTd5VG1NNTBDMXItdHAwOEZ6RlROUmkxbGhTdzhsY0dIOWVPRURVUXF6RWQyX3NuRVpfajFTcEtlNnhGUUkya2wxS09aaXFOZnA1bWxTcnl1YjRRajdEZjlFcHhMMjlqejlPdDNGTWdQVlBI?oc=5) ⭐️ 8.0/10
 
-Ukrainian President Zelenskiy met with envoys from Donald Trump to discuss a potential visit and ongoing peace efforts.
+乌克兰总统泽连斯基会见了唐纳德·特朗普的特使，讨论可能的访问和持续的和平努力。
 
 rss · Reuters \(English\) · 9月1日 00:39
 
@@ -210,7 +210,7 @@ rss · BBC中文 · 8月31日 19:13
 <a id="item-16"></a>
 ## [中国、美国和俄罗斯的太空攻防战：卫星如何成为现代战争的第一击？](https://www.bbc.com/zhongwen/articles/cgljn380r59o/simp#4) ⭐️ 8.0/10
 
-The article explores the shifting landscape of modern warfare, using the 2022 Russian cyberattack on Viasat satellites as a case study to illustrate how space has become a primary domain for conflict involving the US, China, and Russia.
+文章探讨了现代战争格局的变化，以2022年俄罗斯对Viasat卫星的网络攻击为案例，说明太空如何已成为涉及美国、中国和俄罗斯冲突的主要领域。
 
 rss · BBC中文 · 8月31日 19:13
 
@@ -232,7 +232,7 @@ rss · BBC中文 · 8月31日 19:13
 <a id="item-18"></a>
 ## [厄尔尼诺最迟 10 月达超级强度，全球粮食航运承压](https://m.thepaper.cn/newsDetail_forward_33846426) ⭐️ 8.0/10
 
-A strengthening &\#x27;Super El Niño&\#x27; threatens global food supplies and shipping, with potential severe shortages by 2027.
+不断加剧的“超级厄尔尼诺”威胁全球粮食供应和航运，到2027年可能出现严重短缺。
 
 telegram · zaihuapd · 8月31日 12:01
 
@@ -241,9 +241,9 @@ telegram · zaihuapd · 8月31日 12:01
 ---
 
 <a id="item-19"></a>
-## [ChatGPT and Reddit now face EU&\#x27;s toughest online safety rules](https://arstechnica.com/tech-policy/2026/08/chatgtp-and-reddit-now-face-eus-toughest-online-safety-rules/) ⭐️ 7.5/10
+## [ChatGPT和Reddit现在面临欧盟最严格的在线安全规则](https://arstechnica.com/tech-policy/2026/08/chatgtp-and-reddit-now-face-eus-toughest-online-safety-rules/) ⭐️ 7.5/10
 
-ChatGPT and Reddit are now subject to the European Union&\#x27;s strictest online safety rules under the Digital Services Act.
+根据《数字服务法》，ChatGPT和Reddit现在须遵守欧盟最严格的在线安全规则。
 
 rss · Ars Technica · 8月31日 21:41
 
@@ -252,9 +252,9 @@ rss · Ars Technica · 8月31日 21:41
 ---
 
 <a id="item-20"></a>
-## [FTC accuses Amazon of running a ‘secret ad surcharge scheme’ in new lawsuit](https://techcrunch.com/2026/08/31/ftc-accuses-amazon-of-running-a-secret-ad-surcharge-scheme-in-new-lawsuit/) ⭐️ 7.5/10
+## [FTC在新诉讼中指控亚马逊实施“秘密广告附加费计划”](https://techcrunch.com/2026/08/31/ftc-accuses-amazon-of-running-a-secret-ad-surcharge-scheme-in-new-lawsuit/) ⭐️ 7.5/10
 
-The FTC and 22 states have filed a new lawsuit against Amazon, accusing the company of secretly overcharging businesses for advertising.
+美国联邦贸易委员会和22个州对亚马逊提起新诉讼，指控该公司秘密向企业多收广告费用。
 
 rss · TechCrunch · 9月1日 04:20
 
