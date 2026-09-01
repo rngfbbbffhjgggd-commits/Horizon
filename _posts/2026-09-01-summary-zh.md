@@ -1,6 +1,6 @@
 ---
 layout: default
-标题：地平线摘要：2026-09-01（中文）
+title: "Horizon Summary: 2026-09-01 (ZH)"
 date: 2026-09-01
 lang: zh
 ---
