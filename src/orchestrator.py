@@ -249,6 +249,12 @@ class HorizonOrchestrator:
             # 5.6 Apply digest limits after any targeted re-analysis changes scores.
             important_items = self.apply_balanced_digest(important_items).items
 
+            # 5.7 Drop distinct_points (其他来源补充) from all items — digest is
+            #     simplified to scoring + summary + link only. DISABLED 2026-09-01.
+            for item in important_items:
+                if item.metadata:
+                    item.metadata.pop("distinct_points", None)
+
             # Show per-sub-source selection breakdown
             selected_counts: Dict[str, int] = defaultdict(int)
             for item in important_items:
