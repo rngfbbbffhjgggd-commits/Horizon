@@ -265,9 +265,24 @@ class HorizonOrchestrator:
             self.console.print("")
 
             # 6. Search related stories + enrich with background knowledge (2nd AI pass)
-            # DISABLED 2026-08-31: digest simplified to scoring + summary + link only.
-            # Background enrichment cost too much output and GLM-4.7 rendered it poorly.
-            # await self._enrich_important_items(important_items)
+            # RE-ENABLED 2026-09-02: enrichment also produces title_zh (Chinese
+            # headline) which the digest needs. After enrichment we prune the
+            # heavy fields so the digest stays lean (no background section).
+            await self._enrich_important_items(important_items)
+
+            # 6.1 Prune enrichment fields: keep title_zh + tags + community
+            #     discussion; drop background and long detailed summaries so the
+            #     digest renders title + short summary + link only.
+            for item in important_items:
+                if not item.metadata:
+                    continue
+                for lang in ("en", "zh", ""):
+                    for key in (
+                        f"background_{lang}" if lang else "background",
+                        f"detailed_summary_{lang}" if lang else "detailed_summary",
+                    ):
+                        if key:
+                            item.metadata.pop(key, None)
 
             # 7. Generate and save daily summaries for each configured language
             # Use Beijing time (UTC+8) for the summary filename so the date
