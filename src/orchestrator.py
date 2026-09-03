@@ -270,19 +270,20 @@ class HorizonOrchestrator:
             # heavy fields so the digest stays lean (no background section).
             await self._enrich_important_items(important_items)
 
-            # 6.1 Prune enrichment fields: keep title_zh + tags + community
-            #     discussion; drop background and long detailed summaries so the
-            #     digest renders title + short summary + link only.
+            # 6.1 Prune enrichment fields: keep title_zh, detailed_summary_zh
+            #     (Chinese summary), tags, community discussion; drop background
+            #     and English detailed_summary so the digest renders Chinese
+            #     title + Chinese summary + link only.
             for item in important_items:
                 if not item.metadata:
                     continue
-                for lang in ("en", "zh", ""):
-                    for key in (
-                        f"background_{lang}" if lang else "background",
-                        f"detailed_summary_{lang}" if lang else "detailed_summary",
-                    ):
-                        if key:
-                            item.metadata.pop(key, None)
+                for key in (
+                    "background", "background_en", "background_zh",
+                    "detailed_summary", "detailed_summary_en",
+                    "whats_new_en", "why_it_matters_en", "key_details_en",
+                    "whats_new_zh", "why_it_matters_zh", "key_details_zh",
+                ):
+                    item.metadata.pop(key, None)
 
             # 7. Generate and save daily summaries for each configured language
             # Use Beijing time (UTC+8) for the summary filename so the date
