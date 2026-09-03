@@ -35,7 +35,7 @@ lang: zh
 <a id="item-1"></a>
 ## [以色列寻求特朗普支持以将巴勒斯坦人逐出加沙](https://www.theguardian.com/world/2026/sep/02/israel-seeking-trumps-support-for-plan-to-expel-palestinians-from-gaza) ⭐️ 9.0/10
 
-Israel&\#x27;s defence minister says the government is seeking Trump&\#x27;s support for a plan to resettle Palestinians out of Gaza by force.
+以色列国防部长表示，政府正在寻求特朗普支持一项计划，以武力将巴勒斯坦人重新安置出加沙。
 
 rss · The Guardian - World · 9月3日 02:20
 
@@ -46,7 +46,7 @@ rss · The Guardian - World · 9月3日 02:20
 <a id="item-2"></a>
 ## [科学家首次在量子尺度观察到引力效应](https://news.google.com/rss/articles/CBMiggFBVV95cUxNZ0gwWE5FYXNaX3FteFFKdXp2bjR6UEtqM2Z0cjVkazk3eldfdy1hS3BySnV1MTZ3YVc0dWh6ZHZqMmJpemlCQjRsdHM5ZDhFVjFVOG5mS3ZWUTlTTzVMVzI3TkRZdWc2by1fV1pNYU42OVJGaURrS3hwa2htVUNwdEFB?oc=5) ⭐️ 9.0/10
 
-Scientists report the first observation of gravity&\#x27;s effect on a quantum-scale particle, a landmark step toward understanding quantum gravity.
+科学家报告首次观测到引力对量子尺度粒子的影响，这是迈向理解量子引力的里程碑式一步。
 
 rss · Phys.org · 9月3日 02:00
 
@@ -65,7 +65,7 @@ rss · Phys.org · 9月3日 02:00
 <a id="item-3"></a>
 ## [谷歌发布 Gemini 3.8 Flash 与 Flash Cyber：面向智能体与安全的新模型](https://blog.google/innovation-and-ai/models-and-research/gemini-models/3-8-flash-and-3-8-flash-cyber/) ⭐️ 8.0/10
 
-Google introduces Gemini 3.8 Flash and 3.8 Flash Cyber, a fast, cheap AI model that tops several benchmarks and sparks strong community buzz.
+谷歌推出Gemini 3.8 Flash和3.8 Flash Cyber，这是一款快速、廉价的AI模型，在多项基准测试中名列前茅，并引发社区热议。
 
 hackernews · bratao · 9月2日 23:12 · [社区讨论](https://news.ycombinator.com/item?id=49537553)
 
@@ -87,7 +87,7 @@ hackernews · bratao · 9月2日 23:12 · [社区讨论](https://news.ycombinato
 <a id="item-4"></a>
 ## [大型证件核验服务疑遭黑客入侵，1.5 亿张驾照照片被窃](https://techcrunch.com/2026/09/02/it-sure-looks-like-hackers-breached-a-major-id-card-verification-service/) ⭐️ 8.0/10
 
-Hackers reportedly breached a major ID card verification service, allegedly stealing over 150 million driver&\#x27;s license photos.
+据报道，黑客攻破了一家大型身份证验证服务商，据称窃取了超过1.5亿张驾照照片。
 
 rss · TechCrunch · 9月3日 03:35
 
@@ -98,7 +98,7 @@ rss · TechCrunch · 9月3日 03:35
 <a id="item-5"></a>
 ## [德国外卖巨头 Delivery Hero 董事会支持 Uber 150 亿美元收购案](https://techcrunch.com/2026/09/02/delivery-hero-board-backs-ubers-15b-takeover-bid/) ⭐️ 8.0/10
 
-Delivery Hero&\#x27;s board endorses Uber&\#x27;s $15B takeover bid, potentially creating one of the world&\#x27;s largest food delivery platforms.
+Delivery Hero董事会支持Uber 150亿美元的收购要约，或将打造全球最大送餐平台之一。
 
 rss · TechCrunch · 9月3日 03:25
 
@@ -109,7 +109,7 @@ rss · TechCrunch · 9月3日 03:25
 <a id="item-6"></a>
 ## [伊朗将更多过航霍尔木兹海峡船只列入黑名单](https://news.google.com/rss/articles/CBMiwgFBVV95cUxOVmhMd2p2Z3VsWGROU3BobXFXeEV3ZVZwZ3JLbzNUWUtIY1pwUTljaEFMWHBOV0RJamJuNXlrd0dRNnJQY3I3S1ZTenZtSzhoYm11WTBKUkhsTkJUb3hkVVNVUXdsTTZxYkk5c2VsS3ZBeDVNTjFPTnlsQ0RXb0N1ZHFJQnV2VnZPSk5ua2ZUMG9qajVYZF9rUFhEZWlZZGV0bFFPVS1Ud09DZlpRYl8xWnNVYTk3ZmtCaHRSbnY3Mm1pQQ?oc=5) ⭐️ 8.0/10
 
-Iran has added more vessels to a blacklist over attempts to sail through the Strait of Hormuz, according to a government website, signaling heightened maritime tensions.
+据政府网站消息，伊朗将更多船只列入试图穿越霍尔木兹海峡的黑名单，显示海上紧张局势升级。
 
 rss · Reuters \(English\) · 9月2日 23:32
 
@@ -120,7 +120,7 @@ rss · Reuters \(English\) · 9月2日 23:32
 <a id="item-7"></a>
 ## [特朗普助手寻求对伊冲突降温，暗示大选后可能升级行动](https://news.google.com/rss/articles/CBMipgFBVV95cUxNMDJDS3ZmaHY1S0hTTlJiUUVPQ081YTU5bWV3NmJJLTRTNDdNQUhKNWdFTXd4TzVVRkRiRXd6SV9xZ1hmbHVxMFVGOUhXMkJLTkdaN0VWa3g3aEZ1aWZDbnlNTkRoUk5zY2ltOW9PNVk1SlFJVU1mNzZFSE9GTGpGbmhwdW1sMFNuTFhwcTVmSlFUNUIwM3lOV3ZpQ0NCX3B2TmMwbXZB?oc=5) ⭐️ 8.0/10
 
-Trump aides are reportedly seeking quiet in the conflict with Iran but warn that attacks may intensify after the November elections.
+据报道，特朗普助手正寻求在伊朗冲突中保持低调，但警告称11月大选后攻击可能加剧。
 
 rss · Reuters \(English\) · 9月2日 23:52
 
@@ -131,7 +131,7 @@ rss · Reuters \(English\) · 9月2日 23:52
 <a id="item-8"></a>
 ## [刚果（金）埃博拉疫情未见减缓，死亡人数突破 3000](https://news.google.com/rss/articles/CBMimwFBVV95cUxNRlh1SmNWYWRRMVhwNms0SXo0YlJkVTRobFM4WWl2c0h4QWhEYmo5a2YtUExuOE1JYm9rNVI2dnlZT25rdDFHR0VKUEd3TUlVendUYmZHQXdBb0ZrbWxtM1hTSTg2SlpyOTlYWUR4OWpsU3hYYXdGQ0w5Nm1GMW94YjRQeUxrcnYxX3U2LURqQ1BDRXdhZFBuT2paWQ?oc=5) ⭐️ 8.0/10
 
-Congo&\#x27;s Ebola outbreak continues unabated as the death toll passes 3,000.
+刚果（金）埃博拉疫情持续肆虐，死亡人数已超过3000人。
 
 rss · 美联社 · 9月3日 02:32
 
@@ -142,7 +142,7 @@ rss · 美联社 · 9月3日 02:32
 <a id="item-9"></a>
 ## [AI 用于设计物理实验的新进展](https://news.google.com/rss/articles/CBMiX0FVX3lxTE11VEZFMWNpM1FINFh5X3lhb0NOYzk0bTJkNjFqel9QVEZNZW9lbWhJbnZnT2h5YWNPdmJBcWZfSjV0QUl6NXJoT3paQVRrYlVjR1hac0wyblFiNVRjam9j?oc=5) ⭐️ 8.0/10
 
-Nature reports on the use of artificial intelligence to design physics experiments, highlighting a novel application of AI in scientific discovery.
+《自然》杂志报道了利用人工智能设计物理实验的研究，凸显了AI在科学发现中的新颖应用。
 
 rss · Nature · 9月3日 00:30
 
@@ -153,7 +153,7 @@ rss · Nature · 9月3日 00:30
 <a id="item-10"></a>
 ## [晚期使用司美格鲁肽可减缓雌性小鼠衰老并延长寿命](https://news.google.com/rss/articles/CBMiX0FVX3lxTE5xeEk1VlZ4eHczcWJ5OGZOQ2hFeEZXLXo5UVBfSm9CX2RCd3pVa2xHMW5Gc0x0QmpmU0R3X1ZXQXE0azVTMFdmbnRrQlQwbXBHWHYtbmVBODFCT2pOTmdj?oc=5) ⭐️ 8.0/10
 
-A Nature study reports that late-life semaglutide treatment slows aging and extends lifespan in female mice.
+《自然》杂志一项研究显示，晚年使用司美格鲁肽治疗可减缓衰老并延长雌性小鼠的寿命。
 
 rss · Nature · 9月3日 00:22
 
@@ -173,7 +173,7 @@ rss · Nature · 9月3日 00:22
 <a id="item-11"></a>
 ## [联合国警告：气候变化已越过不可逆转的临界点](https://www.reddit.com/r/worldnews/comments/1w5h3ix/climate_change_past_the_point_of_no_return_un/) ⭐️ 8.0/10
 
-The UN reports that climate change has passed the point of no return, with the worst impacts now unavoidable.
+联合国报告称，气候变化已越过不可逆转的临界点，最严重的影响现已不可避免。
 
 reddit · r/worldnews · /u/Immediate-Link490 · 9月3日 01:32
 
@@ -184,7 +184,7 @@ reddit · r/worldnews · /u/Immediate-Link490 · 9月3日 01:32
 <a id="item-12"></a>
 ## [内塔尼亚胡称以色列正致力于推翻伊朗政权](https://www.reddit.com/r/worldnews/comments/1w5i3vy/netanyahu_says_israel_working_to_overthrow_irans/) ⭐️ 8.0/10
 
-Israeli Prime Minister Netanyahu stated that Israel is working to overthrow Iran&\#x27;s regime.
+以色列总理内塔尼亚胡表示，以色列正在致力于推翻伊朗政权。
 
 reddit · r/worldnews · /u/Immediate-Link490 · 9月3日 02:07
 
@@ -195,7 +195,7 @@ reddit · r/worldnews · /u/Immediate-Link490 · 9月3日 02:07
 <a id="item-13"></a>
 ## [全球每年近半数农民农药中毒](https://www.solidot.org/story?sid=85267) ⭐️ 8.0/10
 
-A new study estimates that about 46% of the world&\#x27;s farmers, roughly 402-433 million people, experience acute pesticide poisoning each year, with the highest rates in South Asia and Africa and about 11,000 deaths annually.
+一项新研究估计，全球约46%的农民——约4.02亿至4.33亿人——每年遭受急性农药中毒，南亚和非洲发生率最高，每年约有1.1万人死亡。
 
 telegram · solidot · 9月3日 01:10
 
@@ -206,7 +206,7 @@ telegram · solidot · 9月3日 01:10
 <a id="item-14"></a>
 ## [科学家或首次发现暗物质线索](https://news.google.com/rss/articles/CBMiWkFVX3lxTE8wOXJkWmlBdzZuZHlaV2F4bzl0SWMyeDJVR2JNMjJlaWFRZ0hIa0lUSEJfREpQb3BZYXdDNVJuZGxEd1I3UFRoS3BzRmVPdVZKQmEwdUIyLVVyZw?oc=5) ⭐️ 8.0/10
 
-BBC reports that scientists may have found the first hint of dark matter.
+BBC报道，科学家可能发现了暗物质的第一个线索。
 
 google\_news · BBC · 9月2日 23:54
 
@@ -217,7 +217,7 @@ google\_news · BBC · 9月2日 23:54
 <a id="item-15"></a>
 ## [Google 向 Fervo 采购 400 兆瓦增强型地热电力，可为犹他州 AI 数据中心供电](https://techcrunch.com/2026/09/02/enhanced-geothermal-notches-another-win-as-google-buys-400-mw-from-fervo/) ⭐️ 7.5/10
 
-Google&\#x27;s purchase of 400 MW \(expandable to 1 GW\) from enhanced geothermal startup Fervo marks a notable commercial milestone for clean baseload power for AI data centers.
+谷歌从增强型地热初创公司Fervo购买400兆瓦（可扩展至1吉瓦）电力，这标志着为AI数据中心提供清洁基荷电力的重要商业里程碑。
 
 rss · TechCrunch · 9月3日 00:54
 
@@ -237,7 +237,7 @@ rss · TechCrunch · 9月3日 00:54
 <a id="item-16"></a>
 ## [习近平访问埃及吁建中东新安全框架](https://news.google.com/rss/articles/CBMipgFBVV95cUxPZS1HRXhpY18xZjJMeV8tOU5UcFVxOFkzSVRKT3ZSR1Myak1oRHZZN081aVY2MldCemZNa1c0U1hKaUtyOHRJaUVjb0U0S2xCWC14cGIyN2QxQzVzVFhfZl85dkhRdFZtMjBCeGVpV2lQQ0g5alBZVnFiUGg5MDkzdDF3eGozTkg4Sm9kc2FIcHZNbXA3TVZoLW4zZ001ejY1UWFaOVdB?oc=5) ⭐️ 7.5/10
 
-China&\#x27;s Xi Jinping has called for a new Middle East security framework during his visit to Egypt.
+中国国家主席习近平在访问埃及期间呼吁建立新的中东安全框架。
 
 rss · Reuters \(English\) · 9月2日 23:50
 
@@ -248,7 +248,7 @@ rss · Reuters \(English\) · 9月2日 23:50
 <a id="item-17"></a>
 ## [黄仁勋促 G20（二十国集团）建设数据中心 警告过度监管 AI 恐落后](https://news.google.com/rss/articles/CBMiakFVX3lxTFBlbkpweUY2eEpvektPRW9udS1iaTBVR1BqRUdOLS1XT0VDcEVGMDBMUVpjanNDRF9jS2RqOWpDM0RmMHZWcjhiR1RQWmt2VjJ2VHhpLVFEcWYtc2ZRUnJuRGlSRFZ0N2Q5b0E?oc=5) ⭐️ 7.5/10
 
-NVIDIA CEO Jensen Huang urges G20 nations to build data centers and warns that over-regulating AI could cause countries to fall behind.
+英伟达CEO黄仁勋敦促二十国集团国家建设数据中心，并警告称对AI的过度监管可能导致国家落后。
 
 rss · 联合早报 · 9月2日 23:18
 
@@ -259,7 +259,7 @@ rss · 联合早报 · 9月2日 23:18
 <a id="item-18"></a>
 ## [德国指俄发动无人机袭击 欧盟难寻统一对策](https://news.google.com/rss/articles/CBMiqAFBVV95cUxPVGRNWFdXclZxNGQxMGdIWFF3Q2E3UHdFM0lyU29mdnVqVGdKWFN1ZVZxVXFHNEl5dlRtbkxsa2FocHAwMFc4ME1MZndYUm9QSUVWelM4X2hLdWlRRUc2N18wd0FnelNDejNjSnl1bmZraVlDWXFvUWpHMThvZjc3ZU1KeFJVWlY3cTVFaWZ2RFJlN2UzMllBX1BVOEZBZHhqOTducWt3ZXo?oc=5) ⭐️ 7.5/10
 
-EU leaders struggle to craft a unified response after Germany accuses Russia of involvement in a failed drone attack.
+在德国指责俄罗斯参与一次未遂无人机袭击后，欧盟领导人难以制定统一应对措施。
 
 rss · 美联社 · 9月2日 23:30
 
@@ -270,7 +270,7 @@ rss · 美联社 · 9月2日 23:30
 <a id="item-19"></a>
 ## [OpenAI 新推理技术“循环深度”引发 AI 安全担忧](https://techcrunch.com/2026/09/02/openais-new-reasoning-technique-alarms-ai-safety-experts/) ⭐️ 7.0/10
 
-OpenAI&\#x27;s Astra model will use a new &\#x27;recurrent depth&\#x27; reasoning technique that operates outside sequential thinking, raising concerns among AI safety experts.
+OpenAI的Astra模型将使用一种新的“循环深度”推理技术，该技术在顺序思维之外运作，引发AI安全专家的担忧。
 
 rss · TechCrunch · 9月3日 04:19
 
@@ -290,7 +290,7 @@ rss · TechCrunch · 9月3日 04:19
 <a id="item-20"></a>
 ## [美国政府支持 OpenAI，力挺用版权内容训练 AI](https://techcrunch.com/2026/09/02/u-s-government-sides-with-openai-on-issue-of-training-llms-on-copyrighted-material/) ⭐️ 7.0/10
 
-The US government has filed a brief supporting OpenAI&\#x27;s position that training LLMs on copyrighted material serves the national interest in maintaining AI leadership.
+美国政府提交了一份简报，支持OpenAI的立场，即使用受版权保护的材料训练大型语言模型符合美国保持AI领导地位的国家利益。
 
 rss · TechCrunch · 9月3日 01:09
 
