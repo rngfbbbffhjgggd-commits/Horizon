@@ -61,6 +61,24 @@
           "time_filter": "day",
           "fetch_limit": 10,
           "min_score": 50
+        },
+        {
+          "subreddit": "finance",
+          "enabled": true,
+          "sort": "hot",
+          "time_filter": "day",
+          "fetch_limit": 10,
+          "min_score": 50,
+          "category": "finance"
+        },
+        {
+          "subreddit": "Economics",
+          "enabled": true,
+          "sort": "hot",
+          "time_filter": "day",
+          "fetch_limit": 10,
+          "min_score": 50,
+          "category": "finance"
         }
       ],
       "users": [],
@@ -129,11 +147,53 @@
         "name": "Nature",
         "url": "https://news.google.com/rss/search?q=site:nature.com&hl=en-US&gl=US&ceid=US:en",
         "enabled": true
+      },
+      {
+        "name": "FT英文 - World",
+        "url": "https://www.ft.com/world?format=rss",
+        "enabled": true,
+        "category": "finance"
+      },
+      {
+        "name": "日经中文网",
+        "url": "https://news.google.com/rss/search?q=site:cn.nikkei.com&hl=zh-CN&gl=CN&ceid=CN:zh-Hans",
+        "enabled": true,
+        "category": "finance"
+      },
+      {
+        "name": "华尔街日报",
+        "url": "https://news.google.com/rss/search?q=site:wsj.com&hl=en-US&gl=US&ceid=US:en",
+        "enabled": true,
+        "category": "finance"
+      },
+      {
+        "name": "界面新闻",
+        "url": "https://feedx.net/rss/jiemian.xml",
+        "enabled": true,
+        "category": "finance"
+      },
+      {
+        "name": "经济日报",
+        "url": "https://feedx.net/rss/jingjiribao.xml",
+        "enabled": true,
+        "category": "finance"
+      },
+      {
+        "name": "经济学人",
+        "url": "https://news.google.com/rss/search?q=site:economist.com&hl=en-US&gl=US&ceid=US:en",
+        "enabled": true,
+        "category": "finance"
+      },
+      {
+        "name": "财新",
+        "url": "https://news.google.com/rss/search?q=site:caixin.com&hl=zh-CN&gl=CN&ceid=CN:zh-Hans",
+        "enabled": true,
+        "category": "finance"
       }
     ],
     "google_news": {
       "enabled": true,
-      "query": "world news technology science politics",
+      "query": "world news technology business finance science politics",
       "language": "en",
       "country": "US",
       "max_results": 30,
@@ -183,13 +243,20 @@
   "filtering": {
     "ai_score_threshold": 6.0,
     "time_window_hours": 24,
-    "max_items": 20,
+    "max_items": 25,
     "category_groups": {
       "tech": {
         "name": "科技",
         "limit": 5,
         "categories": [
           "tech"
+        ]
+      },
+      "finance": {
+        "name": "财经",
+        "limit": 5,
+        "categories": [
+          "finance"
         ]
       }
     },
