@@ -309,3 +309,114 @@ class ContentEnricher:
                 f"Warning: translation fallback failed for {item.id} after retries "
                 f"(provider rejection: {last_error}). Item left with original title."
             )
+
+
+def _is_mostly_latin(text: str) -> bool:
+    """Return True when a string has meaningful Latin/CJK mix that is mostly
+    untranslated. Used to detect an item whose title/summary was left in
+    English by the primary model (e.g. a content-filter rejection)."""
+    if not text:
+        return False
+    letters = [c for c in text if c.isalpha()]
+    if not letters:
+        return False
+    cjk = sum(1 for c in letters if "\u4e00" <= c <= "\u9fff")
+    return cjk / len(letters) < 0.4
+
+
+class TranslationFixer:
+    """Thin post-enrichment pass that re-translates any item the primary model
+    left in English.
+
+    The primary model (e.g. Zhipu GLM) may occasionally reject a politically
+    sensitive item via its content filter, leaving the title/summary in English.
+    This pass uses a separate, content-filter-lenient model (e.g. DeepSeek) to
+    review every item and fill in the Chinese title and summary when they are
+    missing or still mostly Latin-script.
+    """
+
+    def __init__(self, ai_client: AIClient):
+        self.client = ai_client
+
+    def _get_concurrency(self) -> int:
+        config = getattr(self.client, "config", None)
+        concurrency = getattr(config, "enrichment_concurrency", 1)
+        return max(concurrency, 1)
+
+    @staticmethod
+    def _needs_fix(item: ContentItem) -> bool:
+        meta = item.metadata or {}
+        title_zh = str(meta.get("title_zh") or "")
+        summary_zh = str(meta.get("detailed_summary_zh") or "")
+        # Needs a fix when the Chinese title is missing/empty/English, or the
+        # Chinese summary is missing/empty/English.
+        return (
+            (not title_zh or _is_mostly_latin(title_zh))
+            or (not summary_zh or _is_mostly_latin(summary_zh))
+        )
+
+    async def fix_batch(self, items: List[ContentItem]) -> None:
+        """Review items in-place; re-translate any not yet in Chinese."""
+        if not items:
+            return
+        to_fix = [it for it in items if self._needs_fix(it)]
+        if not to_fix:
+            return
+
+        concurrency = self._get_concurrency()
+        semaphore = asyncio.Semaphore(concurrency)
+
+        async def _process(item: ContentItem) -> None:
+            async with semaphore:
+                try:
+                    await self._fix_item(item)
+                except Exception as e:
+                    # Never let a correction failure break the digest.
+                    print(f"TranslationFixer: item {item.id} fix failed ({e}), leaving as-is")
+
+        await asyncio.gather(*(_process(it) for it in to_fix))
+
+    async def _fix_item(self, item: ContentItem) -> None:
+        """Re-translate a single item's title and summary to Simplified Chinese."""
+        meta = item.metadata if item.metadata is not None else {}
+        title_zh = str(meta.get("title_zh") or "")
+        summary_zh = str(meta.get("detailed_summary_zh") or "")
+
+        prompt_parts = ["Translate the following news into Simplified Chinese."]
+        if title_zh and not _is_mostly_latin(title_zh):
+            # Title already Chinese; only ask for a summary.
+            prompt_parts.append(f"Title (keep as-is): {title_zh}")
+        else:
+            prompt_parts.append(f"Original title: {item.title}")
+        if summary_zh and not _is_mostly_latin(summary_zh):
+            prompt_parts.append(f"Summary (keep as-is): {summary_zh}")
+        else:
+            prompt_parts.append(
+                f"Original summary: {item.ai_summary or item.title}"
+            )
+        prompt_parts.append(
+            "Return valid JSON only:\n"
+            '{"title_zh": "<中文标题>", "summary_zh": "<用中文写1-2句摘要>"}'
+        )
+        user = "\n".join(prompt_parts)
+
+        response = await self.client.complete(
+            system=(
+                "You are a translator into Simplified Chinese. Translate only. "
+                "Return only valid JSON, no other text."
+            ),
+            user=user,
+        )
+        result = parse_json_response(response)
+        if not result:
+            print(f"TranslationFixer: could not parse fix response for {item.id}")
+            return
+
+        new_title = result.get("title_zh") or title_zh
+        new_summary = result.get("summary_zh") or summary_zh
+
+        if new_title and not _is_mostly_latin(new_title):
+            meta["title_zh"] = new_title
+        if new_summary and not _is_mostly_latin(new_summary):
+            meta["detailed_summary_zh"] = new_summary
+        item.metadata = meta
