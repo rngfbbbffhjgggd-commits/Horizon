@@ -144,6 +144,11 @@ class AIConfig(BaseModel):
     analysis_concurrency: int = 1
     enrichment_concurrency: int = 1
     languages: List[str] = Field(default_factory=lambda: ["en"])
+    # Thin post-enrichment translation pass: a separate, content-filter-lenient
+    # model (e.g. DeepSeek) that reviews each item and re-translates any title
+    # or summary that is still untranslated. Optional; when omitted, no extra
+    # translation pass runs and enrichment output is used as-is.
+    translation: Optional["AIConfig"] = None
     # Azure OpenAI specific; required when provider == AZURE
     azure_endpoint_env: Optional[str] = None
     api_version: Optional[str] = None
