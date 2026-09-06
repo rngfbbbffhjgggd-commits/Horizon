@@ -16,7 +16,7 @@ lang: zh
 5. [特朗普称美军将攻击伊朗镐山核设施](#item-5) ⭐️ 8.5/10
 6. [欧洲官员警告称欧洲无法维持与俄罗斯的消耗战](#item-6) ⭐️ 8.0/10
 7. [美中两国拟于九月中旬举行 AI 安全会谈](#item-7) ⭐️ 8.0/10
-8. [EXCLUSIVE: China&\#x27;s Xi seeks to bring large CEO delegation on US visit, sources say - Reuters](#item-8) ⭐️ 8.0/10
+8. [独家：据消息人士称习近平计划带大型CEO代表团访美 - 路透社](#item-8) ⭐️ 8.0/10
 9. [大众汽车裁员 10 万人；月之暗面计划香港 IPO](#item-9) ⭐️ 8.0/10
 10. [多国加速推进黄金储备回迁与多元化布局](#item-10) ⭐️ 8.0/10
 11. [DeepSeek 据报在内蒙古部署 16 万片华为晶片](#item-11) ⭐️ 8.0/10
@@ -134,9 +134,9 @@ rss · Reuters \(English\) · 9月5日 06:57
 ---
 
 <a id="item-8"></a>
-## [EXCLUSIVE: China&\#x27;s Xi seeks to bring large CEO delegation on US visit, sources say - Reuters](https://news.google.com/rss/articles/CBMixwFBVV95cUxONFEycUQtWHlNWVlNdHl2S2JKX2pmMDRUYmp5V1dVN2xnWkdnOVQ2QW1VM2ZRSEdCdElaRTQ1cGlGMDkxV25PYWRfVEJJWllCRjBIVzYwZ1JjMGotd2t0YzRQQ1huRG9CNnpraXVsakw1clltekpVU1czZm9VQUhVQ3R3N2NSdEc1LTJqYWlsa3p2UGh3dWZHU0F0ek5CbEdQTUhUdGc4dVplVG5YYUxKV0xoQU9UdU9GUEZOS0dJTFZKUzg1RHRR?oc=5) ⭐️ 8.0/10
+## [独家：据消息人士称习近平计划带大型CEO代表团访美 - 路透社](https://news.google.com/rss/articles/CBMixwFBVV95cUxONFEycUQtWHlNWVlNdHl2S2JKX2pmMDRUYmp5V1dVN2xnWkdnOVQ2QW1VM2ZRSEdCdElaRTQ1cGlGMDkxV25PYWRfVEJJWllCRjBIVzYwZ1JjMGotd2t0YzRQQ1huRG9CNnpraXVsakw1clltekpVU1czZm9VQUhVQ3R3N2NSdEc1LTJqYWlsa3p2UGh3dWZHU0F0ek5CbEdQTUhUdGc4dVplVG5YYUxKV0xoQU9UdU9GUEZOS0dJTFZKUzg1RHRR?oc=5) ⭐️ 8.0/10
 
-Chinese President Xi Jinping reportedly plans to include a large delegation of CEOs on a potential visit to the US, aiming to bolster economic engagement and business confidence.
+据消息人士透露，中国国家主席习近平计划在一次潜在访美行程中带领一个大型首席执行官（CEO）代表团，以加强经济往来和提振商业信心。
 
 rss · Reuters \(English\) · 9月5日 06:45
 
