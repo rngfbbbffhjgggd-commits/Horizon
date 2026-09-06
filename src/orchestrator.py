@@ -27,7 +27,7 @@ from .scrapers.google_news import GoogleNewsScraper
 from .ai.client import create_ai_client
 from .ai.analyzer import ContentAnalyzer
 from .ai.summarizer import DailySummarizer
-from .ai.enricher import ContentEnricher
+from .ai.enricher import ContentEnricher, TranslationFixer
 from .ai.tokens import get_usage_snapshot
 
 
@@ -269,6 +269,13 @@ class HorizonOrchestrator:
             # headline) which the digest needs. After enrichment we prune the
             # heavy fields so the digest stays lean (no background section).
             await self._enrich_important_items(important_items)
+
+            # 6.0 Translation verification (RE-ADDED 2026-09-06): a separate,
+            #     content-filter-lenient model (config.ai.translation, e.g.
+            #     DeepSeek) reviews every item and re-translates any title or
+            #     summary the primary model left in English (e.g. a Zhipu
+            #     content-filter rejection). Prevents stray English entries.
+            await self._verify_translations(important_items)
 
             # 6.1 Prune enrichment fields: keep title_zh, detailed_summary_zh
             #     (Chinese summary), tags, community discussion; drop background
@@ -1090,6 +1097,27 @@ class HorizonOrchestrator:
         enricher = ContentEnricher(ai_client)
         await enricher.enrich_batch(items)
         self.console.print(f"   Enriched {len(items)} items\n")
+
+    async def _verify_translations(self, items: List[ContentItem]) -> None:
+        """Optional post-enrichment pass: re-translate any item the primary
+        model left in English.
+
+        Uses a separate, content-filter-lenient model (config.ai.translation,
+        e.g. DeepSeek) so a politically sensitive item rejected by the primary
+        model's content filter still gets a Chinese title/summary. No-op when
+        translation config is absent. Only runs when at least one item needs a
+        fix, so the extra cost stays near zero.
+        """
+        translation_cfg = getattr(self.config.ai, "translation", None)
+        if not translation_cfg:
+            self.console.print("   translation check: no translation config, skipping\n")
+            return
+
+        self.console.print("🔤 Verifying translations with secondary model...")
+        fix_client = create_ai_client(translation_cfg)
+        fixer = TranslationFixer(fix_client)
+        await fixer.fix_batch(items)
+        self.console.print(f"   Translation check complete\n")
 
     def _prefilter_for_analysis(self, items: List[ContentItem]) -> List[ContentItem]:
         """Cheap rule-based prefilter that runs BEFORE the paid AI analysis.
