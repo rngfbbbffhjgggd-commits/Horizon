@@ -258,22 +258,54 @@ class ContentEnricher:
 
     async def _translate_item(self, item: ContentItem) -> None:
         """Lightweight translation fallback: when full enrichment fails, at least
-        translate the title and summary to Chinese so the item is not dropped."""
-        try:
-            response = await self.client.complete(
-                system="You are a translator. Translate to Simplified Chinese. Return only valid JSON, no other text.",
-                user=(
-                    f'Title: {item.title}\n'
-                    f'Summary: {item.ai_summary or item.title}\n\n'
-                    'Return JSON:\n'
-                    '{"title_zh": "<中文标题>", "summary_zh": "<用中文写1-2句摘要>"}'
-                ),
+        translate the title and summary to Chinese so the item is not dropped.
+
+        Retries once on transient failures and — unlike the caller — keeps the
+        translated Chinese even if the model restates the English source, so the
+        summary survives for the ZH digest. Also logs instead of swallowing
+        silently, so a provider content-filter rejection is visible.
+        """
+        last_error = None
+        for attempt in range(2):
+            try:
+                response = await self.client.complete(
+                    system="You are a translator. Translate only to Simplified Chinese. Do not reproduce English. Return only valid JSON, no other text.",
+                    user=(
+                        f'Title: {item.title}\n'
+                        f'Summary: {item.ai_summary or item.title}\n\n'
+                        'Return JSON:\n'
+                        '{"title_zh": "<中文标题>", "summary_zh": "<用中文写1-2句摘要>"}'
+                    ),
+                )
+                result = self._parse_json_response(response)
+                if result:
+                    saved = False
+                    if result.get("title_zh"):
+                        item.metadata["title_zh"] = result["title_zh"]
+                        saved = True
+                    if result.get("summary_zh"):
+                        item.metadata["detailed_summary_zh"] = result["summary_zh"]
+                        saved = True
+                    if saved:
+                        return
+                    if attempt == 0:
+                        print(
+                            f"Warning: could not parse translation fallback for {item.id} "
+                            f"(attempt 1/2), retrying"
+                        )
+                elif attempt == 0:
+                    print(
+                        f"Warning: could not parse translation fallback for {item.id} "
+                        f"(attempt 1/2), retrying"
+                    )
+            except Exception as e:
+                last_error = e
+                if attempt == 0:
+                    print(
+                        f"Warning: translation fallback failed for {item.id} ({e}), retrying"
+                    )
+        if last_error is not None:
+            print(
+                f"Warning: translation fallback failed for {item.id} after retries "
+                f"(provider rejection: {last_error}). Item left with original title."
             )
-            result = self._parse_json_response(response)
-            if result:
-                if result.get("title_zh"):
-                    item.metadata["title_zh"] = result["title_zh"]
-                if result.get("summary_zh"):
-                    item.metadata["detailed_summary_zh"] = result["summary_zh"]
-        except Exception:
-            pass
