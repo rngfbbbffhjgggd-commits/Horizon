@@ -2,17 +2,17 @@
   "version": "1.0",
   "ai": {
     "provider": "openai",
-    "model": "deepseek-v4-flash",
-    "base_url": "https://api.deepseek.com",
-    "api_key_env": "DEEPSEEK_API_KEY",
+    "model": "glm-4.7-flash",
+    "base_url": "https://open.bigmodel.cn/api/paas/v4",
+    "api_key_env": "ZHIPU_API_KEY",
     "temperature": 0.3,
     "max_tokens": 16384,
-    "throttle_sec": 1,
+    "throttle_sec": 15,
     "languages": [
       "zh"
     ],
-    "analysis_concurrency": 5,
-    "enrichment_concurrency": 5,
+    "analysis_concurrency": 1,
+    "enrichment_concurrency": 1,
     "translation": {
       "provider": "openai",
       "model": "deepseek-v4-flash",
@@ -281,5 +281,6 @@
     "enabled": false
   }
 }
+
 
 
