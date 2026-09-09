@@ -31,7 +31,7 @@ lang: zh
 20. [中国首发 AI 司法文件规制换脸拟声等行为 - 联合早报](#item-20) ⭐️ 8.0/10
 21. [俄罗斯：普京与特朗普进行了“坦诚”的通话 - 联合早报](#item-21) ⭐️ 8.0/10
 22. [史密森尼学会负责人因特朗普抨击美国奴隶制展览而辞职](#item-22) ⭐️ 7.5/10
-23. [Meta unveils AI personal assistant linked to WhatsApp and Instagram](#item-23) ⭐️ 6.5/10
+23. [Meta 推出与 WhatsApp 和 Instagram 关联的 AI 个人助理](#item-23) ⭐️ 6.5/10
 24. [英国称将强制科技巨头阻止儿童分享裸照](#item-24) ⭐️ 6.5/10
 25. [Anthropic 与 OpenAI 银行家推动 IPO 后获顶级信用评级](#item-25) ⭐️ 6.0/10
 
@@ -280,7 +280,7 @@ rss · FT英文 - World · 9月9日 02:30
 ---
 
 <a id="item-23"></a>
-## [Meta unveils AI personal assistant linked to WhatsApp and Instagram](https://www.ft.com/content/5816292b-c36b-4c22-aa50-2680b9970382?syn-25a6b1a6=1) ⭐️ 6.5/10
+## [Meta 推出与 WhatsApp 和 Instagram 关联的 AI 个人助理](https://www.ft.com/content/5816292b-c36b-4c22-aa50-2680b9970382?syn-25a6b1a6=1) ⭐️ 6.5/10
 
 Meta 推出了名为 Muse 的新型 AI 个人助理，该助理与 WhatsApp 和 Instagram 集成，提供定制化建议。
 
