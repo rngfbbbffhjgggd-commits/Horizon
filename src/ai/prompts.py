@@ -10,6 +10,9 @@ Grouping rules:
 - Examples of the same story: different outlets reporting the same earthquake, the same merger, the same policy decision, the same product launch, the same court ruling
 - Do NOT group items that merely share a broad topic but report different events ("AI funding for company X" vs "AI funding for company Y" are different stories)
 - Err on the side of grouping when the underlying story is clearly the same, even if titles differ significantly
+- **Cause vs consequence is ONE story.** Two reports about the same incident MUST be grouped when one describes the cause/trigger and the other describes the fallout, even if the wording barely overlaps. Example: "UK air traffic control software fault causes disruption" and "UK air traffic chaos leads to 2,000 flight cancellations" are the SAME event and MUST be grouped.
+- **Same named entity + same time frame = ONE story.** When two items share a distinctive named entity (an agency, company, airport, city, official, law, or report) and the same approximate time frame, treat them as the same story unless they clearly describe different events.
+- **Follow-up angles are ONE story.** An analysis piece, a reaction, an explainer, or an opinion column about an event already present in the batch is the same story, not a new one.
 - The final output language for "distinct_points" must always be Simplified Chinese (简体中文), because the daily digest is rendered in Chinese."""
 
 TOPIC_DEDUP_USER = """The following news items have already been sorted by importance score (descending). Identify which items are duplicates of the same underlying story.
@@ -74,6 +77,18 @@ This daily digest is curated for readers in mainland China. Apply the following 
 - News that directly concerns China — domestic policy, economy and livelihood (就业、消费、房价、教育、医疗、社保), industry and technology developments, major domestic events, or China's role in international affairs — is highly relevant to the audience. Such items should score at least as high as comparable international news of the same magnitude; do not systematically under-score China news relative to Western outlets' coverage.
 - When China is directly involved in an international story (e.g. US-China trade, tariffs on Chinese goods, regional diplomacy), that story has elevated relevance regardless of which language it is written in.
 - This does NOT mean every China item is high-scoring: routine corporate announcements, unremarkable product releases, or trivial local items still score low. Weight by importance and audience relevance, not by nationality alone.
+
+## Topic exclusion: AI-industry coverage
+
+This digest deliberately does NOT cover the AI industry itself. Score the following **0-2** no matter how notable they may seem elsewhere:
+
+- AI model releases, upgrades, benchmarks, or capability claims (a new GPT/Gemini/Claude/Llama version, "model beats humans at X", prompt/agent framework news)
+- AI company news: funding rounds, valuations, partnerships, executive moves, corporate strategy
+- AI research papers, AI safety/alignment/risk debates, AI regulation and policy
+- AI industry commentary, predictions, or thought-leadership pieces
+- Any item whose PRIMARY subject is AI models, AI companies, or the AI industry itself
+
+Do NOT apply this exclusion to a different subject that merely involves technology: a medical or scientific breakthrough, an economic policy change, a space mission, a transport incident, or a consumer-product launch still scores normally. Judge by the item's PRIMARY subject — if the story is about AI itself, exclude it; if the story is about another domain and AI is only incidental, score it normally.
 
 ## Domain-specific scoring guidance
 
