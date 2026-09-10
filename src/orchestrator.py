@@ -278,14 +278,18 @@ class HorizonOrchestrator:
             await self._verify_translations(important_items)
 
             # 6.1 Prune enrichment fields: keep title_zh, detailed_summary_zh
-            #     (Chinese summary), tags, community discussion; drop background
-            #     and English detailed_summary so the digest renders Chinese
-            #     title + Chinese summary + link only.
+            #     (Chinese summary), background_zh (Chinese background), tags,
+            #     community discussion; drop English-only fields so the digest
+            #     renders Chinese title + summary + background + link.
+            #     UPDATED 2026-09-10: background_zh is now KEPT — readers found
+            #     the digest too thin with only a one-paragraph summary per item.
+            #     "background" (the English copy) is still dropped so a missing
+            #     background_zh never renders English text.
             for item in important_items:
                 if not item.metadata:
                     continue
                 for key in (
-                    "background", "background_en", "background_zh",
+                    "background", "background_en",
                     "detailed_summary", "detailed_summary_en",
                     "whats_new_en", "why_it_matters_en", "key_details_en",
                     "whats_new_zh", "why_it_matters_zh", "key_details_zh",
@@ -711,6 +715,9 @@ class HorizonOrchestrator:
         together. Fall back to returning items unchanged if all AI calls fail.
         """
         _DEDUP_BATCH_SIZES = (35, 50)
+        # Above this size a single unbatched dedup request risks truncated JSON,
+        # so the final full-list pass is skipped.
+        _DEDUP_FULL_PASS_MAX = 60
 
         if len(items) <= 1:
             return items
@@ -853,6 +860,20 @@ class HorizonOrchestrator:
         # Pass 2 with a different batch size to catch cross-batch duplicates.
         if len(working) > _DEDUP_BATCH_SIZES[0] and len(_DEDUP_BATCH_SIZES) > 1:
             working = await _dedup_pass(ai_client, working, _DEDUP_BATCH_SIZES[1], "pass2")
+
+        # Pass 3 (final, unbatched): send EVERY remaining item in ONE request so
+        # no cross-batch duplicate pair can survive. Added 2026-09-10 after the
+        # same event (a UK air-traffic outage) appeared twice in the digest
+        # because the two reports landed in different batches. Only runs when the
+        # surviving set is small enough to fit comfortably in one prompt.
+        if 1 < len(working) <= _DEDUP_FULL_PASS_MAX:
+            before = len(working)
+            working = await _dedup_pass(ai_client, working, len(working), "pass3-full")
+            if log and len(working) < before:
+                self.console.print(
+                    f"[dim]   dedup: final full-list pass removed "
+                    f"{before - len(working)} more duplicate(s)[/dim]"
+                )
 
         return working
     async def filter_items(
