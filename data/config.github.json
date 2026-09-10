@@ -15,7 +15,7 @@
     "enrichment_concurrency": 3,
     "translation": {
       "provider": "openai",
-      "model": "deepseek-v4-flash",
+      "model": "deepseek-flash",
       "base_url": "https://api.deepseek.com",
       "api_key_env": "DEEPSEEK_API_KEY",
       "temperature": 0.2,
