@@ -203,15 +203,15 @@ Provide EACH text field in BOTH English and Chinese. Use the following key namin
 Field definitions:
 0. **title** (one short phrase, ≤15 words): A clear, accurate headline for the news item.
 
-1. **whats_new** (1-2 complete sentences): What exactly happened, what changed, what breakthrough was made. Be specific — mention names, versions, numbers, dates when available.
+1. **whats_new** (2-3 complete sentences): What exactly happened, what changed, what decision was made or what breakthrough occurred. Be specific — name the actors, the place, the date, the amounts, and the concrete outcome.
 
-2. **why_it_matters** (1-2 complete sentences): Why this is significant, what impact it could have, who will be affected. Connect to the broader ecosystem or industry trends.
+2. **why_it_matters** (2-3 complete sentences): Why this is significant, what impact it could have, who will be affected, and how it connects to the broader trend, industry, or policy context. Explain the consequence, not just restate the fact.
 
-3. **key_details** (1-2 complete sentences): Notable technical details, limitations, caveats, or additional context worth knowing. Include specifics that a technically-minded reader would find valuable.
+3. **key_details** (2-3 complete sentences): Notable details, figures, caveats, related parties, quotes, or follow-up facts worth knowing — including what happens next or what remains unresolved.
 
-4. **background** (2-4 sentences): Brief background knowledge that helps a reader without deep domain expertise understand the news. Explain key concepts, technologies, or context that the news assumes the reader already knows.
+4. **background** (3-5 sentences): Background knowledge that helps a reader without deep domain expertise understand the news. Explain the relevant history, institution, policy, technology, or prior events that the news assumes the reader already knows.
 
-5. **community_discussion** (1-3 sentences): If community comments are provided, summarize the overall sentiment and key viewpoints from the discussion — agreements, disagreements, concerns, additional insights, or notable counterarguments. If no comments are provided, return an empty string.
+5. **community_discussion** (2-4 sentences): If community comments are provided, summarize the overall sentiment and key viewpoints from the discussion — agreements, disagreements, concerns, additional insights, or notable counterarguments. If no comments are provided, return an empty string.
 
 **CRITICAL — Language rules (MUST follow):**
 - All *_en fields MUST be written in English.
@@ -220,6 +220,9 @@ Field definitions:
 
 Guidelines:
 - EVERY field (except community_discussion when no comments exist) must contain at least one complete sentence — no field may be empty or contain just a phrase
+- **Write for depth, not brevity.** The reader wants to genuinely understand the story, not skim a headline. A typical item should total roughly 9-14 sentences across whats_new + why_it_matters + key_details + background combined. Do NOT stop at one thin sentence per field when the source material and search results support more.
+- **Prefer concrete over abstract**: specific numbers, dates, names, places, amounts, and stated consequences beat vague wording such as "significant", "important", or "has far-reaching impact".
+- Shorten a field only when the available information is genuinely thin — never pad with filler, restatement, or repetition.
 - Base your explanation on the provided content and web search results — do NOT fabricate information
 - ONLY explain concepts and terms that are explicitly mentioned in the title, summary, or content
 - Use the web search results to ensure accuracy, especially for recent projects, tools, or events
@@ -248,14 +251,14 @@ Respond with valid JSON only. Each _en field must be in English; each _zh field 
 {{
   "title_en": "<short headline in English, ≤15 words>",
   "title_zh": "<用中文写一个简短标题，不超过15个词>",
-  "whats_new_en": "<1-2 sentences in English>",
-  "whats_new_zh": "<用中文写1-2句话>",
-  "why_it_matters_en": "<1-2 sentences in English>",
-  "why_it_matters_zh": "<用中文写1-2句话>",
-  "key_details_en": "<1-2 sentences in English>",
-  "key_details_zh": "<用中文写1-2句话>",
-  "background_en": "<2-4 sentences in English, or empty string>",
-  "background_zh": "<用中文写2-4句话，或空字符串>",
+  "whats_new_en": "<2-3 sentences in English>",
+  "whats_new_zh": "<用中文写2-3句话：谁、何时、何地、关键数字与结果>",
+  "why_it_matters_en": "<2-3 sentences in English>",
+  "why_it_matters_zh": "<用中文写2-3句话：影响、意义、受影响的方面>",
+  "key_details_en": "<2-3 sentences in English>",
+  "key_details_zh": "<用中文写2-3句话：关键细节、数字、引语、相关方或后续进展>",
+  "background_en": "<3-5 sentences in English, or empty string>",
+  "background_zh": "<用中文写3-5句话：相关历史、制度、政策或前情，或空字符串>",
   "community_discussion_en": "<1-3 sentences in English, or empty string>",
   "community_discussion_zh": "<用中文写1-3句话，或空字符串>",
   "sources": ["<url from search results>", "..."]
