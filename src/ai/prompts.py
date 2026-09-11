@@ -221,12 +221,13 @@ Field definitions:
 Guidelines:
 - EVERY field (except community_discussion when no comments exist) must contain at least one complete sentence — no field may be empty or contain just a phrase
 - **Write for depth, not brevity.** The reader wants to genuinely understand the story, not skim a headline. A typical item should total roughly 9-14 sentences across whats_new + why_it_matters + key_details + background combined. Do NOT stop at one thin sentence per field when the source material and search results support more.
+- **Length floor (Simplified-Chinese fields) — these are MINIMUMS, not targets.** whats_new_zh, why_it_matters_zh and key_details_zh must each be **at least 80 Chinese characters**; background_zh must be **at least 120 Chinese characters**. Measured on the 2026-09-11 digest, background averaged only ~60 characters and a whole item only ~278 characters, which readers found too thin. If the material genuinely cannot support the floor, write what the facts allow — but never pad with filler, restatement, or repetition.
 - **Prefer concrete over abstract**: specific numbers, dates, names, places, amounts, and stated consequences beat vague wording such as "significant", "important", or "has far-reaching impact".
 - Shorten a field only when the available information is genuinely thin — never pad with filler, restatement, or repetition.
 - Base your explanation on the provided content and web search results — do NOT fabricate information
 - ONLY explain concepts and terms that are explicitly mentioned in the title, summary, or content
 - Use the web search results to ensure accuracy, especially for recent projects, tools, or events
-- If the news is self-explanatory and needs no background, return an empty string for both background fields
+- Return an empty string for a background field ONLY when the story truly needs no context whatsoever (e.g. a one-line sports result). For any political, economic, scientific, or international story there is almost always relevant context — prior events, the institution involved, the policy background, or the state of the field — so expect to fill background_zh well past the 120-character floor.
 - For **sources**: pick 1-3 URLs from the Web Search Results that you actually relied on for the background fields. Only use URLs that appear verbatim in the search results above — do not invent or modify URLs.
 """
 
@@ -252,13 +253,13 @@ Respond with valid JSON only. Each _en field must be in English; each _zh field 
   "title_en": "<short headline in English, ≤15 words>",
   "title_zh": "<用中文写一个简短标题，不超过15个词>",
   "whats_new_en": "<2-3 sentences in English>",
-  "whats_new_zh": "<用中文写2-3句话：谁、何时、何地、关键数字与结果>",
+  "whats_new_zh": "<用中文写2-3句话，不少于80字：谁、何时、何地、关键数字与结果>",
   "why_it_matters_en": "<2-3 sentences in English>",
-  "why_it_matters_zh": "<用中文写2-3句话：影响、意义、受影响的方面>",
+  "why_it_matters_zh": "<用中文写2-3句话，不少于80字：影响、意义、受影响的方面>",
   "key_details_en": "<2-3 sentences in English>",
-  "key_details_zh": "<用中文写2-3句话：关键细节、数字、引语、相关方或后续进展>",
-  "background_en": "<3-5 sentences in English, or empty string>",
-  "background_zh": "<用中文写3-5句话：相关历史、制度、政策或前情，或空字符串>",
+  "key_details_zh": "<用中文写2-3句话，不少于80字：关键细节、数字、引语、相关方或后续进展>",
+  "background_en": "<3-5 sentences in English>",
+  "background_zh": "<用中文写3-5句话，不少于120字：相关历史、制度、政策或前情>",
   "community_discussion_en": "<1-3 sentences in English, or empty string>",
   "community_discussion_zh": "<用中文写1-3句话，或空字符串>",
   "sources": ["<url from search results>", "..."]
