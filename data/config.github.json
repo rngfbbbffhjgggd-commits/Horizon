@@ -29,7 +29,7 @@
     }
   },
   "email": {
-    "enabled": true,
+    "enabled": false,
     "imap_enabled": false,
     "imap_server": "imap.gmail.com",
     "imap_port": 993,
@@ -281,7 +281,3 @@
     "enabled": false
   }
 }
-
-
-
-
