@@ -716,8 +716,11 @@ class HorizonOrchestrator:
         """
         _DEDUP_BATCH_SIZES = (35, 50)
         # Above this size a single unbatched dedup request risks truncated JSON,
-        # so the final full-list pass is skipped.
-        _DEDUP_FULL_PASS_MAX = 60
+        # so the final full-list pass is skipped. Raised 60 -> 150 on 2026-09-11:
+        # with a typical threshold set of 60-120 items the old cap silently
+        # skipped this pass, which is why same-event clusters (e.g. three ECB
+        # rate-hike reports) still reached the digest.
+        _DEDUP_FULL_PASS_MAX = 150
 
         if len(items) <= 1:
             return items
@@ -928,6 +931,24 @@ class HorizonOrchestrator:
             if apply_balance
             else BalancedDigestResult(items=deduped_items)
         )
+
+        # Final safety pass on the SELECTED digest only. The digest is small
+        # (~25 items), so one unbatched dedup call is guaranteed to compare
+        # every pair — unlike the earlier passes, whose batches can hide a
+        # same-event pair from each other. Added 2026-09-11 after three separate
+        # ECB rate-hike reports all reached the same digest.
+        if topic_dedup and len(balanced_digest.items) > 1:
+            before_final = len(balanced_digest.items)
+            final_items = await self.merge_topic_duplicates(balanced_digest.items, log=log)
+            if len(final_items) < before_final:
+                if log:
+                    self.console.print(
+                        f"🧹 Final digest dedup: removed "
+                        f"{before_final - len(final_items)} duplicate(s) "
+                        f"→ {len(final_items)} items\n"
+                    )
+                balanced_digest = BalancedDigestResult(items=final_items)
+
         return FilteringPipelineResult(
             items=balanced_digest.items,
             threshold_count=len(threshold_items),
@@ -1150,6 +1171,22 @@ class HorizonOrchestrator:
         """
         import re as _re
 
+        # AI-industry headlines are dropped before analysis at the user's
+        # request (2026-09-10): the digest deliberately does not cover the AI
+        # industry itself. Stories that merely involve technology still pass.
+        # This is the deterministic backstop for the prompt-level rule, which a
+        # small model does not always follow (e.g. "AI agents are flooding
+        # public services" still reached the 2026-09-11 digest).
+        _ai_title_re = _re.compile(
+            r"(?:\bAI\b|\bAGI\b|\bLLM\b|\bGPT(?:-\d+)?\b|\bOpenAI\b|\bAnthropic\b|"
+            r"\bDeepMind\b|\bGemini\b|\bClaude\b|\bLlama\b|\bCopilot\b|\bChatGPT\b|"
+            r"\bMidjourney\b|\bDeepSeek\b|\bMachine\s+Learning\b|\bNeural\s+Network\b|"
+            r"人工智能|大模型|大语言模型|机器学习|深度学习|神经网络|生成式\s*AI|"
+            r"AI\s*(?:模型|公司|代理|助手|芯片|监管|风险|安全|智能体|生成))",
+            _re.IGNORECASE,
+        )
+        ai_dropped = 0
+
         def _norm(t: str) -> str:
             return _re.sub(r"[^\w]+", "", t.lower())
 
@@ -1180,6 +1217,9 @@ class HorizonOrchestrator:
             title = (item.title or "").strip()
             if not title:
                 continue
+            if _ai_title_re.search(title):
+                ai_dropped += 1
+                continue
             meta = item.metadata or {}
             feed_key = (item.source_type.value, str(meta.get("feed_name", "")))
             bucket = seen_titles.setdefault(feed_key, [])
@@ -1187,6 +1227,10 @@ class HorizonOrchestrator:
                 continue
             bucket.append(title)
             kept.append(item)
+        if ai_dropped:
+            self.console.print(
+                f"🚫 Dropped {ai_dropped} AI-industry item(s) before analysis\n"
+            )
         return kept
 
     async def _analyze_content(self, items: List[ContentItem]) -> List[ContentItem]:
