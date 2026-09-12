@@ -67,8 +67,12 @@ class ContentEnricher:
             ]
             await asyncio.gather(*coros)
 
-    async def _web_search(self, query: str, max_results: int = 3) -> list:
+    async def _web_search(self, query: str, max_results: int = 5) -> list:
         """Search the web for context via DuckDuckGo.
+
+        Raised 3 -> 5 results per concept on 2026-09-12: more grounding
+        material gives the (small, free) writer model more concrete facts to
+        draw on, which is the supply-side fix for thin one-paragraph items.
 
         Returns:
             List of dicts with keys: title, url, body
@@ -125,7 +129,8 @@ class ContentEnricher:
             if result is None:
                 return []
             queries = result.get("queries", [])
-            return queries[:3]
+            # 3 -> 4 concepts (2026-09-12): wider grounding coverage per item.
+            return queries[:4]
         except Exception:
             return []
 
@@ -155,13 +160,18 @@ class ContentEnricher:
         queries = await self._extract_concepts(item, content_text)
 
         # Step 2: Search web for each concept
+        # Body snippets are capped so that the larger result count (5 per
+        # concept x up to 4 concepts) does not bloat the prompt.
         all_results = []
         web_sections = []
         for query in queries:
             results = await self._web_search(query)
             all_results.extend(results)
             if results:
-                lines = [f"- [{r['title']}]({r['url']}): {r['body']}" for r in results]
+                lines = [
+                    f"- [{r['title']}]({r['url']}): {str(r['body'])[:400]}"
+                    for r in results
+                ]
                 web_sections.append(f"**{query}:**\n" + "\n".join(lines))
         web_context = "\n\n".join(web_sections) if web_sections else ""
 
