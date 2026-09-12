@@ -203,6 +203,24 @@
         "url": "https://news.google.com/rss/search?q=site:caixin.com&hl=zh-CN&gl=CN&ceid=CN:zh-Hans",
         "enabled": true,
         "category": "finance"
+      },
+      {
+        "name": "Solidot",
+        "url": "https://www.solidot.org/index.rss",
+        "enabled": true,
+        "category": "tech"
+      },
+      {
+        "name": "IEEE Spectrum",
+        "url": "https://spectrum.ieee.org/feeds/feed.rss",
+        "enabled": true,
+        "category": "tech"
+      },
+      {
+        "name": "少数派",
+        "url": "https://sspai.com/feed",
+        "enabled": true,
+        "category": "tech"
       }
     ],
     "google_news": {
