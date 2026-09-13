@@ -334,6 +334,14 @@ def _is_mostly_latin(text: str) -> bool:
     return cjk / len(letters) < 0.4
 
 
+# A Chinese summary shorter than this is treated as a failed enrichment pass
+# rather than a deliberately terse one. Measured 2026-09-13: healthy items
+# averaged ~190 characters, while the items whose enrichment had been rejected
+# (content filter, upstream error) carried only 29-56 characters — the raw
+# one-line analysis summary with no background at all.
+_MIN_SUMMARY_CHARS = 80
+
+
 class TranslationFixer:
     """Thin post-enrichment pass that re-translates any item the primary model
     left in English.
@@ -358,11 +366,14 @@ class TranslationFixer:
         meta = item.metadata or {}
         title_zh = str(meta.get("title_zh") or "")
         summary_zh = str(meta.get("detailed_summary_zh") or "")
-        # Needs a fix when the Chinese title is missing/empty/English, or the
-        # Chinese summary is missing/empty/English.
+        # Needs a fix when the Chinese title is missing/empty/English, when the
+        # Chinese summary is missing/empty/English, OR when the summary is far
+        # too short — the signature of a failed primary enrichment pass (content
+        # filter, upstream error) that left only the raw one-line summary.
         return (
             (not title_zh or _is_mostly_latin(title_zh))
             or (not summary_zh or _is_mostly_latin(summary_zh))
+            or len(summary_zh) < _MIN_SUMMARY_CHARS
         )
 
     async def fix_batch(self, items: List[ContentItem]) -> None:
@@ -387,11 +398,60 @@ class TranslationFixer:
         await asyncio.gather(*(_process(it) for it in to_fix))
 
     async def _fix_item(self, item: ContentItem) -> None:
-        """Re-translate a single item's title and summary to Simplified Chinese."""
+        """Repair a single item: translate it into Chinese, or expand it when the
+        primary enrichment pass failed and left only a bare one-line summary."""
         meta = item.metadata if item.metadata is not None else {}
         title_zh = str(meta.get("title_zh") or "")
         summary_zh = str(meta.get("detailed_summary_zh") or "")
 
+        title_ok = bool(title_zh) and not _is_mostly_latin(title_zh)
+        summary_ok = bool(summary_zh) and not _is_mostly_latin(summary_zh)
+
+        # --- Expand mode -------------------------------------------------
+        # Title and summary are already Chinese — they are simply too thin
+        # because the primary enrichment pass failed. Ask the correction model
+        # to write a real entry from the raw material, rather than translating.
+        if title_ok and summary_ok and len(summary_zh) < _MIN_SUMMARY_CHARS:
+            raw = (item.content or "").strip()[:2500]
+            expand_parts = [
+                "The news item below reached the digest with only a very short "
+                "Chinese summary, because automatic enrichment failed for it.",
+                f"Title: {title_zh}",
+                f"Current short summary: {summary_zh}",
+                f"Original title: {item.title}",
+                f"Original summary: {item.ai_summary or item.title}",
+            ]
+            if raw:
+                expand_parts.append(f"Source material:\n{raw}")
+            expand_parts.append(
+                "Write a proper digest entry for this item in Simplified "
+                "Chinese, using ONLY facts present above. Return valid JSON:\n"
+                '{"summary_zh": "<3-4句，含具体数字/日期/机构/地点，不要编造>", '
+                '"background_zh": "<2-4句背景，素材确实不足则留空字符串>"}'
+            )
+            response = await self.client.complete(
+                system=(
+                    "You are a Chinese news editor. Write only from the given "
+                    "material — never invent facts. Return only valid JSON."
+                ),
+                user="\n".join(expand_parts),
+            )
+            result = parse_json_response(response)
+            if not result:
+                print(f"TranslationFixer: could not parse expand response for {item.id}")
+                return
+            new_summary = str(result.get("summary_zh") or "").strip()
+            new_bg = str(result.get("background_zh") or "").strip()
+            if len(new_summary) > len(summary_zh):
+                meta["detailed_summary_zh"] = new_summary
+            if new_bg and not _is_mostly_latin(new_bg) and not meta.get("background_zh"):
+                meta["background_zh"] = new_bg
+            item.metadata = meta
+            print(f"TranslationFixer: expanded thin item {item.id} "
+                  f"({len(summary_zh)} -> {len(meta.get('detailed_summary_zh') or '')} chars)")
+            return
+
+        # --- Translate mode (original behaviour) -------------------------
         prompt_parts = ["Translate the following news into Simplified Chinese."]
         if title_zh and not _is_mostly_latin(title_zh):
             # Title already Chinese; only ask for a summary.
