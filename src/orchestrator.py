@@ -1,6 +1,7 @@
 """Main orchestrator coordinating the entire workflow."""
 
 import asyncio
+import re
 from collections import defaultdict
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta, timezone
@@ -45,6 +46,20 @@ _TRACKING_QUERY_PARAMETERS = {
     "twclid",
     "vero_id",
 }
+
+
+# AI-industry headlines are excluded from the digest at the user's request
+# (2026-09-10). Kept at module level so BOTH the pre-analysis filter (which sees
+# the raw, often English title) and the post-enrichment check (which sees the
+# rewritten Chinese title) apply exactly the same rule.
+_AI_TITLE_RE = re.compile(
+    r"(?:\bAI\b|\bAGI\b|\bLLM\b|\bGPT(?:-\d+)?\b|\bOpenAI\b|\bAnthropic\b|"
+    r"\bDeepMind\b|\bGemini\b|\bClaude\b|\bLlama\b|\bCopilot\b|\bChatGPT\b|"
+    r"\bMidjourney\b|\bDeepSeek\b|\bMachine\s+Learning\b|\bNeural\s+Network\b|"
+    r"人工智能|大模型|大语言模型|机器学习|深度学习|神经网络|生成式\s*AI|"
+    r"AI\s*(?:模型|公司|代理|助手|芯片|监管|风险|安全|智能体|生成))",
+    re.IGNORECASE,
+)
 
 
 def _deduplication_url_key(url: str) -> tuple[str, str, str, str, Optional[int], str, str]:
@@ -295,6 +310,25 @@ class HorizonOrchestrator:
                     "whats_new_zh", "why_it_matters_zh", "key_details_zh",
                 ):
                     item.metadata.pop(key, None)
+
+            # 6.2 Final AI-topic check on the ENRICHED Chinese titles. The
+            #     pre-analysis filter only saw the raw (often English) titles, so
+            #     a story that is not about the AI industry can acquire an "AI"
+            #     headline only after enrichment rewrites it (2026-09-13:
+            #     "We must pace the frontier" -> "AI 前沿的步伐控制").
+            before_ai_check = len(important_items)
+            important_items = [
+                it
+                for it in important_items
+                if not _AI_TITLE_RE.search(
+                    str((it.metadata or {}).get("title_zh") or it.title or "")
+                )
+            ]
+            if len(important_items) != before_ai_check:
+                self.console.print(
+                    f"🚫 Dropped {before_ai_check - len(important_items)} "
+                    f"AI-industry item(s) after enrichment\n"
+                )
 
             # 7. Generate and save daily summaries for each configured language
             # Use Beijing time (UTC+8) for the summary filename so the date
@@ -1172,19 +1206,8 @@ class HorizonOrchestrator:
         import re as _re
 
         # AI-industry headlines are dropped before analysis at the user's
-        # request (2026-09-10): the digest deliberately does not cover the AI
-        # industry itself. Stories that merely involve technology still pass.
-        # This is the deterministic backstop for the prompt-level rule, which a
-        # small model does not always follow (e.g. "AI agents are flooding
-        # public services" still reached the 2026-09-11 digest).
-        _ai_title_re = _re.compile(
-            r"(?:\bAI\b|\bAGI\b|\bLLM\b|\bGPT(?:-\d+)?\b|\bOpenAI\b|\bAnthropic\b|"
-            r"\bDeepMind\b|\bGemini\b|\bClaude\b|\bLlama\b|\bCopilot\b|\bChatGPT\b|"
-            r"\bMidjourney\b|\bDeepSeek\b|\bMachine\s+Learning\b|\bNeural\s+Network\b|"
-            r"人工智能|大模型|大语言模型|机器学习|深度学习|神经网络|生成式\s*AI|"
-            r"AI\s*(?:模型|公司|代理|助手|芯片|监管|风险|安全|智能体|生成))",
-            _re.IGNORECASE,
-        )
+        # request (2026-09-10) — the shared module-level _AI_TITLE_RE defines
+        # what counts as AI-industry coverage.
         ai_dropped = 0
 
         def _norm(t: str) -> str:
@@ -1217,7 +1240,7 @@ class HorizonOrchestrator:
             title = (item.title or "").strip()
             if not title:
                 continue
-            if _ai_title_re.search(title):
+            if _AI_TITLE_RE.search(title):
                 ai_dropped += 1
                 continue
             meta = item.metadata or {}
