@@ -205,12 +205,6 @@
         "category": "finance"
       },
       {
-        "name": "Solidot",
-        "url": "https://www.solidot.org/index.rss",
-        "enabled": true,
-        "category": "tech"
-      },
-      {
         "name": "IEEE Spectrum",
         "url": "https://spectrum.ieee.org/feeds/feed.rss",
         "enabled": true,
