@@ -1068,6 +1068,30 @@ class HorizonOrchestrator:
         if max_items is not None:
             selected = selected[:max_items]
 
+        # Borrow pass (added 2026-09-14): a group whose candidate pool is smaller
+        # than its quota leaves the digest short of max_items -- e.g. tech had
+        # only 2 non-AI candidates against a quota of 5, so 2026-09-14 produced
+        # 22 of 25 items. Fill the leftover slots from the still-unselected items
+        # in score order, so the digest reaches max_items WITHOUT lowering the
+        # score threshold. Group quotas stay caps, never floors.
+        borrowed: List[tuple[ContentItem, str]] = []
+        if max_items is not None and len(selected) < max_items:
+            chosen = {id(it) for it, _ in selected}
+            for item in sorted_items:
+                if len(selected) + len(borrowed) >= max_items:
+                    break
+                if id(item) in chosen:
+                    continue
+                category = item.metadata.get("category")
+                group_key = (
+                    category_to_group.get(category, default_group)
+                    if isinstance(category, str)
+                    else default_group
+                )
+                borrowed.append((item, group_key))
+                chosen.add(id(item))
+            selected.extend(borrowed)
+
         final_counts: Dict[str, int] = defaultdict(int)
         for _, group_key in selected:
             final_counts[group_key] += 1
@@ -1081,10 +1105,17 @@ class HorizonOrchestrator:
             self.console.print(
                 f"⚖️ Balanced digest selected {len(selected)}/{len(items)} items"
             )
+            if borrowed:
+                self.console.print(
+                    f"      • borrowed {len(borrowed)} item(s) beyond quota "
+                    f"(some groups had too few candidates; highest score first)"
+                )
             for group_key, group in groups.items():
                 label = group.name or group_key
+                count = final_counts.get(group_key, 0)
+                mark = " (+borrowed)" if count > group.limit else ""
                 self.console.print(
-                    f"      • {label}: {final_counts.get(group_key, 0)}/{group.limit}"
+                    f"      • {label}: {count}/{group.limit}{mark}"
                 )
             if (
                 final_counts.get(default_group, 0)
