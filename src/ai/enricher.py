@@ -407,48 +407,14 @@ class TranslationFixer:
         title_ok = bool(title_zh) and not _is_mostly_latin(title_zh)
         summary_ok = bool(summary_zh) and not _is_mostly_latin(summary_zh)
 
-        # --- Expand mode -------------------------------------------------
-        # Title and summary are already Chinese — they are simply too thin
-        # because the primary enrichment pass failed. Ask the correction model
-        # to write a real entry from the raw material, rather than translating.
-        if title_ok and summary_ok and len(summary_zh) < _MIN_SUMMARY_CHARS:
-            raw = (item.content or "").strip()[:2500]
-            expand_parts = [
-                "The news item below reached the digest with only a very short "
-                "Chinese summary, because automatic enrichment failed for it.",
-                f"Title: {title_zh}",
-                f"Current short summary: {summary_zh}",
-                f"Original title: {item.title}",
-                f"Original summary: {item.ai_summary or item.title}",
-            ]
-            if raw:
-                expand_parts.append(f"Source material:\n{raw}")
-            expand_parts.append(
-                "Write a proper digest entry for this item in Simplified "
-                "Chinese, using ONLY facts present above. Return valid JSON:\n"
-                '{"summary_zh": "<3-4句，含具体数字/日期/机构/地点，不要编造>", '
-                '"background_zh": "<2-4句背景，素材确实不足则留空字符串>"}'
-            )
-            response = await self.client.complete(
-                system=(
-                    "You are a Chinese news editor. Write only from the given "
-                    "material — never invent facts. Return only valid JSON."
-                ),
-                user="\n".join(expand_parts),
-            )
-            result = parse_json_response(response)
-            if not result:
-                print(f"TranslationFixer: could not parse expand response for {item.id}")
-                return
-            new_summary = str(result.get("summary_zh") or "").strip()
-            new_bg = str(result.get("background_zh") or "").strip()
-            if len(new_summary) > len(summary_zh):
-                meta["detailed_summary_zh"] = new_summary
-            if new_bg and not _is_mostly_latin(new_bg) and not meta.get("background_zh"):
-                meta["background_zh"] = new_bg
-            item.metadata = meta
-            print(f"TranslationFixer: expanded thin item {item.id} "
-                  f"({len(summary_zh)} -> {len(meta.get('detailed_summary_zh') or '')} chars)")
+        # --- Already Chinese: only the LENGTH may need fixing ---------------
+        # (2026-09-15 restructure) This branch used to require
+        # `title_ok and summary_ok and too_short`; when the title was empty the
+        # function fell through to Translate mode and stopped there, so an item
+        # whose translator returned a 21-character summary was never expanded.
+        if title_ok and summary_ok:
+            if len(summary_zh) < _MIN_SUMMARY_CHARS:
+                await self._expand_item(item)
             return
 
         # --- Translate mode (original behaviour) -------------------------
@@ -490,3 +456,66 @@ class TranslationFixer:
         if new_summary and not _is_mostly_latin(new_summary):
             meta["detailed_summary_zh"] = new_summary
         item.metadata = meta
+
+        # The translator is only asked for "1-2 sentences", so its output can
+        # still sit under the length floor — exactly the case that produced a
+        # 21-character entry on 2026-09-14. Hand it to the expand pass as well.
+        final_title = str(meta.get("title_zh") or "")
+        final_summary = str(meta.get("detailed_summary_zh") or "")
+        if (
+            final_title
+            and not _is_mostly_latin(final_title)
+            and len(final_summary) < _MIN_SUMMARY_CHARS
+        ):
+            await self._expand_item(item)
+
+    async def _expand_item(self, item: ContentItem) -> None:
+        """Expand a thin (but already Chinese) entry using the raw material.
+
+        Called both when an item arrives with a too-short Chinese summary and
+        after a translate pass that produced one.
+        """
+        meta = item.metadata if item.metadata is not None else {}
+        title_zh = str(meta.get("title_zh") or "")
+        summary_zh = str(meta.get("detailed_summary_zh") or "")
+        before = len(summary_zh)
+
+        raw = (item.content or "").strip()[:2500]
+        expand_parts = [
+            "The news item below reached the digest with only a very short "
+            "Chinese summary, because automatic enrichment failed for it.",
+            f"Title: {title_zh}",
+            f"Current short summary: {summary_zh}",
+            f"Original title: {item.title}",
+            f"Original summary: {item.ai_summary or item.title}",
+        ]
+        if raw:
+            expand_parts.append(f"Source material:\n{raw}")
+        expand_parts.append(
+            "Write a proper digest entry for this item in Simplified "
+            "Chinese, using ONLY facts present above. Return valid JSON:\n"
+            '{"summary_zh": "<3-4句，含具体数字/日期/机构/地点，不要编造>", '
+            '"background_zh": "<2-4句背景，素材确实不足则留空字符串>"}'
+        )
+        response = await self.client.complete(
+            system=(
+                "You are a Chinese news editor. Write only from the given "
+                "material — never invent facts. Return only valid JSON."
+            ),
+            user="\n".join(expand_parts),
+        )
+        result = parse_json_response(response)
+        if not result:
+            print(f"TranslationFixer: could not parse expand response for {item.id}")
+            return
+        new_summary = str(result.get("summary_zh") or "").strip()
+        new_bg = str(result.get("background_zh") or "").strip()
+        if len(new_summary) > before:
+            meta["detailed_summary_zh"] = new_summary
+        if new_bg and not _is_mostly_latin(new_bg) and not meta.get("background_zh"):
+            meta["background_zh"] = new_bg
+        item.metadata = meta
+        print(
+            f"TranslationFixer: expanded thin item {item.id} "
+            f"({before} -> {len(meta.get('detailed_summary_zh') or '')} chars)"
+        )
