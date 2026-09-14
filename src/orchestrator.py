@@ -52,10 +52,18 @@ _TRACKING_QUERY_PARAMETERS = {
 # (2026-09-10). Kept at module level so BOTH the pre-analysis filter (which sees
 # the raw, often English title) and the post-enrichment check (which sees the
 # rewritten Chinese title) apply exactly the same rule.
+#
+# NOTE ON BOUNDARIES (fixed 2026-09-14): do NOT use \b around the short tokens.
+# CJK characters ARE regex "word" characters, so "支持OpenAI融资" has no word
+# boundary between 持 and O and "\bOpenAI\b" silently fails to match it. The
+# 2026-09-14 digest shipped "软银为支持OpenAI融资获得 118.7 亿美元贷款" because
+# of exactly that. `(?<![A-Za-z])...(?![A-Za-z])` means "not adjacent to a Latin
+# letter", which still rejects "AIDS"/"AIGC" while matching CJK-adjacent forms.
 _AI_TITLE_RE = re.compile(
-    r"(?:\bAI\b|\bAGI\b|\bLLM\b|\bGPT(?:-\d+)?\b|\bOpenAI\b|\bAnthropic\b|"
-    r"\bDeepMind\b|\bGemini\b|\bClaude\b|\bLlama\b|\bCopilot\b|\bChatGPT\b|"
-    r"\bMidjourney\b|\bDeepSeek\b|\bMachine\s+Learning\b|\bNeural\s+Network\b|"
+    r"(?:(?<![A-Za-z])AI(?![A-Za-z])|(?<![A-Za-z])AGI(?![A-Za-z])|"
+    r"(?<![A-Za-z])LLM(?![A-Za-z])|(?<![A-Za-z])GPT(?:-\d+)?(?![A-Za-z])|"
+    r"OpenAI|Anthropic|DeepMind|Gemini|Claude|Llama|Copilot|ChatGPT|"
+    r"Midjourney|DeepSeek|Machine\s+Learning|Neural\s+Network|"
     r"人工智能|大模型|大语言模型|机器学习|深度学习|神经网络|生成式\s*AI|"
     r"AI\s*(?:模型|公司|代理|助手|芯片|监管|风险|安全|智能体|生成))",
     re.IGNORECASE,
