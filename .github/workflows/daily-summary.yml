@@ -42,8 +42,18 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           LAST_TS=$(gh api "repos/$GITHUB_REPOSITORY/commits?path=_posts&sha=gh-pages&per_page=1" --jq '.[0].commit.committer.date // empty' 2>/dev/null || true)
-          if [ -n "$LAST_TS" ]; then
+          # Clamp the fetch start to at most 24h ago. Normally the newest
+          # _posts commit is yesterday's digest, but a manual edit of a
+          # historical post moves it to "now" and shrinks the window to a few
+          # hours -- exactly what happened on 2026-09-14 (4h window, 48 items
+          # fetched, a 14-item digest). The digest must always cover a full day.
+          CLAMP_TS=$(date -u -d '24 hours ago' +%Y-%m-%dT%H:%M:%SZ)
+          if [ -n "$LAST_TS" ] && [[ "$LAST_TS" < "$CLAMP_TS" ]]; then
             echo "SINCE=$LAST_TS" >> "$GITHUB_ENV"
+            echo "SINCE=$LAST_TS (from newest _posts commit)"
+          else
+            echo "SINCE=$CLAMP_TS" >> "$GITHUB_ENV"
+            echo "SINCE=$CLAMP_TS (clamped to 24h; newest _posts commit was '$LAST_TS')"
           fi
 
       - name: Test SMTP connection
