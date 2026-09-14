@@ -321,9 +321,11 @@ rss · 联合早报 · 9月13日 16:14
 <a id="item-16"></a>
 ## [特朗普：不担心习近平可能取消峰会 - zaobao.com.sg](https://news.google.com/rss/articles/CBMiakFVX3lxTE9SSkx4NkczZXppemk5My1yRlRMMWZDRXo2a0ZHQkFodExRSDBfMzM1Ty1tbHJsNU9JaUxQd3BhdEdmUzg4OUE5RlRYWGcwSlhnYTVPbVktQmhtNWMwUndDZWRWcXBkVzNpQVE?oc=5) ⭐️ 7.0/10
 
-特朗普表示，他并不担心习近平可能取消峰会。
+据日本共同社9月13日引述多位熟悉中美双边关系的消息人士报道，中国大陆已告知美国，若美方批准任何新的对台军售，中方计划取消定于本月举行的习特会。美国总统特朗普同日在爱尔兰西部杜恩贝格出席爱尔兰公开赛决赛轮时对记者表示，不担心中国国家主席习近平可能取消峰会，并称“不，我不担心这个。我们关系很好”。特朗普还说，习近平希望相处融洽，美方也希望如此，双方会相处得很好，并称过去几年中国一直公平对待美国。
 
 rss · 联合早报 · 9月13日 21:44
+
+**背景**: 特朗普与习近平今年5月在北京举行峰会，两人预计今年9月在白宫再次会晤。此次日媒报道的取消峰会可能性，与美方是否批准新对台军售直接相关。特朗普的表态由路透社、彭博社报道，共同社的报道则引述了熟悉中美双边关系的消息人士。
 
 **标签**: `#International Politics`, `#Diplomacy`, `#Summit`
 
