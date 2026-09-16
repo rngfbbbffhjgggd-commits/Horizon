@@ -78,6 +78,20 @@ This daily digest is curated for readers in mainland China. Apply the following 
 - When China is directly involved in an international story (e.g. US-China trade, tariffs on Chinese goods, regional diplomacy), that story has elevated relevance regardless of which language it is written in.
 - This does NOT mean every China item is high-scoring: routine corporate announcements, unremarkable product releases, or trivial local items still score low. Weight by importance and audience relevance, not by nationality alone.
 
+## Content type: news reports only — no articles
+
+This digest carries **NEWS**: reports of something that actually happened. Score **0-2** any item that is not a news report, however interesting it may be:
+
+- Personal essays, memoirs, or first-person narratives (e.g. "why I can't stop thinking about X", a writer's recollections of a trip, or anecdotes from the 1960s)
+- Cultural, travel, or history features with no time-bound news hook
+- Opinion columns, commentary, or analysis pieces that report no new development
+- Evergreen explainers, "state of X" round-ups, or listicles that are not reporting a specific event
+- Substack / personal-blog / newsletter posts that are not reporting news
+
+A news report answers: **what happened, who did it, when and where**. If an item has no time-bound event at its core, treat it as an article and score it 0-2.
+
+This does NOT exclude items that are reported and carry a specific new fact: an investigation's findings, a data release, a research result, a market move, a court ruling, a product launch, or a reported feature that breaks new information — those are news and score normally.
+
 ## Topic exclusion: AI-industry coverage
 
 This digest deliberately does NOT cover the AI industry itself. Score the following **0-2** no matter how notable they may seem elsewhere:
