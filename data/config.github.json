@@ -20,6 +20,7 @@
       "api_key_env": "DEEPSEEK_API_KEY",
       "temperature": 0.2,
       "max_tokens": 4096,
+      "disable_thinking": true,
       "throttle_sec": 1,
       "languages": [
         "zh"
