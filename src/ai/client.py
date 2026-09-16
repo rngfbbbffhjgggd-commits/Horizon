@@ -323,6 +323,13 @@ class OpenAIClient(AIClient):
         request_kwargs[token_param] = max_tokens
         if include_temperature:
             request_kwargs["temperature"] = temperature
+        # Reasoning models would otherwise spend most of the output budget on a
+        # hidden thinking pass before writing the answer (measured 2026-09-17:
+        # 660 of 717 completion tokens on the translate prompt). Only sent when
+        # a config asks for it, so every other OpenAI-compatible provider keeps
+        # exactly the request it had before.
+        if getattr(self.config, "disable_thinking", False):
+            request_kwargs["thinking"] = {"type": "disabled"}
         if self.provider not in self._NO_RESPONSE_FORMAT:
             request_kwargs["response_format"] = {"type": "json_object"}
         return await self.client.chat.completions.create(**request_kwargs)
