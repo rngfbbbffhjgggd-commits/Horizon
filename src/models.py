@@ -140,6 +140,16 @@ class AIConfig(BaseModel):
     api_key_env: str
     temperature: float = 0.3
     max_tokens: int = 4096
+    # Reasoning models (e.g. DeepSeek) spend output tokens on a hidden
+    # "thinking" pass before writing the visible answer. The translation
+    # fallback only needs a short JSON payload, so that pass buys nothing and
+    # costs a lot: measured 2026-09-17 on the digest's own prompts, the
+    # translate call burned 660 of 717 completion tokens on reasoning and the
+    # expand call 376 of 434. It also adds a tail risk — a long think can
+    # exhaust max_tokens and truncate the JSON, which is how thin "shell"
+    # entries appear. Set true for providers that accept
+    # `thinking: {"type": "disabled"}` on the wire.
+    disable_thinking: bool = False
     throttle_sec: float = 0.0
     analysis_concurrency: int = 1
     enrichment_concurrency: int = 1
