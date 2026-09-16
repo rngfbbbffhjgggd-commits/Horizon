@@ -70,6 +70,37 @@ _AI_TITLE_RE = re.compile(
 )
 
 
+# Article-shaped headlines are dropped before analysis at the user's request
+# (2026-09-16): only reports of a specific event belong in the digest, so
+# opinion/analysis columns, reviews and year-in-review round-ups are out.
+# This is a deliberately CONSERVATIVE belt to the AI scorer's braces — it only
+# fires on unambiguous self-labelling ("Opinion:", "Analysis:") and on
+# round-up wording ("盘点", "of the year", "10 best ..."), never on a title
+# that merely mentions a topic. The model-side rule in prompts.py catches the
+# subtler cases (essays, explainers, history features) by scoring them 0-2.
+_ARTICLE_TITLE_RE = re.compile(
+    r"(?:"
+    # Self-labelled article types, English (leading label only).
+    r"^\s*(?:opinion|analysis|commentary|explainer|editorial|op-?ed|column|"
+    r"review|feature|essay|obituary|listicle)\b\s*[:\-–—]"
+    # Round-ups and listicles, English.
+    r"|^(?:the\s+)?\d+\s+(?:best|worst|biggest|most|top)\b"
+    r"|\b(?:best|worst|biggest|top)\b[^.!?]{0,40}\bof\s+(?:19|20)\d{2}\b"
+    r"|\bof\s+the\s+year\b"
+    r"|\b(?:year|week|month)\s+in\s+review\b"
+    r"|\b(?:round-?up|recap|retrospective)\b"
+    r"|^\s*a\s+look\s+back\b"
+    # Round-ups and columns, Chinese (leading label, or unmistakable wording).
+    r"|盘点"
+    r"|(?:年度|年终|全年)(?:盘点|回顾|总结|特稿|综述|榜单|十大)"
+    r"|十大\s*[^\s]{0,8}(?:新闻|事件|人物|盘点|榜单)"
+    r"|(?:回顾|展望)与(?:展望|回顾)"
+    r"|^\s*(?:观察|解读|评论|社论|专栏|分析|锐评|热评|述评)\s*[:：]"
+    r")",
+    re.IGNORECASE,
+)
+
+
 def _deduplication_url_key(url: str) -> tuple[str, str, str, str, Optional[int], str, str]:
     """Return a conservative URL identity key for cross-source deduplication."""
     parsed = urlsplit(url)
@@ -1248,6 +1279,10 @@ class HorizonOrchestrator:
         # request (2026-09-10) — the shared module-level _AI_TITLE_RE defines
         # what counts as AI-industry coverage.
         ai_dropped = 0
+        # Article-shaped headlines (opinion/analysis columns, reviews, annual
+        # round-ups) are dropped too (2026-09-16) — the digest carries news
+        # reports only. See _ARTICLE_TITLE_RE.
+        article_dropped = 0
 
         def _norm(t: str) -> str:
             return _re.sub(r"[^\w]+", "", t.lower())
@@ -1282,6 +1317,9 @@ class HorizonOrchestrator:
             if _AI_TITLE_RE.search(title):
                 ai_dropped += 1
                 continue
+            if _ARTICLE_TITLE_RE.search(title):
+                article_dropped += 1
+                continue
             meta = item.metadata or {}
             feed_key = (item.source_type.value, str(meta.get("feed_name", "")))
             bucket = seen_titles.setdefault(feed_key, [])
@@ -1292,6 +1330,10 @@ class HorizonOrchestrator:
         if ai_dropped:
             self.console.print(
                 f"🚫 Dropped {ai_dropped} AI-industry item(s) before analysis\n"
+            )
+        if article_dropped:
+            self.console.print(
+                f"📄 Dropped {article_dropped} article-type item(s) before analysis\n"
             )
         return kept
 
