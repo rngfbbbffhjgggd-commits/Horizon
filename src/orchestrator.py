@@ -103,7 +103,23 @@ _ARTICLE_TITLE_RE = re.compile(
     r"|(?:年度|年终|全年)(?:盘点|回顾|总结|特稿|综述|榜单|十大)"
     r"|十大\s*[^\s]{0,8}(?:新闻|事件|人物|盘点|榜单)"
     r"|(?:回顾|展望)与(?:展望|回顾)"
-    r"|^\s*(?:观察|解读|评论|社论|专栏|分析|锐评|热评|述评)\s*[:：]"
+    # Reporter's notebook / colour piece / review — added 2026-09-18 after
+    # "老牌经济特区赶路记丨记者手记" and "让·努维尔上海个展回顾" both shipped
+    # on 2026-09-17 (the first as a 40-char shell as well). These words have no
+    # news sense on their own: 手记/侧记/札记 are always a writer's notebook,
+    # 见闻 is always a travel/observation piece, and 回顾/回望 only count at the
+    # END of a title (so "习近平回顾改革开放历程" stays news).
+    r"|手记|侧记|札记|见闻"
+    r"|回顾\s*$|回望\s*$"
+    r"|(?:展|演出|赛季|赛事|活动|会议|论坛|峰会|发布会)\s*(?:回顾|回望)"
+    r"|(?:记者|现场|一线|媒体|财经|体育|文化|两会)\s*观察"
+    # Leading column labels, with any of the separators Chinese media uses
+    # (half/full-width colon, the 丨 / ｜ pipes, middle dot, dashes).
+    r"|^\s*(?:观察|解读|评论|社论|专栏|分析|锐评|热评|述评)\s*[:：丨|｜·\-–—]"
+    # A title that OPENS with 回顾/回望 is a retrospective whatever follows —
+    # "回望 2026：这一年的中国电影" has the year before the colon, so the
+    # separator rule above cannot see it.
+    r"|^\s*(?:回顾|回望)"
     r")",
     re.IGNORECASE,
 )
