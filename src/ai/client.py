@@ -328,8 +328,17 @@ class OpenAIClient(AIClient):
         # 660 of 717 completion tokens on the translate prompt). Only sent when
         # a config asks for it, so every other OpenAI-compatible provider keeps
         # exactly the request it had before.
+        #
+        # 2026-09-18 fix: this MUST travel via `extra_body`. Sent as a
+        # top-level kwarg, `thinking=` was rejected by the OpenAI SDK before any
+        # request left the process — "AsyncCompletions.create() got an
+        # unexpected keyword argument 'thinking'" — which silently killed the
+        # entire translation-fixer pass on the 2026-09-17 and 2026-09-18 runs
+        # (the fixer catches the error, logs "leaving as-is", and the item stays
+        # a thin shell). `extra_body` merges the key into the JSON payload
+        # instead of binding it against the method signature.
         if getattr(self.config, "disable_thinking", False):
-            request_kwargs["thinking"] = {"type": "disabled"}
+            request_kwargs["extra_body"] = {"thinking": {"type": "disabled"}}
         if self.provider not in self._NO_RESPONSE_FORMAT:
             request_kwargs["response_format"] = {"type": "json_object"}
         return await self.client.chat.completions.create(**request_kwargs)
