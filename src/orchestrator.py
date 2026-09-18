@@ -64,6 +64,14 @@ _AI_TITLE_RE = re.compile(
     r"(?<![A-Za-z])LLM(?![A-Za-z])|(?<![A-Za-z])GPT(?:-\d+)?(?![A-Za-z])|"
     r"OpenAI|Anthropic|DeepMind|Gemini|Claude|Llama|Copilot|ChatGPT|"
     r"Midjourney|DeepSeek|Machine\s+Learning|Neural\s+Network|"
+    # Model and company names that carry no "AI" token of their own. Added
+    # 2026-09-18 after the 2026-09-18 digest shipped "GLM 推理基础设施的开发"
+    # (智谱's own inference stack) — a textbook AI-industry item that the rest
+    # of this pattern could not see. Kept to unambiguous product names only:
+    # no bare "Mistral" (a wind), "Sora" (a name) or "豆包" (a steamed bun).
+    r"(?<![A-Za-z])GLM(?![A-Za-z])|(?<![A-Za-z])Qwen(?![A-Za-z])|"
+    r"(?<![A-Za-z])Grok(?![A-Za-z])|Stable\s+Diffusion|Perplexity|"
+    r"智谱|通义千问|通义|月之暗面|Kimi|混元大模型|文心一言|"
     r"人工智能|大模型|大语言模型|机器学习|深度学习|神经网络|生成式\s*AI|"
     r"AI\s*(?:模型|公司|代理|助手|芯片|监管|风险|安全|智能体|生成))",
     re.IGNORECASE,
