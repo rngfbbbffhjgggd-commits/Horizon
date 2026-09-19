@@ -1264,8 +1264,19 @@ class HorizonOrchestrator:
 
         self.console.print("📚 Enriching with background knowledge...")
         ai_client = create_ai_client(self.config.ai)
-        enricher = ContentEnricher(ai_client)
-        await enricher.enrich_batch(items)
+        from .extractors import ExtractorRegistry
+
+        # The extractor is handed to the enricher only for its backfill path:
+        # when the primary model's content filter rejects an item, fetching the
+        # article body gives the fallback pass enough facts to write a real
+        # summary instead of a one-line shell (see ContentEnricher._backfill_content).
+        async with httpx.AsyncClient(timeout=30.0) as fetch_client:
+            enricher = ContentEnricher(
+                ai_client,
+                extractors=ExtractorRegistry(self.config.extractors),
+                http_client=fetch_client,
+            )
+            await enricher.enrich_batch(items)
         self.console.print(f"   Enriched {len(items)} items\n")
 
     async def _verify_translations(self, items: List[ContentItem]) -> None:
