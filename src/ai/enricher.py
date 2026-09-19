@@ -27,8 +27,121 @@ from ..models import ContentItem
 class ContentEnricher:
     """Enriches high-scoring content items with background knowledge."""
 
-    def __init__(self, ai_client: AIClient):
+    def __init__(self, ai_client: AIClient, extractors=None, http_client=None):
         self.client = ai_client
+        # Optional article extractor + HTTP client, used ONLY by the
+        # backfill path below (see _backfill_content). Both may be None, in
+        # which case backfill is a no-op and behaviour is unchanged.
+        self._extractors = extractors
+        self._http_client = http_client
+
+    # Content shorter than this is treated as "headline only" and worth
+    # gathering material for when the enrichment call has been rejected.
+    _BACKFILL_MIN_CHARS = 700
+    # How much material to keep. The enrichment prompt truncates to 4000 and
+    # _expand_item to 2500, so anything beyond this is never read.
+    _BACKFILL_KEEP_CHARS = 4000
+    # If the article fetch yields at least this much, do not also search.
+    _ARTICLE_ENOUGH_CHARS = 400
+
+    async def _fetch_article_body(self, item: ContentItem) -> str:
+        """Extract the article text for `item`, or '' when unavailable.
+
+        Measured 2026-09-19 on the two items that shipped as shells: a
+        Google-News RSS link (`news.google.com/rss/articles/...`) returns
+        594 KB of JavaScript with **0 extractable characters**, its base64 id
+        decodes to a payload with no plain URL, and the HTML contains no
+        publisher link either — so those items cannot be resolved to the
+        original article at all, and the caller must fall back to a search.
+        A normal publisher URL works fine (solidot: 681 chars).
+        """
+        if self._extractors is None or self._http_client is None:
+            return ""
+        # item.url is a pydantic HttpUrl at runtime, not a str — str() it (the
+        # 2026-09-19 test caught this before it reached production).
+        url = str(item.url or "").strip()
+        if not url.lower().startswith(("http://", "https://")):
+            return ""
+        extractor = self._extractors.get("trafilatura")
+        if extractor is None:
+            return ""
+        try:
+            body = await extractor.extract(url, self._http_client)
+        except Exception as e:  # never let a fetch break the pipeline
+            print(f"Warning: full-text fetch failed for {item.id} ({e})")
+            return ""
+        return (body or "").strip()
+
+    async def _search_material(self, item: ContentItem) -> str:
+        """Headline search, for items whose article body cannot be fetched.
+
+        This is the path that actually rescues Google-News items: searching the
+        headline returned 570-581 characters of concrete, dated reporting for
+        both 2026-09-19 shells, which is enough for the expand pass to write a
+        real summary. Uses the enricher's existing DuckDuckGo helper.
+        """
+        query = str((item.metadata or {}).get("title_zh") or item.title or "").strip()
+        if not query:
+            return ""
+        try:
+            results = await self._web_search(query, max_results=5)
+        except Exception as e:  # never let a search break the pipeline
+            print(f"Warning: headline search failed for {item.id} ({e})")
+            return ""
+        lines = []
+        for r in results or []:
+            body = str(r.get("body") or "").strip()
+            if not body:
+                continue
+            title = str(r.get("title") or "").strip()
+            lines.append(f"- {title}: {body}" if title else f"- {body}")
+        return "\n".join(lines)
+
+    async def _backfill_content(self, item: ContentItem) -> int:
+        """Gather material for an item whose enrichment call was rejected.
+
+        Google-News style RSS entries carry only a headline plus a one-line
+        summary, so when the primary model's content filter rejects the
+        enrichment call the item is left with nothing to write from. That is
+        exactly how the thin one-sentence "shell" entries appear: the 2026-09-19
+        digest shipped two of them (47 and 30 chars) that the fallback pass
+        could only stretch to 69 and 74.
+
+        The RSS scraper can already fetch full text, but only for sources that
+        opt in via `content_extractor`; none do. So we gather material here, on
+        demand, for the handful of items that actually need it — the article
+        itself when its URL is a real publisher URL, otherwise a headline
+        search.
+
+        Returns the number of characters added (0 when nothing was gathered).
+        """
+        existing = (item.content or "").strip()
+        if len(existing) >= self._BACKFILL_MIN_CHARS:
+            return 0
+
+        pieces = []
+        body = await self._fetch_article_body(item)
+        if body:
+            pieces.append("--- Full article ---\n" + body)
+        if len(body) < self._ARTICLE_ENOUGH_CHARS:
+            snippets = await self._search_material(item)
+            if snippets:
+                pieces.append("--- Related coverage ---\n" + snippets)
+        if not pieces:
+            return 0
+
+        merged = "\n\n".join([existing] + pieces) if existing else "\n\n".join(pieces)
+        merged = merged[:self._BACKFILL_KEEP_CHARS]
+        added = len(merged) - len(existing)
+        if added <= 0:
+            return 0
+        item.content = merged
+        print(
+            f"🩹 backfilled material for {item.id} (+{added} chars; "
+            f"article={len(body)}, search={'yes' if len(pieces) > (1 if body else 0) else 'no'})"
+        )
+        return added
+
 
     def _get_concurrency(self) -> int:
         """Return the configured enrichment concurrency, clamped to 1 or above."""
@@ -215,6 +328,11 @@ class ContentEnricher:
                     f"Warning: enrichment request rejected for {item.id} "
                     f"(BadRequestError), falling back to translation"
                 )
+                # The rejection is usually a content filter, and it usually hits
+                # items that arrived with nothing but a headline. Fetch the
+                # article body first so the fallback (and the later expand pass)
+                # has real facts to write from instead of producing a shell.
+                await self._backfill_content(item)
                 await self._translate_item(item)
                 return
             except Exception as e:
