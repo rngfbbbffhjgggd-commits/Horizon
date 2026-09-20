@@ -288,7 +288,8 @@
       }
     },
     "default_group": "全球要闻",
-    "default_group_limit": 15
+    "default_group_limit": 15,
+    "sports_limit": 1
   },
   "webhook": {
     "enabled": false
