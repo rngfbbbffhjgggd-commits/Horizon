@@ -114,6 +114,8 @@ This digest carries **NEWS**: a report that something specific HAPPENED. Score *
 
 This does NOT exclude a reported story that breaks a specific new fact: an investigation's findings, a data release, a research result, a market move, a court ruling, or a product launch — those are single events and score normally.
 
+**Chinese-language commentary usually carries no "Opinion:" label.** Judge it by its subject: if the piece's subject is an *analysis, an argument or a narrative* rather than an event, it is an ARTICLE and scores 0-2. This covers theory/opinion-page pieces（理论版、评论版）, "剖析 / 辨析 / 论调 / 评析 / 思考 / 启示" titles, and pieces written to refute or defend a claim（e.g. 「破解"中国挤压"论调」）. Contrast: a report that a spokesperson *rejected* a claim at a briefing is NEWS, because its subject is the briefing. An athlete profile or a "road back to the top" feature is an ARTICLE too.
+
 ## Topic exclusion: AI-industry coverage
 
 This digest deliberately does NOT cover the AI industry itself. Score the following **0-2** no matter how notable they may seem elsewhere:
@@ -151,6 +153,13 @@ Apply the relevant guidance below based on the primary domain of the item, then 
 - Assess relevance to the Chinese-speaking readership of this daily digest. Foreign local-news items with little global consequence (e.g. a domestic trial, a routine local statistic) should score lower than world-significant developments.
 - Score routine violence below the same story's first report: recurring attacks, bombings, or casualties that merely continue an ongoing pattern (e.g. another village raid in a long-running conflict, another police-station bombing) are 5-6 at most unless they represent a major escalation or a large-scale humanitarian event.
 - Disasters and crises score by magnitude and human impact: a major wildfire forcing mass evacuations is high value; a small-scale incident with limited impact is not.
+
+**Sports news** (matches, tournaments, athletes):
+- This digest is not a sports page. Routine coverage — a league or group-stage match, a regular-season result, a qualifying round, a transfer rumour — scores **3-5** at most, which puts it below the selection threshold on ordinary days.
+- 6-8: only a genuinely major event a general reader would know about — a World Cup or Olympic final, a world record, a first-ever title for a country, a final decided by a major controversy, or a doping case with wide implications.
+- 9-10: reserve for a once-in-a-decade sporting moment whose significance reaches beyond the sport itself.
+- Do **not** let a lopsided score line (e.g. "won 111-46"), a famous name, or a large audience inflate the score. Judge what the event means, not how emphatic the result was. An athlete profile or a "road back to the top" feature is an ARTICLE — score it 0-2.
+- If a sports story competes with world, finance, science or China news of similar importance, the sports story loses.
 
 **Technology news**:
 - 9-10: Systemic. Breakthroughs that reshape an industry or field - frontier model milestones, fundamental scientific results, major platform shifts, landmark regulation.
