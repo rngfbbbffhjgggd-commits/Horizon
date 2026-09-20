@@ -110,6 +110,12 @@ _ARTICLE_TITLE_RE = re.compile(
     # 见闻 is always a travel/observation piece, and 回顾/回望 only count at the
     # END of a title (so "习近平回顾改革开放历程" stays news).
     r"|手记|侧记|札记|见闻"
+    # Analysis / commentary words that carry no news sense (added 2026-09-20
+    # after the 2026-09-20 digest shipped "移民真实财政成本的剖析" and
+    # "破解"中国挤压"论调"). Deliberately NOT including 论调 on its own: hard-news
+    # headlines use it too ("外交部驳斥…论调" reports a briefing, and dropping
+    # those would lose real news), so that case is left to the model-side rule.
+    r"|剖析|辨析|评析|论析|刍议|浅析|探析|管窥|漫谈|随笔|之我见|再思考|冷思考"
     r"|回顾\s*$|回望\s*$"
     r"|(?:展|演出|赛季|赛事|活动|会议|论坛|峰会|发布会)\s*(?:回顾|回望)"
     r"|(?:记者|现场|一线|媒体|财经|体育|文化|两会)\s*观察"
@@ -123,6 +129,26 @@ _ARTICLE_TITLE_RE = re.compile(
     r")",
     re.IGNORECASE,
 )
+
+
+# Sports items are capped separately from the category groups (2026-09-20).
+# Matching is by analyzer tag, which is what the digest renders: the 2026-09-20
+# digest carried "#Sports" on both of its sports items.
+_SPORTS_TAG_RE = re.compile(
+    r"^(?:sport|sports|football|soccer|basketball|baseball|tennis|golf|cricket|"
+    r"rugby|hockey|volleyball|badminton|table\s*tennis|swimming|athletics|"
+    r"olympic|olympics|esports|formula\s*1|boxing|cycling|marathon|"
+    r"体育|足球|篮球|排球|乒乓|羽毛球|网球|游泳|田径|奥运|亚运|电竞|赛事)",
+    re.IGNORECASE,
+)
+
+
+def _is_sports_item(item) -> bool:
+    """True when the analyzer tagged this item as sport."""
+    for tag in (getattr(item, "ai_tags", None) or []):
+        if _SPORTS_TAG_RE.match(str(tag).strip()):
+            return True
+    return False
 
 
 def _deduplication_url_key(url: str) -> tuple[str, str, str, str, Optional[int], str, str]:
@@ -1101,6 +1127,22 @@ class HorizonOrchestrator:
         group_counts: Dict[str, int] = defaultdict(int)
         default_group = filtering.default_group
 
+        # Sports cap (2026-09-20): the model scored a routine Asian-Games group
+        # game 8.0, so guidance alone is not enough. Items are walked in score
+        # order, so the cap keeps the highest-scoring sports item(s).
+        sports_limit = getattr(filtering, "sports_limit", None)
+        sports_count = 0
+
+        def _sports_blocked(it: ContentItem) -> bool:
+            """Count this item if it is sport; return True once the cap is hit."""
+            nonlocal sports_count
+            if not _is_sports_item(it):
+                return False
+            if sports_limit is not None and sports_count >= sports_limit:
+                return True
+            sports_count += 1
+            return False
+
         for item in sorted_items:
             category = item.metadata.get("category")
             group_key = (
@@ -1115,6 +1157,8 @@ class HorizonOrchestrator:
                 limit = filtering.default_group_limit
 
             if limit is not None and group_counts[group_key] >= limit:
+                continue
+            if _sports_blocked(item):
                 continue
 
             selected.append((item, group_key))
@@ -1136,6 +1180,10 @@ class HorizonOrchestrator:
                 if len(selected) + len(borrowed) >= max_items:
                     break
                 if id(item) in chosen:
+                    continue
+                # The cap must also bind here, or the borrow pass would put back
+                # exactly the sports items the main loop just dropped.
+                if _sports_blocked(item):
                     continue
                 category = item.metadata.get("category")
                 group_key = (
@@ -1164,6 +1212,10 @@ class HorizonOrchestrator:
                 self.console.print(
                     f"      • borrowed {len(borrowed)} item(s) beyond quota "
                     f"(some groups had too few candidates; highest score first)"
+                )
+            if sports_limit is not None:
+                self.console.print(
+                    f"      • 体育: {sports_count}/{sports_limit} (超出上限的体育新闻已剔除)"
                 )
             for group_key, group in groups.items():
                 label = group.name or group_key
