@@ -502,6 +502,14 @@ class FilteringConfig(BaseModel):
     category_groups: Dict[str, CategoryGroupConfig] = Field(default_factory=dict)
     default_group: str = "other"
     default_group_limit: Optional[int] = Field(default=None, gt=0)
+    # Hard cap on how many sports items may reach the digest (added 2026-09-20
+    # at the user's request: "reduce sports news unless it is really
+    # important"). This is a deterministic safety net under the sports scoring
+    # guidance in prompts.py — that guidance asks for routine match coverage to
+    # score below the threshold, but the model gave a lopsided 111-46 group
+    # game an 8.0. Counting is by analyzer tag (see _is_sports_item); 0 disables
+    # sports entirely and None means no cap.
+    sports_limit: Optional[int] = Field(default=1, ge=0)
 
 
 class Config(BaseModel):
