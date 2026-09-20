@@ -23,6 +23,30 @@ from .prompts import (
 from .utils import parse_json_response
 from ..models import ContentItem
 
+_TAG_RE = re.compile(r"<[^>]+>")
+_URL_RE = re.compile(r"https?://\S+")
+
+
+def _plain_text(value: str) -> str:
+    """Strip HTML tags and URLs, keeping line breaks.
+
+    Google-News RSS entries carry ~420 characters of markup whose actual text
+    is ~83 characters — just the headline repeated (measured 2026-09-20). Any
+    length test run on the raw string therefore reports "plenty of material"
+    for what is really a bare headline.
+    """
+    text = (value or "").replace("&nbsp;", " ").replace("&amp;", "&")
+    text = _TAG_RE.sub(" ", text)
+    text = _URL_RE.sub(" ", text)
+    text = re.sub(r"[ \t\u00a0]+", " ", text)
+    text = re.sub(r"\n\s*\n+", "\n", text)
+    return text.strip()
+
+
+def _plain_len(value: str) -> int:
+    """Length of the readable text, ignoring whitespace."""
+    return len(re.sub(r"\s+", "", _plain_text(value)))
+
 
 class ContentEnricher:
     """Enriches high-scoring content items with background knowledge."""
@@ -35,9 +59,11 @@ class ContentEnricher:
         self._extractors = extractors
         self._http_client = http_client
 
-    # Content shorter than this is treated as "headline only" and worth
-    # gathering material for when the enrichment call has been rejected.
-    _BACKFILL_MIN_CHARS = 700
+    # Readable characters below which the item counts as "headline only" and is
+    # worth gathering material for. Measured against PLAIN TEXT, not the raw
+    # string: a Google-News entry is ~420 chars of markup but only ~83 chars of
+    # text (2026-09-20), so a raw-length threshold is meaningless.
+    _BACKFILL_MIN_CHARS = 400
     # How much material to keep. The enrichment prompt truncates to 4000 and
     # _expand_item to 2500, so anything beyond this is never read.
     _BACKFILL_KEEP_CHARS = 4000
@@ -56,21 +82,27 @@ class ContentEnricher:
         A normal publisher URL works fine (solidot: 681 chars).
         """
         if self._extractors is None or self._http_client is None:
+            print(f"🩹 article fetch for {item.id}: no extractor wired up")
             return ""
         # item.url is a pydantic HttpUrl at runtime, not a str — str() it (the
         # 2026-09-19 test caught this before it reached production).
         url = str(item.url or "").strip()
         if not url.lower().startswith(("http://", "https://")):
+            print(f"🩹 article fetch for {item.id}: unusable url {url[:40]!r}")
             return ""
         extractor = self._extractors.get("trafilatura")
         if extractor is None:
+            print(f"🩹 article fetch for {item.id}: no trafilatura extractor")
             return ""
         try:
             body = await extractor.extract(url, self._http_client)
         except Exception as e:  # never let a fetch break the pipeline
             print(f"Warning: full-text fetch failed for {item.id} ({e})")
             return ""
-        return (body or "").strip()
+        body = (body or "").strip()
+        if not body:
+            print(f"🩹 article fetch for {item.id}: no text extracted from {url[:60]}")
+        return body
 
     async def _search_material(self, item: ContentItem) -> str:
         """Headline search, for items whose article body cannot be fetched.
@@ -82,6 +114,7 @@ class ContentEnricher:
         """
         query = str((item.metadata or {}).get("title_zh") or item.title or "").strip()
         if not query:
+            print(f"🩹 headline search for {item.id}: no query available")
             return ""
         try:
             results = await self._web_search(query, max_results=5)
@@ -95,6 +128,11 @@ class ContentEnricher:
                 continue
             title = str(r.get("title") or "").strip()
             lines.append(f"- {title}: {body}" if title else f"- {body}")
+        # `_web_search` swallows its own exceptions and returns [], so an empty
+        # result here covers "no hits", a timeout and a rate limit alike — log
+        # it, otherwise the reason a rescue did not happen is invisible.
+        print(f"🩹 headline search for {item.id}: {len(results or [])} result(s), "
+              f"{len(lines)} with text")
         return "\n".join(lines)
 
     async def _backfill_content(self, item: ContentItem) -> int:
@@ -103,9 +141,7 @@ class ContentEnricher:
         Google-News style RSS entries carry only a headline plus a one-line
         summary, so when the primary model's content filter rejects the
         enrichment call the item is left with nothing to write from. That is
-        exactly how the thin one-sentence "shell" entries appear: the 2026-09-19
-        digest shipped two of them (47 and 30 chars) that the fallback pass
-        could only stretch to 69 and 74.
+        exactly how the thin one-sentence "shell" entries appear.
 
         The RSS scraper can already fetch full text, but only for sources that
         opt in via `content_extractor`; none do. So we gather material here, on
@@ -113,27 +149,40 @@ class ContentEnricher:
         itself when its URL is a real publisher URL, otherwise a headline
         search.
 
+        EVERY exit prints why, because the first version (2026-09-19) returned
+        silently and that made the 2026-09-20 run impossible to diagnose: the
+        two rescued items came out as 163-char entries that added no facts at
+        all ("目前素材中未提供更多细节"), i.e. the backfill had done nothing and
+        the length gate was being satisfied by padding.
+
         Returns the number of characters added (0 when nothing was gathered).
         """
         existing = (item.content or "").strip()
-        if len(existing) >= self._BACKFILL_MIN_CHARS:
+        have = _plain_len(existing)
+        if have >= self._BACKFILL_MIN_CHARS:
+            print(f"🩹 backfill skipped for {item.id}: {have} readable chars already")
             return 0
 
         pieces = []
         body = await self._fetch_article_body(item)
         if body:
-            pieces.append("--- Full article ---\n" + body)
+            pieces.append("--- Full article ---\n" + _plain_text(body))
         if len(body) < self._ARTICLE_ENOUGH_CHARS:
             snippets = await self._search_material(item)
             if snippets:
                 pieces.append("--- Related coverage ---\n" + snippets)
         if not pieces:
+            print(
+                f"🩹 backfill found NOTHING for {item.id} "
+                f"(have={have} chars, article={len(body)} chars, search=0 results)"
+            )
             return 0
 
         merged = "\n\n".join([existing] + pieces) if existing else "\n\n".join(pieces)
         merged = merged[:self._BACKFILL_KEEP_CHARS]
         added = len(merged) - len(existing)
         if added <= 0:
+            print(f"🩹 backfill produced no new text for {item.id}")
             return 0
         item.content = merged
         print(
@@ -598,7 +647,10 @@ class TranslationFixer:
         summary_zh = str(meta.get("detailed_summary_zh") or "")
         before = len(summary_zh)
 
-        raw = (item.content or "").strip()[:2500]
+        # Plain text, not the raw blob: a Google-News entry is ~420 chars of
+        # markup around ~83 chars of text, and feeding the markup made the model
+        # believe it had material when it did not (2026-09-20).
+        raw = _plain_text(item.content)[:2500]
         expand_parts = [
             "The news item below reached the digest with only a very short "
             "Chinese summary, because automatic enrichment failed for it.",
@@ -611,7 +663,12 @@ class TranslationFixer:
             expand_parts.append(f"Source material:\n{raw}")
         expand_parts.append(
             "Write a proper digest entry for this item in Simplified "
-            "Chinese, using ONLY facts present above. Return valid JSON:\n"
+            "Chinese, using ONLY facts present above.\n"
+            "IMPORTANT: if the material above has no concrete facts beyond the "
+            "headline, return the current short summary unchanged. NEVER pad "
+            "with filler such as \"目前素材中未提供更多细节\" or \"报道未提供具体内容\" — "
+            "a short honest entry is required, a long empty one is not.\n"
+            "Return valid JSON:\n"
             '{"summary_zh": "<3-4句，含具体数字/日期/机构/地点，不要编造>", '
             '"background_zh": "<2-4句背景，素材确实不足则留空字符串>"}'
         )
