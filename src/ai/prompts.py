@@ -155,11 +155,11 @@ Apply the relevant guidance below based on the primary domain of the item, then 
 - Disasters and crises score by magnitude and human impact: a major wildfire forcing mass evacuations is high value; a small-scale incident with limited impact is not.
 
 **Sports news** (matches, tournaments, athletes):
-- This digest is not a sports page. Routine coverage — a league or group-stage match, a regular-season result, a qualifying round, a transfer rumour — scores **3-5** at most, which puts it below the selection threshold on ordinary days.
-- 6-8: only a genuinely major event a general reader would know about — a World Cup or Olympic final, a world record, a first-ever title for a country, a final decided by a major controversy, or a doping case with wide implications.
+- This digest is not a sports page. Routine coverage scores **3-5** at most, which puts it below the selection threshold. Routine includes: a league or group-stage match, a regular-season or qualifying result, **a continental or regional games medal — including the "首金"/first gold of the Asian Games or similar —**, a national championship, a domestic cup, a transfer rumour, and any athlete profile.
+- 6-8: only a genuinely major event a general reader anywhere would know about — a **World Cup or Olympic final**, a world record, a first-ever **world** title for a country, a final decided by a major controversy, or a doping or betting scandal with wide implications. An Asian Games or other continental medal is **not** in this band.
 - 9-10: reserve for a once-in-a-decade sporting moment whose significance reaches beyond the sport itself.
-- Do **not** let a lopsided score line (e.g. "won 111-46"), a famous name, or a large audience inflate the score. Judge what the event means, not how emphatic the result was. An athlete profile or a "road back to the top" feature is an ARTICLE — score it 0-2.
-- If a sports story competes with world, finance, science or China news of similar importance, the sports story loses.
+- Do **not** let a lopsided score line (e.g. "won 111-46"), a famous name, home-country pride, or a large audience inflate the score. Judge what the event means, not how emphatic the result was. An athlete profile or a "road back to the top" feature is an ARTICLE — score it 0-2.
+- When in doubt about a sports item, score it 4. Sports should reach this digest only a few times a year.
 
 **Technology news**:
 - 9-10: Systemic. Breakthroughs that reshape an industry or field - frontier model milestones, fundamental scientific results, major platform shifts, landmark regulation.
