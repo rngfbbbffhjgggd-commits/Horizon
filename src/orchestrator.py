@@ -151,6 +151,11 @@ def _is_sports_item(item) -> bool:
     return False
 
 
+# How many extra items to carry through enrichment beyond max_items, so the
+# post-enrichment checks have spares to fill in with (2026-09-21).
+_DIGEST_ENRICH_BUFFER = 3
+
+
 def _deduplication_url_key(url: str) -> tuple[str, str, str, str, Optional[int], str, str]:
     """Return a conservative URL identity key for cross-source deduplication."""
     parsed = urlsplit(url)
@@ -351,7 +356,19 @@ class HorizonOrchestrator:
             await self._expand_twitter_discussion(important_items)
 
             # 5.6 Apply digest limits after any targeted re-analysis changes scores.
-            important_items = self.apply_balanced_digest(important_items).items
+            #     Select a few SPARES beyond max_items (2026-09-21): the final
+            #     AI-topic check in 6.2 runs after enrichment and can drop items,
+            #     which used to shrink the digest with nothing to fill the gap —
+            #     2026-09-18, 09-20 and 09-21 all shipped 24 of 25 that way.
+            #     The spares are enriched too and trimmed back in 6.3.
+            _configured_max = self.config.filtering.max_items
+            important_items = self.apply_balanced_digest(
+                important_items,
+                limit_override=(
+                    None if _configured_max is None
+                    else _configured_max + _DIGEST_ENRICH_BUFFER
+                ),
+            ).items
 
             # 5.7 Drop distinct_points (其他来源补充) from all items — digest is
             #     simplified to scoring + summary + link only. DISABLED 2026-09-01.
@@ -418,6 +435,14 @@ class HorizonOrchestrator:
                     f"🚫 Dropped {before_ai_check - len(important_items)} "
                     f"AI-industry item(s) after enrichment\n"
                 )
+
+            # 6.3 Trim back to the configured size. Sections 5.6 selected
+            #     max_items + spares; the checks above (translation fallback, the
+            #     AI-topic drop) have now run, so cutting the tail here keeps the
+            #     digest at exactly max_items instead of silently shipping fewer.
+            important_items = self._trim_to_max_items(
+                important_items, self.config.filtering.max_items
+            )
 
             # 7. Generate and save daily summaries for each configured language
             # Use Beijing time (UTC+8) for the summary filename so the date
@@ -1080,21 +1105,43 @@ class HorizonOrchestrator:
             balanced_digest=balanced_digest,
         )
 
+    @staticmethod
+    def _trim_to_max_items(
+        items: List[ContentItem], max_items: Optional[int]
+    ) -> List[ContentItem]:
+        """Cut the digest back to its configured size after the late checks.
+
+        The selection in step 5.6 deliberately carries spares through
+        enrichment, and the AI-topic check in 6.2 can remove entries. Trimming
+        the tail (lowest score, or borrowed items) here is what makes the
+        published digest land on max_items instead of silently shipping fewer.
+        """
+        if max_items is None or len(items) <= max_items:
+            return items
+        dropped = len(items) - max_items
+        print(f"✂️ Trimmed {dropped} spare item(s) to hold the digest at {max_items}\n")
+        return items[:max_items]
+
     def apply_balanced_digest(
         self,
         items: List[ContentItem],
         *,
         log: bool = True,
+        limit_override: Optional[int] = None,
     ) -> BalancedDigestResult:
         """Apply configured category quotas and the final item cap.
 
         Categories are read from ``item.metadata["category"]``. If a category
         appears in more than one configured group, the first group in config
         order wins.
+
+        ``limit_override`` replaces the configured max_items for this call; the
+        main flow passes max_items + _DIGEST_ENRICH_BUFFER so the post-enrichment
+        AI check has spares to draw on (see _trim_to_max_items).
         """
         filtering = self.config.filtering
         groups = filtering.category_groups
-        max_items = filtering.max_items
+        max_items = filtering.max_items if limit_override is None else limit_override
 
         if not groups and max_items is None:
             return BalancedDigestResult(items=items)
