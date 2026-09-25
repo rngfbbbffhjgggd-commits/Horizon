@@ -1,6 +1,7 @@
 """Main orchestrator coordinating the entire workflow."""
 
 import asyncio
+import json
 import re
 from collections import defaultdict
 from dataclasses import dataclass, field
@@ -10,6 +11,7 @@ from urllib.parse import unquote_plus, urlsplit
 import httpx
 from rich.console import Console
 
+from .ai.prompts import ITEM_KIND_SYSTEM, ITEM_KIND_USER
 from .models import Config, ContentItem
 from .storage.manager import StorageManager, safe_output_path
 from .services.email import EmailManager
@@ -116,6 +118,12 @@ _ARTICLE_TITLE_RE = re.compile(
     # headlines use it too ("外交部驳斥…论调" reports a briefing, and dropping
     # those would lose real news), so that case is left to the model-side rule.
     r"|剖析|辨析|评析|论析|刍议|浅析|探析|管窥|漫谈|随笔|之我见|再思考|冷思考"
+    # Essay-shaped topic titles (2026-09-25, after "非洲无标签啤酒的文化与经济意义"
+    # — an Economist culture feature — scored 7.5). Deliberately NARROW: a generic
+    # "…的重要意义" is a normal hard-news headline ("习近平强调教育公平的重要意义"),
+    # so only the "文化的/经济的/社会的 意义" forms and a trailing "的启示" are
+    # treated as articles. The general case is handled by the NEWS-vs-ARTICLE pass.
+    r"|的文化(?:与|和)?经济意义|的文化意义|的经济意义|的社会意义|的启示\s*$"
     r"|回顾\s*$|回望\s*$"
     r"|(?:展|演出|赛季|赛事|活动|会议|论坛|峰会|发布会)\s*(?:回顾|回望)"
     r"|(?:记者|现场|一线|媒体|财经|体育|文化|两会)\s*观察"
@@ -436,10 +444,20 @@ class HorizonOrchestrator:
                     f"AI-industry item(s) after enrichment\n"
                 )
 
+            # 6.25 Article pass (added 2026-09-25). The scoring prompt tells the
+            #      model to score articles 0-2, but it applies that rubric
+            #      inconsistently — the 2026-09-25 digest shipped
+            #      "非洲无标签啤酒的文化与经济意义" (an Economist culture feature)
+            #      at 7.5, and 09-16/09-17/09-20 produced similar misses. A single
+            #      binary question is a task the same model answers far more
+            #      reliably, so ask it separately, on the already-selected items.
+            important_items = await self._drop_articles(important_items)
+
             # 6.3 Trim back to the configured size. Sections 5.6 selected
             #     max_items + spares; the checks above (translation fallback, the
-            #     AI-topic drop) have now run, so cutting the tail here keeps the
-            #     digest at exactly max_items instead of silently shipping fewer.
+            #     AI-topic drop, the article pass) have now run, so cutting the
+            #     tail here keeps the digest at exactly max_items instead of
+            #     silently shipping fewer.
             important_items = self._trim_to_max_items(
                 important_items, self.config.filtering.max_items
             )
@@ -1104,6 +1122,109 @@ class HorizonOrchestrator:
             topic_dedup_removed=topic_dedup_removed,
             balanced_digest=balanced_digest,
         )
+
+    @staticmethod
+    def _parse_kind_response(raw: str, count: int) -> Optional[set]:
+        """Return the set of 0-based indices labelled ARTICLE, or None.
+
+        None means "could not tell" and the caller must keep everything: a
+        classifier that fails must never be read as "nothing is an article".
+        """
+        if not raw:
+            return None
+        m = re.search(r"\[.*\]", raw, re.S)
+        if not m:
+            return None
+        try:
+            parsed = json.loads(m.group(0))
+        except Exception:
+            return None
+        if not isinstance(parsed, list):
+            return None
+        articles = set()
+        for entry in parsed:
+            if not isinstance(entry, dict):
+                continue
+            kind = str(entry.get("kind", "")).strip().upper()
+            if kind != "ARTICLE":
+                continue
+            try:
+                idx = int(entry.get("i"))
+            except (TypeError, ValueError):
+                continue
+            if 1 <= idx <= count:
+                articles.add(idx - 1)
+        return articles
+
+    async def _drop_articles(
+        self,
+        items: List[ContentItem],
+        ai_client=None,
+        batch_size: int = 30,
+    ) -> List[ContentItem]:
+        """Drop entries a dedicated NEWS-vs-ARTICLE pass calls articles.
+
+        The scoring prompt already asks for articles to score 0-2, but a small
+        model applies that rubric inconsistently: 2026-09-25 shipped
+        "非洲无标签啤酒的文化与经济意义" (an Economist culture feature) at 7.5,
+        and 09-16 / 09-17 / 09-20 produced similar misses. A single binary
+        question is a task the same model answers far more reliably.
+
+        Fails OPEN at every step — no client, a failed call, unparseable JSON,
+        or an empty answer all keep every item, because a classifier outage must
+        never silently empty the digest. Drops are logged with their titles so a
+        false positive is visible rather than silent.
+        """
+        if not items:
+            return items
+        try:
+            client = ai_client or create_ai_client(self.config.ai)
+        except Exception as e:
+            self.console.print(f"📰 Article pass skipped (no client: {e})\n")
+            return items
+
+        drop_indices = set()
+        for start in range(0, len(items), batch_size):
+            chunk = items[start:start + batch_size]
+            blocks = []
+            for n, item in enumerate(chunk, start=1):
+                meta = item.metadata or {}
+                title = str(meta.get("title_zh") or item.title or "")
+                summary = str(meta.get("detailed_summary_zh") or item.ai_summary or "")
+                tags = ", ".join(item.ai_tags or [])
+                blocks.append(
+                    f"{n}. 标题: {title}\n   摘要: {summary[:300]}\n   标签: {tags}"
+                )
+            try:
+                raw = await client.complete(
+                    system=ITEM_KIND_SYSTEM,
+                    user=ITEM_KIND_USER.format(items="\n".join(blocks)),
+                )
+            except Exception as e:
+                self.console.print(
+                    f"📰 Article pass: batch @{start} call failed ({e}); keeping those items\n"
+                )
+                continue
+            found = self._parse_kind_response(raw, len(chunk))
+            if found is None:
+                self.console.print(
+                    f"📰 Article pass: batch @{start} unparseable; keeping those items\n"
+                )
+                continue
+            drop_indices |= {start + i for i in found}
+
+        if not drop_indices:
+            self.console.print("📰 Article pass: nothing dropped\n")
+            return items
+        kept = [it for i, it in enumerate(items) if i not in drop_indices]
+        for i in sorted(drop_indices):
+            meta = items[i].metadata or {}
+            title = str(meta.get("title_zh") or items[i].title or "")
+            self.console.print(f"      • dropped article: {title}")
+        self.console.print(
+            f"📰 Article pass: dropped {len(drop_indices)} article(s)\n"
+        )
+        return kept
 
     @staticmethod
     def _trim_to_max_items(
