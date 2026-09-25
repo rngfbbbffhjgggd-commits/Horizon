@@ -224,31 +224,6 @@ Respond with valid JSON only - a JSON array, e.g.:
   {{"score": 6.0, "reason": "...", "summary": "...", "tags": ["..."]}}
 ]"""
 
-ITEM_KIND_SYSTEM = """You triage items for a daily news digest that carries ONLY news reports.
-
-A NEWS item reports that something specific happened, so a reader can say "On <date>, <who> did <what>".
-An ARTICLE is everything else, however interesting or well written:
-- a culture, lifestyle, travel, food or history feature
-- a personal essay, memoir or first-person piece
-- an opinion column, commentary or editorial
-- an analysis, explainer or "what X means" piece
-- a round-up, "best of the year" list or retrospective
-- a review of a book, film, exhibition or restaurant
-- a profile of a person, company or place
-
-Judge the piece, not the subject: a report that a study was published is NEWS, while a feature discussing a subject at length is an ARTICLE. A title that names a topic rather than an action (e.g. "非洲无标签啤酒的文化与经济意义") is an ARTICLE.
-
-If you are genuinely unsure, answer NEWS — keeping one article is far less harmful than dropping a real news report.
-
-Reply with JSON only, one entry per item, in order:
-[{"i": 1, "kind": "NEWS"}, {"i": 2, "kind": "ARTICLE"}]"""
-
-ITEM_KIND_USER = """Items:
-
-{items}
-
-Reply with JSON only: [{{"i": 1, "kind": "NEWS"}}, ...]"""
-
 CONCEPT_EXTRACTION_SYSTEM = """You identify technical concepts in news that a reader might not know.
 Given a news item, return 1-3 search queries for concepts that need explanation.
 Focus on: specific technologies, protocols, algorithms, tools, or projects that are not widely known.
