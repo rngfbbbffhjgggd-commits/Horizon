@@ -158,9 +158,69 @@ def _is_sports_item(item) -> bool:
     return False
 
 
-# How many extra items to carry through enrichment beyond max_items, so the
-# post-enrichment checks have spares to fill in with (2026-09-21).
+    # How many extra items to carry through enrichment beyond max_items, so the
+    # post-enrichment checks have spares to fill in with (2026-09-21).
 _DIGEST_ENRICH_BUFFER = 3
+
+# Far-away science and nature-curiosity stories the reader asked to stop seeing
+# (2026-10-09: "天文学家探测到来自遥远星系的神秘能量爆发" scored 9.0,
+# "塞舌尔岛屿发现 18 万只巨型陆龟" 8.0, "最大二维宇宙地图…" 7.5,
+# "Tangermeme 工具包解析顺式调控逻辑" 7.5).
+#
+# WHY THIS IS CODE AND NOT A PROMPT RULE: the rewritten scoring prompt was
+# tested live on those very items in the production batch shape — only the two
+# whose wording the prompt happened to name verbatim dropped (fast radio burst
+# 9.0->3, tortoise census 8.0->3); the other four stayed at 7.5-8.0. The same
+# thing happened with the article classifier on 2026-09-25. glm-4-flash reads
+# such rules and does not apply them, so the reliable lever is a deterministic
+# cap here.
+_LOW_INTEREST_TITLE_RE = re.compile(
+    r"(?:"
+    # Astronomy / astrophysics / space science.
+    r"天文学家|天文学|天文台|宇宙地图|宇宙学|宇宙起源|星系|银河系|黑洞|"
+    r"系外行星|中子星|脉冲星|射电暴|快速射电|超新星|望远镜|引力透镜|"
+    r"暗物质|暗能量|星云|星际|小行星|彗星|陨石|"
+    r"astronom|astrophys|\bgalax|black\s+hole|exoplanet|neutron\s+star|"
+    r"pulsar|radio\s+burst|supernova|telescope|gravitational\s+lens|"
+    r"dark\s+matter|cosmolog|nebula|asteroid|comet|interstellar"
+    # Nature / wildlife curiosities.
+    r"|陆龟|海龟|鲸鱼|座头鲸|新物种|濒危物种|种群数量|种群调查|生态调查|"
+    r"珊瑚礁|野生动物数量|鸟类种群|"
+    r"tortoise|tortoises|new\s+species|wildlife\s+census|coral\s+reef|"
+    r"population\s+of\s+\d|colony\s+of\s+\d"
+    # Pure-research results, toolkits and method papers with no near-term use.
+    r"|量子纠缠|光量子|量子比特|量子模拟|顺式调控|基因组|转录组|蛋白质结构|"
+    r"粒子物理|对撞机|凝聚态|"
+    r"quantum\s+entangle|photonic\s+qubit|\bqubit|genom|transcriptom|"
+    r"protein\s+structure|particle\s+physics|collider|toolkit\s+for"
+    r")",
+    re.IGNORECASE,
+)
+# Cap, not a drop: the item keeps its row in the pipeline and the "low interest"
+# list in the log, so a false positive is visible instead of silent. 4.0 is
+# below every configured threshold, so a capped item cannot reach the digest.
+_LOW_INTEREST_MAX_SCORE = 4.0
+
+
+def _cap_low_interest(items, log_fn=None) -> List[str]:
+    """Cap the score of far-away science / nature-curiosity items.
+
+    Returns the titles it capped, for logging.
+    """
+    capped = []
+    for item in items:
+        if item.ai_score is None or item.ai_score <= _LOW_INTEREST_MAX_SCORE:
+            continue
+        meta = item.metadata or {}
+        title = str(meta.get("title_zh") or item.title or "")
+        if not _LOW_INTEREST_TITLE_RE.search(title):
+            continue
+        item.ai_score = _LOW_INTEREST_MAX_SCORE
+        capped.append(title)
+    if capped and log_fn is not None:
+        for t in capped:
+            log_fn(f"      • low-interest cap: {t}")
+    return capped
 
 
 def _deduplication_url_key(url: str) -> tuple[str, str, str, str, Optional[int], str, str]:
@@ -1059,6 +1119,18 @@ class HorizonOrchestrator:
             if threshold is not None
             else self.config.filtering.ai_score_threshold
         )
+
+        # Far-away science / nature curiosities are capped BEFORE thresholding,
+        # so they never occupy a slot (2026-10-09 request). Logged, not silent.
+        capped = _cap_low_interest(items)
+        if capped and log:
+            self.console.print(
+                f"🔭 Capped {len(capped)} far-away-science/nature item(s) to "
+                f"{_LOW_INTEREST_MAX_SCORE}\n"
+            )
+            for t in capped:
+                self.console.print(f"      • {t}")
+
         threshold_items = [
             item
             for item in items
