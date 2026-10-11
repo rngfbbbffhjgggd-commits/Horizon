@@ -59,41 +59,6 @@
           "time_filter": "day",
           "fetch_limit": 15,
           "min_score": 100
-        },
-        {
-          "subreddit": "technology",
-          "enabled": true,
-          "sort": "hot",
-          "time_filter": "day",
-          "fetch_limit": 10,
-          "min_score": 50,
-          "category": "tech"
-        },
-        {
-          "subreddit": "science",
-          "enabled": true,
-          "sort": "hot",
-          "time_filter": "day",
-          "fetch_limit": 10,
-          "min_score": 50
-        },
-        {
-          "subreddit": "finance",
-          "enabled": true,
-          "sort": "hot",
-          "time_filter": "day",
-          "fetch_limit": 10,
-          "min_score": 50,
-          "category": "finance"
-        },
-        {
-          "subreddit": "Economics",
-          "enabled": true,
-          "sort": "hot",
-          "time_filter": "day",
-          "fetch_limit": 10,
-          "min_score": 50,
-          "category": "finance"
         }
       ],
       "users": [],
@@ -204,12 +169,6 @@
         "url": "https://news.google.com/rss/search?q=site:caixin.com&hl=zh-CN&gl=CN&ceid=CN:zh-Hans",
         "enabled": true,
         "category": "finance"
-      },
-      {
-        "name": "IEEE Spectrum",
-        "url": "https://spectrum.ieee.org/feeds/feed.rss",
-        "enabled": true,
-        "category": "tech"
       },
       {
         "name": "少数派",
