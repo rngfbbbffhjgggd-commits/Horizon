@@ -162,6 +162,12 @@ def _is_sports_item(item) -> bool:
     # post-enrichment checks have spares to fill in with (2026-09-21).
 _DIGEST_ENRICH_BUFFER = 3
 
+# Sources whose per-item fate is printed at the end of a run (2026-10-11).
+# BBC中文: fetched every day, never caught by the rule-based filters (0 of 20 of
+# its current titles match the AI or article regex), yet only 1 of its items
+# reached the digest across 13 sampled days.
+_SOURCE_TRACE = ("BBC中文",)
+
 # Far-away science and nature-curiosity stories the reader asked to stop seeing
 # (2026-10-09: "天文学家探测到来自遥远星系的神秘能量爆发" scored 9.0,
 # "塞舌尔岛屿发现 18 万只巨型陆龟" 8.0, "最大二维宇宙地图…" 7.5,
@@ -519,6 +525,20 @@ class HorizonOrchestrator:
             #     _ARTICLE_TITLE_RE plus the scoring prompt's STEP 1.
             important_items = self._trim_to_max_items(
                 important_items, self.config.filtering.max_items
+            )
+
+            # 6.4 Per-item fate for the watched sources (2026-10-11). BBC中文 is
+            #     fetched daily and is never touched by the rule-based passes,
+            #     yet only 1 of its items reached the digest across 13 sampled
+            #     days — the reason had to be guessed at. This prints, for each
+            #     fetched item of a watched source, exactly which stage it died
+            #     in: prefilter / score / dedup / quota.
+            self._trace_watched_sources(
+                fetched=all_items,
+                prefiltered=prefiltered_items,
+                deduped=filtering_result.items,
+                final_items=important_items,
+                threshold=self.config.filtering.ai_score_threshold,
             )
 
             # 7. Generate and save daily summaries for each configured language
@@ -1193,6 +1213,65 @@ class HorizonOrchestrator:
             topic_dedup_removed=topic_dedup_removed,
             balanced_digest=balanced_digest,
         )
+
+    def _trace_watched_sources(
+        self,
+        *,
+        fetched: List[ContentItem],
+        prefiltered: List[ContentItem],
+        deduped: List[ContentItem],
+        final_items: List[ContentItem],
+        threshold: float,
+    ) -> None:
+        """Print where each fetched item of a watched source died (2026-10-11).
+
+        Added because BBC中文 is fetched every day, is never touched by the
+        rule-based prefilter (0 of 20 of its current titles match the AI or
+        article regex), and yet only 1 of its items appeared across 13 sampled
+        digests. Without this the cause could only be guessed at.
+        """
+        if not _SOURCE_TRACE:
+            return
+        ids = {
+            "prefiltered": {id(i) for i in prefiltered},
+            "deduped": {id(i) for i in deduped},
+            "final": {id(i) for i in final_items},
+        }
+        for name in _SOURCE_TRACE:
+            group = [
+                i for i in fetched
+                if str((i.metadata or {}).get("feed_name") or "") == name
+            ]
+            if not group:
+                self.console.print(f"📊 {name}: nothing fetched today\n")
+                continue
+            passed_pre = sum(1 for i in group if id(i) in ids["prefiltered"])
+            scored = sum(1 for i in group if (i.ai_score or 0) >= threshold)
+            survived = sum(1 for i in group if id(i) in ids["deduped"])
+            final = sum(1 for i in group if id(i) in ids["final"])
+            self.console.print(
+                f"📊 {name}: fetched {len(group)} → passed prefilter {passed_pre} "
+                f"→ scored ≥{threshold} {scored} → survived dedup {survived} "
+                f"→ in digest {final}"
+            )
+            for item in sorted(group, key=lambda i: -(i.ai_score or -1)):
+                if id(item) in ids["final"]:
+                    fate = "IN DIGEST"
+                elif id(item) not in ids["prefiltered"]:
+                    fate = "dropped by rule-based prefilter"
+                elif item.ai_score is None:
+                    fate = "not analyzed"
+                elif item.ai_score < threshold:
+                    fate = "score below threshold"
+                elif id(item) not in ids["deduped"]:
+                    fate = "removed by dedup"
+                else:
+                    fate = "survived dedup, not selected (quota)"
+                score = "-" if item.ai_score is None else "%.1f" % item.ai_score
+                self.console.print(
+                    f"      {score:>5}  {str(item.title)[:64]:<64}  [{fate}]"
+                )
+            self.console.print("")
 
     @staticmethod
     def _trim_to_max_items(
