@@ -4,6 +4,19 @@ on:
   schedule:
     # UTC 19:00 = 北京时间 03:00, 提前生成保证早上起床前有日报
     - cron: "0 19 * * *"
+    # Fallback (added 2026-10-15). UTC 02:30 = Beijing 10:30.
+    #
+    # Why this slot: the primary run is queued by GitHub for 3-6h (measured over
+    # 20 runs: cron 19:00Z, actual start 22:01Z-01:05Z, finish by 01:43Z at the
+    # latest). An earlier fallback -- e.g. Beijing 06:30 / 22:30Z, the first
+    # thing I proposed -- would have started WHILE the primary was still running.
+    #
+    # Why it exists: on 2026-10-14 the primary was killed mid-run by a runner
+    # shutdown ("The runner has received a shutdown signal") and 2026-10-15
+    # shipped no digest at all; nobody noticed until the reader did. This run
+    # skips itself when the day's post already exists (or another digest run is
+    # still going) and only generates when the day is genuinely missing.
+    - cron: "30 2 * * *"
   workflow_dispatch:
     inputs:
       smtp_test_only:
@@ -16,22 +29,54 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      # Needed by the fallback guard, which lists this workflow's in-progress
+      # runs to avoid starting a second digest while one is still going
+      # (2026-10-15). Without it that call returns 403 and the guard falls back
+      # to "proceed", which would defeat the protection.
+      actions: read
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
 
+      # Guard for the fallback slot (2026-10-15). Only the schedule trigger is
+      # gated: a manual dispatch must still be able to regenerate today on
+      # demand, even when the post already exists.
+      - name: Skip when today's digest already exists
+        if: ${{ github.event_name == 'schedule' }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SELF_RUN_ID: ${{ github.run_id }}
+        run: |
+          DATE=$(date -u -d '+8 hours' +%Y-%m-%d)
+          if gh api "repos/$GITHUB_REPOSITORY/contents/_posts/$DATE-summary-zh.md?ref=gh-pages" >/dev/null 2>&1; then
+            echo "SKIP=true" >> "$GITHUB_ENV"
+            echo "today's digest ($DATE) already exists - nothing to do"
+            exit 0
+          fi
+          OTHERS=$(gh api "repos/$GITHUB_REPOSITORY/actions/workflows/daily-summary.yml/runs?status=in_progress&per_page=50" \
+            --jq "[.workflow_runs[] | select(.id != ($SELF_RUN_ID|tonumber))] | length" 2>/dev/null || echo 0)
+          if [ "${OTHERS:-0}" != "0" ]; then
+            echo "SKIP=true" >> "$GITHUB_ENV"
+            echo "$OTHERS other digest run(s) still in progress - yielding to them"
+          else
+            echo "no digest for $DATE and no run in progress - continuing"
+          fi
+
       - name: Set up Python
+        if: ${{ env.SKIP != 'true' }}
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
 
       - name: Install uv
+        if: ${{ env.SKIP != 'true' }}
         uses: astral-sh/setup-uv@v6
         with:
           version: "0.11.26"
 
       - name: Install dependencies
+        if: ${{ env.SKIP != 'true' }}
         # `trafilatura` is an optional extra and is NOT installed by a bare
         # `uv sync`. The enricher now uses it to fetch an article body when the
         # primary model's content filter rejects an item (ContentEnricher.
@@ -40,9 +85,11 @@ jobs:
         run: uv sync --extra trafilatura
 
       - name: Prepare GitHub Actions config
+        if: ${{ env.SKIP != 'true' }}
         run: cp data/config.github.json data/config.json
 
       - name: Determine fetch window from last digest
+        if: ${{ env.SKIP != 'true' }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -62,6 +109,7 @@ jobs:
           fi
 
       - name: Test SMTP connection
+        if: ${{ env.SKIP != 'true' }}
         env:
           GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -107,7 +155,7 @@ jobs:
               raise
 
       - name: Run Horizon
-        if: ${{ github.event.inputs.smtp_test_only != 'true' }}
+        if: ${{ github.event.inputs.smtp_test_only != 'true' && env.SKIP != 'true' }}
         env:
           DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
           ZHIPU_API_KEY: ${{ secrets.ZHIPU_API_KEY }}
@@ -123,11 +171,11 @@ jobs:
           fi
 
       - name: Set current date as environment variable (Beijing time)
-        if: ${{ github.event.inputs.smtp_test_only != 'true' }}
+        if: ${{ github.event.inputs.smtp_test_only != 'true' && env.SKIP != 'true' }}
         run: echo "DATE=$(date -u -d '+8 hours' +'%Y-%m-%d')" >> $GITHUB_ENV
 
       - name: Deploy to GitHub Pages
-        if: ${{ github.event.inputs.smtp_test_only != 'true' }}
+        if: ${{ github.event.inputs.smtp_test_only != 'true' && env.SKIP != 'true' }}
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
