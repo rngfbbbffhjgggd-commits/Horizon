@@ -130,14 +130,44 @@ AI_PROVIDER_DEFAULTS = {
 }
 
 
+class AILinkConfig(BaseModel):
+    """One link of an explicit provider chain.
+
+    `AIConfig.provider_chain` is a comma-separated list of provider names, and
+    `_create_chained_client` rebuilds every link after the first one from
+    AI_PROVIDER_DEFAULTS: only the first link can carry a custom `model` and
+    `base_url`, and every later link silently gets the provider's default model
+    (e.g. `deepseek-flash`) and default endpoint. That is fine when the chain
+    means "same provider family, different vendor", but the free-tier channels
+    each need their own base_url, model id and key, so the chain has to be
+    declared explicitly (added 2026-10-21).
+
+    Every field left as None falls back to AI_PROVIDER_DEFAULTS for that
+    provider, so a link that only needs a model id stays short.
+    """
+
+    provider: AIProvider
+    model: str
+    base_url: Optional[str] = None
+    api_key_env: Optional[str] = None
+    # Endpoint answers without any key (e.g. a public free gateway). Without
+    # this the chain would hard-fail on a link whose key is simply not set yet.
+    allow_missing_key: bool = False
+
+
 class AIConfig(BaseModel):
     """AI client configuration."""
 
     provider: AIProvider
     provider_chain: Optional[str] = None
+    # Explicit, per-link chain (model + base_url + key each). Takes precedence
+    # over provider_chain when set; see AILinkConfig for why it exists.
+    chain: Optional[List[AILinkConfig]] = None
     model: str
     base_url: Optional[str] = None
     api_key_env: str
+    # Start without a key when the endpoint does not need one (free gateways).
+    allow_missing_key: bool = False
     temperature: float = 0.3
     max_tokens: int = 4096
     # Reasoning models (e.g. DeepSeek) spend output tokens on a hidden
