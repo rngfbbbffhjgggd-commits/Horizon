@@ -200,10 +200,23 @@ class OpenAIClient(AIClient):
         """
         self.config = config
 
-        fallback = "no_key" if config.provider == AIProvider.OLLAMA else None
+        # OLLAMA is the historical "OpenAI-compatible endpoint without a key"
+        # case. allow_missing_key generalises it to free public gateways whose
+        # key is optional (added 2026-10-21), without the ollama URL rewriting.
+        needs_no_key = (
+            config.provider == AIProvider.OLLAMA or config.allow_missing_key
+        )
+        fallback = "no_key" if needs_no_key else None
         api_key = _resolve_api_key(config, fallback=fallback)
 
         kwargs = {"api_key": api_key}
+        if config.allow_missing_key and config.provider != AIProvider.OLLAMA:
+            # Measured on api.kilo.ai (2026-10-21): no Authorization header ->
+            # 200, "Authorization: Bearer no_key" -> 401 INVALID_TOKEN,
+            # "Authorization: <empty>" -> 200. The SDK always sends
+            # "Bearer <api_key>", so the header has to be emptied explicitly.
+            # Ollama keeps its existing behaviour on purpose.
+            kwargs["default_headers"] = {"Authorization": ""}
         base_url = self._resolve_base_url(config)
         if base_url:
             kwargs["base_url"] = base_url
@@ -295,8 +308,13 @@ class OpenAIClient(AIClient):
                 raise
         usage = getattr(response, "usage", None)
         if usage is not None:
+            # Key the counter by provider AND model: a chain can put several
+            # vendors behind one provider name (e.g. every OpenAI-compatible
+            # free tier is "openai"), and each tier has its own quota, so a
+            # bare provider label cannot answer "how much of THIS free tier
+            # did today cost" (2026-10-21).
             record_usage(
-                self.provider,
+                f"{self.provider}:{self.model}",
                 input_tokens=getattr(usage, "prompt_tokens", 0),
                 output_tokens=getattr(usage, "completion_tokens", 0),
             )
@@ -644,11 +662,64 @@ class ChainedAIClient(AIClient):
             return True
         if "empty response" in msg:
             return True
+        # A link whose key is not configured yet (secret not added, or a free
+        # tier that needs no key) must not take the whole run down: the chain
+        # exists precisely so the next link can serve (2026-10-21).
+        if "api key" in msg or "api_key" in msg:
+            return True
+        # Free pools fail by hanging more often than by returning an error code,
+        # and a bare timeout used to abort the item instead of moving on.
+        if "timeout" in msg or "timed out" in msg:
+            return True
         return False
 
 
 def _create_chained_client(config: AIConfig) -> ChainedAIClient:
-    """Build a ChainedAIClient from a comma-separated provider chain."""
+    """Build a ChainedAIClient from an explicit chain or a provider list.
+
+    `config.chain` (list of AILinkConfig) wins when present: it carries a model,
+    base_url and key env per link, which the legacy comma-separated
+    `provider_chain` cannot express beyond its first link (2026-10-21).
+    """
+    if config.chain:
+        chain_configs: List[AIConfig] = []
+        for link in config.chain:
+            defaults = AI_PROVIDER_DEFAULTS.get(link.provider, {})
+            chain_configs.append(
+                AIConfig(
+                    provider=link.provider,
+                    model=link.model or defaults.get("model", config.model),
+                    api_key_env=(
+                        link.api_key_env
+                        or defaults.get("api_key_env", config.api_key_env)
+                    ),
+                    base_url=(
+                        link.base_url
+                        if link.base_url is not None
+                        else defaults.get("base_url")
+                    ),
+                    allow_missing_key=link.allow_missing_key,
+                    temperature=config.temperature,
+                    max_tokens=config.max_tokens,
+                    disable_thinking=config.disable_thinking,
+                    throttle_sec=config.throttle_sec,
+                    analysis_concurrency=config.analysis_concurrency,
+                    enrichment_concurrency=config.enrichment_concurrency,
+                    languages=config.languages,
+                    azure_endpoint_env=(
+                        config.azure_endpoint_env or defaults.get("azure_endpoint_env")
+                        if link.provider == AIProvider.AZURE
+                        else None
+                    ),
+                    api_version=(
+                        config.api_version or defaults.get("api_version")
+                        if link.provider == AIProvider.AZURE
+                        else None
+                    ),
+                )
+            )
+        return ChainedAIClient(chain_configs)
+
     provider_chain = config.provider_chain or ""
     provider_names = [p.strip() for p in provider_chain.split(",") if p.strip()]
     if not provider_names:
@@ -702,6 +773,9 @@ def create_ai_client(config: AIConfig) -> AIClient:
     Raises:
         ValueError: If provider is not supported
     """
-    if config.provider_chain:
+    # `chain` must be checked too: without this a config carrying an explicit
+    # chain silently degrades to a SINGLE client, and the fallback never runs
+    # (caught by t_chain.py before shipping, 2026-10-21).
+    if config.provider_chain or config.chain:
         return _create_chained_client(config)
     return _create_single_client(config)
