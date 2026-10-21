@@ -2,9 +2,9 @@
   "version": "1.0",
   "ai": {
     "provider": "openai",
-    "model": "glm-4-flash",
-    "base_url": "https://open.bigmodel.cn/api/paas/v4",
-    "api_key_env": "ZHIPU_API_KEY",
+    "model": "nvidia/nemotron-3-ultra-550b-a55b:free",
+    "base_url": "https://api.kilo.ai/api/gateway",
+    "api_key_env": "KILO_API_KEY",
     "temperature": 0.3,
     "max_tokens": 16384,
     "throttle_sec": 1,
@@ -27,7 +27,30 @@
       ],
       "analysis_concurrency": 1,
       "enrichment_concurrency": 3
-    }
+    },
+    "allow_missing_key": true,
+    "chain": [
+      {
+        "provider": "openai",
+        "model": "nvidia/nemotron-3-ultra-550b-a55b:free",
+        "base_url": "https://api.kilo.ai/api/gateway",
+        "api_key_env": "KILO_API_KEY",
+        "allow_missing_key": true
+      },
+      {
+        "provider": "openai",
+        "model": "dots-studio/dots-3-note-preview:free",
+        "base_url": "https://api.kilo.ai/api/gateway",
+        "api_key_env": "KILO_API_KEY",
+        "allow_missing_key": true
+      },
+      {
+        "provider": "openai",
+        "model": "glm-4-flash",
+        "base_url": "https://open.bigmodel.cn/api/paas/v4",
+        "api_key_env": "ZHIPU_API_KEY"
+      }
+    ]
   },
   "email": {
     "enabled": false,
