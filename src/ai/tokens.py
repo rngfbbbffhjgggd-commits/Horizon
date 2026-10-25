@@ -64,3 +64,27 @@ def get_usage_snapshot() -> TokenUsageSnapshot:
 def reset_usage() -> None:
     """Reset all accumulated usage (useful for tests)."""
     _provider_usage.clear()
+    _fallback_state["total"] = 0
+    _fallback_state["rate_limited"] = 0
+
+
+# ---------------------------------------------------------------------------
+# Chain-fallback counters (2026-10-25).
+#
+# The orchestrator builds a fresh AI client for each stage, so a per-instance
+# counter cannot answer "how much did this run degrade". Like the token
+# counters above this is process-wide, and the digest footer reads it.
+# ---------------------------------------------------------------------------
+_fallback_state: Dict[str, int] = {"total": 0, "rate_limited": 0}
+
+
+def record_fallback(rate_limited: bool = False) -> None:
+    """Count one hop to the next provider in a chain."""
+    _fallback_state["total"] += 1
+    if rate_limited:
+        _fallback_state["rate_limited"] += 1
+
+
+def fallback_snapshot() -> Dict[str, int]:
+    """Return {'total': n, 'rate_limited': n} for this run."""
+    return dict(_fallback_state)
