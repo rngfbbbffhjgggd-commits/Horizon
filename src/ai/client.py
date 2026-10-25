@@ -12,7 +12,7 @@ from google.genai import types
 
 from ..models import AIConfig, AIProvider, AI_PROVIDER_DEFAULTS
 from rich import print as rich_print
-from .tokens import record_usage
+from .tokens import record_fallback, record_usage
 
 
 _ENV_VAR_RE = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
@@ -643,6 +643,8 @@ class ChainedAIClient(AIClient):
                 if not self._should_fallback(exc):
                     raise
                 last_error = exc
+                low = str(exc).lower()
+                record_fallback(rate_limited=("429" in low or "rate limit" in low))
                 if i < len(self.configs) - 1:
                     # Name the MODEL, not just the provider: every free tier in
                     # this chain is provider "openai", so the old message read
