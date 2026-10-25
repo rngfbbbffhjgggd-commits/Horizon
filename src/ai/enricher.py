@@ -307,6 +307,15 @@ class ContentEnricher:
         Args:
             item: Content item to enrich (modified in-place via metadata)
         """
+        # Headline-only items (Google News / RSS entries carrying a one-line
+        # blurb) give the writer nothing but a headline, so it fills the item by
+        # describing what the source failed to disclose. Measured 2026-10-25: 3
+        # of 25 items were flagged for exactly that. Backfill used to run ONLY
+        # when the content filter rejected the call, so these items never got
+        # the article. _backfill_content() has its own "already rich" guard.
+        if _plain_len(item.content or "") < self._BACKFILL_MIN_CHARS:
+            await self._backfill_content(item)
+
         # Extract content text and comments separately
         content_text = ""
         comments_text = ""
