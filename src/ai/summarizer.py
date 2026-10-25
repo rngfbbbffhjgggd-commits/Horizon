@@ -104,6 +104,7 @@ class DailySummarizer:
         date: str,
         total_fetched: int,
         language: str = "en",
+        runtime_note: str = "",
     ) -> str:
         """Generate daily summary in Markdown format.
 
@@ -114,6 +115,9 @@ class DailySummarizer:
             date: Date string (YYYY-MM-DD)
             total_fetched: Total number of items fetched before filtering
             language: Output language, either "en" or "zh"
+            runtime_note: Optional footer text saying which model link did the
+                work this run (built by
+                HorizonOrchestrator._model_runtime_note). Empty means no footer.
 
         Returns:
             str: Markdown formatted summary
@@ -142,7 +146,11 @@ class DailySummarizer:
 
         parts = [self._format_item(item, labels, language, i + 1) for i, item in enumerate(items)]
 
-        return header + toc + "".join(parts)
+        footer = ""
+        if runtime_note:
+            footer = "\n---\n\n" + runtime_note.strip() + "\n"
+
+        return header + toc + "".join(parts) + footer
 
     def generate_webhook_overview(
         self,
