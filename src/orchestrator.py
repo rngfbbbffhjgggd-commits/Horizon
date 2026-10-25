@@ -29,7 +29,7 @@ from .ai.client import create_ai_client
 from .ai.analyzer import ContentAnalyzer
 from .ai.summarizer import DailySummarizer
 from .ai.enricher import ContentEnricher, TranslationFixer
-from .ai.tokens import get_usage_snapshot
+from .ai.tokens import fallback_snapshot, get_usage_snapshot
 
 
 _TRACKING_QUERY_PARAMETERS = {
@@ -547,7 +547,12 @@ class HorizonOrchestrator:
             today = (datetime.now(timezone.utc) + timedelta(hours=8)).strftime("%Y-%m-%d")
             for lang in self.config.ai.languages:
                 summarizer = DailySummarizer()
-                summary = await summarizer.generate_summary(important_items, today, len(all_items), language=lang)
+                # Model footer on the Chinese digest only (see _model_runtime_note).
+                note = self._model_runtime_note() if lang == "zh" else ""
+                summary = await summarizer.generate_summary(
+                    important_items, today, len(all_items), language=lang,
+                    runtime_note=note,
+                )
 
                 # Save to data/summaries/
                 summary_path = self.storage.save_daily_summary(today, summary, language=lang)
@@ -1655,6 +1660,64 @@ class HorizonOrchestrator:
 
         return await analyzer.analyze_batch(items)
 
+    def _model_runtime_note(self) -> str:
+        """One short footer for the digest: who wrote this issue, and did it degrade?
+
+        Added 2026-10-25 at the reader's request. The free-tier links throttled
+        140 times in a single run and roughly a third of the writing silently
+        fell to the old fallback model; nothing on the published page showed
+        that, so quality could drop without anyone noticing.
+
+        Levels are deliberately blunt, because the question is "do I need to ask
+        about this?", not a dashboard:
+          正常      the primary link produced >= 90% of the tokens (a real
+                    no-fallback day; the 2026-10-25 run was only 67%, so it does
+                    NOT qualify)
+          部分降级  30-90%, i.e. a visible slice was written by the fallback
+          已降级    < 30% (or nothing at all)
+        """
+        usage = get_usage_snapshot()
+        per = {k: v.total for k, v in usage.per_provider.items() if v.total > 0}
+        if not per:
+            return ""
+
+        chain = self.config.ai.chain
+        if not chain:
+            model = self.config.ai.model
+            return (f"**本期模型**：`{model}`（单链路，没有降级机制）。\n")
+
+        primary_key = f"{chain[0].provider.value}:{chain[0].model}"
+        floor_key = f"{chain[-1].provider.value}:{chain[-1].model}"
+        total = sum(per.values())
+        share = per.get(primary_key, 0) / total if total else 0.0
+        floor_share = per.get(floor_key, 0) / total if total else 0.0
+
+        if share >= 0.90:
+            level = "正常"
+        elif share >= 0.30:
+            level = "部分降级"
+        else:
+            level = "已降级"
+
+        fb = fallback_snapshot()
+        bits = [f"主通道 `{chain[0].model}` 承担 {share * 100:.0f}%"]
+        if floor_share > 0.01 and floor_key != primary_key:
+            bits.append(f"兜底 `{chain[-1].model}` 承担 {floor_share * 100:.0f}%")
+        if fb.get("total"):
+            extra = f"（其中限流 {fb['rate_limited']} 次）" if fb.get("rate_limited") else ""
+            bits.append(f"自动切换 {fb['total']} 次{extra}")
+        note = f"**本期模型运行状态：{level}** ｜ " + "，".join(bits) + "。\n"
+        note += "\n模型用量：" + "，".join(
+            f"`{k}` {v / 1000:.0f}k"
+            for k, v in sorted(per.items(), key=lambda kv: -kv[1])
+        ) + f"（合计 {total / 1000:.0f}k tokens）。\n"
+        if level != "正常":
+            note += (
+                "\n> 免费池限流时，本期有一部分条目是由兜底模型写的，内容会比平时薄。"
+                "看到这行可以直接找维护者查。\n"
+            )
+        return note
+
     async def _generate_summary(
         self,
         items: List[ContentItem],
@@ -1677,5 +1740,11 @@ class HorizonOrchestrator:
 
         summarizer = DailySummarizer()
 
-        return await summarizer.generate_summary(items, date, total_fetched, language=language)
+        # The model footer goes on the Chinese digest only: that is the page the
+        # reader actually reads, and the note is written in Chinese.
+        runtime_note = self._model_runtime_note() if language == "zh" else ""
+
+        return await summarizer.generate_summary(
+            items, date, total_fetched, language=language, runtime_note=runtime_note
+        )
 
