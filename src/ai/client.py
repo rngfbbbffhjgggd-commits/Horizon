@@ -644,9 +644,15 @@ class ChainedAIClient(AIClient):
                     raise
                 last_error = exc
                 if i < len(self.configs) - 1:
+                    # Name the MODEL, not just the provider: every free tier in
+                    # this chain is provider "openai", so the old message read
+                    # "falling back to openai..." 158 times in one run and made
+                    # it impossible to tell which link actually served.
+                    here = self.configs[i]
+                    nxt = self.configs[i + 1]
                     rich_print(
-                        f"\n[yellow]Provider {self.configs[i].provider.value} failed ({exc}), "
-                        f"falling back to {self.configs[i + 1].provider.value}...[/yellow]"
+                        f"\n[yellow]{here.provider.value}:{here.model} failed ({exc}), "
+                        f"falling back to {nxt.provider.value}:{nxt.model}...[/yellow]"
                     )
         raise RuntimeError(f"All providers failed. Last error: {last_error}")
 
