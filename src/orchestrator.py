@@ -942,6 +942,7 @@ class HorizonOrchestrator:
         items: List[ContentItem],
         *,
         log: bool = True,
+        min_keep: int = 0,
     ) -> List[ContentItem]:
         """Merge items covering the same topic using AI semantic deduplication.
 
@@ -1030,10 +1031,10 @@ class HorizonOrchestrator:
             pass_items: List[ContentItem],
             batch_size: int,
             pass_label: str,
-        ) -> List[ContentItem]:
-            """Run one dedup pass over pass_items; returns surviving items."""
+        ) -> tuple[List[ContentItem], List[ContentItem]]:
+            """Run one dedup pass; returns (survivors, dropped items)."""
             if len(pass_items) <= 1:
-                return pass_items
+                return pass_items, []
 
             batches = [
                 pass_items[i : i + batch_size]
@@ -1069,7 +1070,7 @@ class HorizonOrchestrator:
                     )
 
             if not duplicate_groups:
-                return pass_items
+                return pass_items, []
 
             drop_indices: set[int] = set()
             for primary_idx, dup_idxs, distinct_points in duplicate_groups:
@@ -1103,16 +1104,25 @@ class HorizonOrchestrator:
                         )
                     drop_indices.add(dup_idx)
 
-            return [it for i, it in enumerate(pass_items) if i not in drop_indices]
+            dropped = [it for i, it in enumerate(pass_items) if i in drop_indices]
+            return (
+                [it for i, it in enumerate(pass_items) if i not in drop_indices],
+                dropped,
+            )
 
         ai_client = create_ai_client(self.config.ai)
 
         # Pass 1 with the default batch size.
-        working = await _dedup_pass(ai_client, items, _DEDUP_BATCH_SIZES[0], "pass1")
+        working, dropped_items = await _dedup_pass(
+            ai_client, items, _DEDUP_BATCH_SIZES[0], "pass1"
+        )
 
         # Pass 2 with a different batch size to catch cross-batch duplicates.
         if len(working) > _DEDUP_BATCH_SIZES[0] and len(_DEDUP_BATCH_SIZES) > 1:
-            working = await _dedup_pass(ai_client, working, _DEDUP_BATCH_SIZES[1], "pass2")
+            working, dropped2 = await _dedup_pass(
+                ai_client, working, _DEDUP_BATCH_SIZES[1], "pass2"
+            )
+            dropped_items.extend(dropped2)
 
         # Pass 3 (final, unbatched): send EVERY remaining item in ONE request so
         # no cross-batch duplicate pair can survive. Added 2026-09-10 after the
@@ -1121,11 +1131,32 @@ class HorizonOrchestrator:
         # surviving set is small enough to fit comfortably in one prompt.
         if 1 < len(working) <= _DEDUP_FULL_PASS_MAX:
             before = len(working)
-            working = await _dedup_pass(ai_client, working, len(working), "pass3-full")
+            working, dropped3 = await _dedup_pass(
+                ai_client, working, len(working), "pass3-full"
+            )
+            dropped_items.extend(dropped3)
             if log and len(working) < before:
                 self.console.print(
                     f"[dim]   dedup: final full-list pass removed "
                     f"{before - len(working)} more duplicate(s)[/dim]"
+                )
+
+        # ---- candidate-pool floor (2026-10-26) -------------------------------
+        # The model's groupings are trusted verbatim above, and on 2026-10-26 a
+        # throttled/mixed chain returned nonsense groups: 180 scored items became
+        # 60, then 17, and the digest shipped with 17 entries. Wrong merges that
+        # night included 乒乓球男双 vs 女双 and 伊朗无人机 vs 加沙空袭. Dedup must
+        # never shrink the pool below one full edition, so restore the
+        # highest-scored dropped items until the floor is met.
+        if min_keep > 0 and len(working) < min_keep and dropped_items:
+            dropped_items.sort(key=lambda it: -(it.ai_score or 0))
+            need = min(min_keep - len(working), len(dropped_items))
+            restored = dropped_items[:need]
+            working = working + restored
+            if log:
+                self.console.print(
+                    f"🧹 Dedup restored {len(restored)} item(s) to keep the "
+                    f"candidate pool at {len(working)} (floor {min_keep})\n"
                 )
 
         return working
@@ -1179,7 +1210,14 @@ class HorizonOrchestrator:
                 self.console.print(
                     f"🔤 Merged {title_removed} title-similar duplicates\n"
                 )
-            deduped_items = await self.merge_topic_duplicates(deduped_items, log=log)
+            deduped_items = await self.merge_topic_duplicates(
+                deduped_items,
+                log=log,
+                # Never let dedup shrink the pool below one full edition plus
+                # the enrichment spares (the 2026-10-26 run shipped 17 items
+                # because a bad grouping pass was trusted verbatim).
+                min_keep=(self.config.filtering.max_items or 0) + _DIGEST_ENRICH_BUFFER,
+            )
         topic_dedup_removed = len(threshold_items) - len(deduped_items)
 
         if log and topic_dedup_removed:
