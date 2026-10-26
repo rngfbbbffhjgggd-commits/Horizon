@@ -11,7 +11,7 @@
     "languages": [
       "zh"
     ],
-    "analysis_concurrency": 3,
+    "analysis_concurrency": 2,
     "enrichment_concurrency": 3,
     "translation": {
       "provider": "openai",
