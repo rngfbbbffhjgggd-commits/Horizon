@@ -208,9 +208,15 @@ class OpenAIClient(AIClient):
         )
         fallback = "no_key" if needs_no_key else None
         api_key = _resolve_api_key(config, fallback=fallback)
+        # A real key from the environment must win. Before 2026-10-27 the header
+        # was blanked whenever allow_missing_key was set, so adding KILO_API_KEY
+        # would have had NO effect at all -- the gateway kept seeing an anonymous
+        # request and kept hitting its promotion quota.
+        env_key = os.getenv(config.api_key_env or "", "").strip()
 
         kwargs = {"api_key": api_key}
-        if config.allow_missing_key and config.provider != AIProvider.OLLAMA:
+        if (config.allow_missing_key and config.provider != AIProvider.OLLAMA
+                and not env_key):
             # Measured on api.kilo.ai (2026-10-21): no Authorization header ->
             # 200, "Authorization: Bearer no_key" -> 401 INVALID_TOKEN,
             # "Authorization: <empty>" -> 200. The SDK always sends
