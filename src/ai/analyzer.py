@@ -23,6 +23,16 @@ DEFAULT_THROTTLE_SEC = 0.0
 # array parsing harder.
 BATCH_SIZE = 6
 
+# Output budget per item for a batched call. This was 350, which was enough for
+# the terse old model but NOT for the free tier's 550B model: measured
+# 2026-10-27 on a real 6-item batch, it returned finish_reason="length" at
+# exactly 2100 completion tokens, the JSON was cut mid-object, the parse failed
+# and all 6 items fell through to separate per-item calls -- each re-sending the
+# ~4.8k-token system prompt. That is where the free quota went: 17 such failures
+# in one run cost ~102 extra calls (623k input tokens). max_tokens is only a cap,
+# so raising it costs nothing when the model finishes early.
+BATCH_OUTPUT_TOKENS_PER_ITEM = 700
+
 # Prompt payload truncation limits (characters) — keeps per-item input small.
 CONTENT_LIMIT = 700
 COMMENT_LIMIT = 800
@@ -236,7 +246,7 @@ class ContentAnalyzer:
                 response = await self.client.complete(
                     system=CONTENT_ANALYSIS_SYSTEM,
                     user=user_prompt,
-                    max_tokens=BATCH_SIZE * 350,
+                    max_tokens=BATCH_SIZE * BATCH_OUTPUT_TOKENS_PER_ITEM,
                 )
             except Exception as e:
                 print(f"Batch analysis call failed ({e}); retrying")
