@@ -2,20 +2,34 @@ name: Daily Horizon Summary
 
 on:
   schedule:
-    # UTC 19:00 = 北京时间 03:00, 提前生成保证早上起床前有日报
-    - cron: "0 19 * * *"
-    # Fallback (added 2026-10-15). UTC 02:30 = Beijing 10:30.
+    # UTC 16:10 = Beijing 00:10. Moved here from 19:00Z on 2026-10-28.
     #
-    # Why this slot: the primary run is queued by GitHub for 3-6h (measured over
-    # 20 runs: cron 19:00Z, actual start 22:01Z-01:05Z, finish by 01:43Z at the
-    # latest). An earlier fallback -- e.g. Beijing 06:30 / 22:30Z, the first
-    # thing I proposed -- would have started WHILE the primary was still running.
+    # Why: the 2026-10-28 issue only went live at 11:21 Beijing. Two costs stack
+    # up. GitHub queued the 19:00Z slot for 3h50m (measured delays over eight
+    # runs: 2h23m-4h00m), and that run then took 4h31m because 88 of its ~90
+    # six-item analysis batches fell back to per-item calls.
     #
-    # Why it exists: on 2026-10-14 the primary was killed mid-run by a runner
+    # Why 16:10Z and no earlier: the post is dated with
+    # `date -u -d '+8 hours'` taken at run start, so a start before 16:00Z would
+    # stamp YESTERDAY's Beijing date on it, find that file already on gh-pages
+    # and make the guard skip the whole day. 16:10 leaves a 10 minute margin and
+    # is not on the hour, because GitHub documents the top of every hour as its
+    # peak queue time.
+    - cron: "10 16 * * *"
+    # Fallbacks (added 2026-10-15; second slot 2026-10-28).
+    #
+    # Why they exist: on 2026-10-14 the primary was killed mid-run by a runner
     # shutdown ("The runner has received a shutdown signal") and 2026-10-15
-    # shipped no digest at all; nobody noticed until the reader did. This run
-    # skips itself when the day's post already exists (or another digest run is
-    # still going) and only generates when the day is genuinely missing.
+    # shipped no digest at all; nobody noticed until the reader did. Each
+    # fallback skips itself when the day's post already exists, or when another
+    # digest run is still going, and only generates when the day is missing.
+    #
+    # Why these slots: a primary at 16:10Z starts (measured) 18:33Z-20:10Z and a
+    # slow run can still be going at 00:40Z, so a fallback has to sit well after
+    # that to be useful instead of colliding. 20:30Z catches a dropped primary
+    # while it is still early morning in Beijing (its own queue delay lands the
+    # start around 23:00Z-02:30Z). 02:30Z is the last net of the day.
+    - cron: "30 20 * * *"
     - cron: "30 2 * * *"
   workflow_dispatch:
     inputs:
