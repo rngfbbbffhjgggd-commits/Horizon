@@ -219,8 +219,13 @@ class ContentAnalyzer:
         to parse, and because the old code went straight to per-item analysis,
         those 536 items became 536 separate calls -- 3h37m of a 4h31m run. A
         three-item batch still saves half the calls and is far cheaper to get
-        right than six separate ones, and bisection can never cost more than the
-        per-item path it replaces (worst case 2 failed probes per group).
+        right than six separate ones.
+
+        Cost, measured rather than assumed: if EVERY size fails, a 6-item group
+        costs 7 probes + 3 per-item calls instead of the old 2 probes + 6, i.e.
+        about 25% more calls. That case has never been observed (2 of 90
+        six-item batches parsed on 2026-10-28), and the realistic case -- only
+        full-size batches failing -- costs 3 calls per group instead of 8.
         """
         payload = "\n\n".join(
             self._format_item_payload(i + 1, item) for i, item in enumerate(group)
