@@ -23,15 +23,14 @@ DEFAULT_THROTTLE_SEC = 0.0
 # array parsing harder.
 BATCH_SIZE = 6
 
-# Output budget per item for a batched call. This was 350, which was enough for
-# the terse old model but NOT for the free tier's 550B model: measured
-# 2026-10-27 on a real 6-item batch, it returned finish_reason="length" at
-# exactly 2100 completion tokens, the JSON was cut mid-object, the parse failed
-# and all 6 items fell through to separate per-item calls -- each re-sending the
-# ~4.8k-token system prompt. That is where the free quota went: 17 such failures
-# in one run cost ~102 extra calls (623k input tokens). max_tokens is only a cap,
-# so raising it costs nothing when the model finishes early.
-BATCH_OUTPUT_TOKENS_PER_ITEM = 700
+# Output budget per item for a batched call. This was 350, then 700 (2026-10-27:
+# the free tier's 550B model returned finish_reason="length" at exactly 2100 on a
+# 6-item batch). 700 was still too tight: on 2026-10-28 88 of 90 six-item batches
+# failed to parse and every one of them was full-size, while a 6-item batch with
+# 800-char comment sections already used 3408 of the 4200 available tokens
+# (measured offline). max_tokens is only a cap, so raising it costs nothing when
+# the model finishes early; what it buys is a reply that is not cut mid-object.
+BATCH_OUTPUT_TOKENS_PER_ITEM = 1000
 
 # Prompt payload truncation limits (characters) — keeps per-item input small.
 CONTENT_LIMIT = 700
@@ -213,17 +212,36 @@ class ContentAnalyzer:
         return items
 
     async def _analyze_group(self, group: List[ContentItem]) -> None:
-        """One batched AI call for a group; retry once, then fall back to
-        per-item analysis so a bad response never drops the whole group."""
+        """One batched AI call for a group.
+
+        On failure the group is SPLIT IN HALF and retried before falling back to
+        per-item calls. Rationale (2026-10-28): 88 of 90 six-item batches failed
+        to parse, and because the old code went straight to per-item analysis,
+        those 536 items became 536 separate calls -- 3h37m of a 4h31m run. A
+        three-item batch still saves half the calls and is far cheaper to get
+        right than six separate ones, and bisection can never cost more than the
+        per-item path it replaces (worst case 2 failed probes per group).
+        """
         payload = "\n\n".join(
             self._format_item_payload(i + 1, item) for i, item in enumerate(group)
         )
         user_prompt = BATCH_CONTENT_ANALYSIS_USER.format(items=payload)
 
         results = await self._try_batch_request(user_prompt)
-        if results is not None and len(results) >= len(group):
-            for i, item in enumerate(group):
-                self._apply_result(item, results[i])
+        if results is not None:
+            if len(results) >= len(group):
+                for i, item in enumerate(group):
+                    self._apply_result(item, results[i])
+                return
+            print(
+                f"Warning: batch analysis returned {len(results)} result(s) for "
+                f"{len(group)} items, splitting the group"
+            )
+
+        if len(group) > 1:
+            mid = len(group) // 2
+            await self._analyze_group(group[:mid])
+            await self._analyze_group(group[mid:])
             return
 
         print(
@@ -240,7 +258,13 @@ class ContentAnalyzer:
                 item.ai_summary = item.title
 
     async def _try_batch_request(self, user_prompt: str) -> Optional[List[dict]]:
-        """Send the batched request; retry once on failure or unparsable output."""
+        """Send the batched request; retry a FAILED CALL once.
+
+        An unparsable reply is not retried with the same payload: the caller
+        splits the group instead, which is both cheaper (3 items instead of 6)
+        and likelier to parse. Retrying the identical payload cost 88 wasted
+        six-item calls on 2026-10-28, the most expensive call of the run.
+        """
         for _attempt in range(2):
             try:
                 response = await self.client.complete(
@@ -254,6 +278,14 @@ class ContentAnalyzer:
             results = self._parse_batch_response(response)
             if results is not None:
                 return results
+            # Keep the shape of the failure in the log. Until 2026-10-28 the run
+            # only said "could not parse", which cannot distinguish a truncated
+            # reply from a refusal or a differently shaped object.
+            print(
+                "  [batch] unparsable reply: %d chars, starts %r, ends %r"
+                % (len(response), response[:80], response[-40:])
+            )
+            return None
         return None
 
     @retry(
