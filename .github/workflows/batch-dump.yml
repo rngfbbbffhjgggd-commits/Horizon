@@ -108,6 +108,7 @@ jobs:
                       verdicts.append(("INVALID", str(e)[:200], repr(obj)[:300]))
 
           blob = {
+              "scenario": "real-feed-6",
               "http": r.status_code if not ok else 200,
               "items": len(group),
               "prompt_chars": len(user),
@@ -122,4 +123,84 @@ jobs:
           print("DUMP_B64_BEGIN")
           print(base64.b64encode(json.dumps(blob, ensure_ascii=False).encode("utf-8")).decode("ascii"))
           print("DUMP_B64_END")
+
+          # ---- second scenario: production-SIZED payload (700 content + 800 comments per
+          # item, two near-duplicate pairs, mixed Chinese/English) with the real key.
+          COMMENTS = (
+              "--- Top Comments ---\n"
+              "user_a: we tried this on a 4TB dataset and the index build took nine hours, "
+              "which is slower than the docs claim.\n"
+              "user_b: the breaking changes are the real story here, half our dashboards needed edits.\n"
+              "user_c: benchmarks look good but they were run on a single node, so take them with salt.\n"
+              "user_d: anyone know whether the old format is still readable after the upgrade?\n"
+              "user_e: nine hours for 4TB matches what we saw, not a regression, just a bigger dataset.\n"
+              "用户甲: 这个政策对中小企业影响更大，资质门槛实际上抬高了成本。\n"
+              "用户乙: 关键是执行，过去类似规定落地时经常走样。\n"
+          )
+          BODY = (
+              "The company said on Tuesday that the new platform would begin rolling out to enterprise "
+              "customers in the first quarter, with a staged migration for existing deployments. Engineers "
+              "familiar with the work described the change as a rewrite of the ingestion layer rather than "
+              "an incremental patch, and said the old pipeline would keep running in parallel for at least "
+              "six months. Analysts covering the sector noted that the announcement lands just weeks before "
+              "the competitor is expected to ship its own update, which some see as an attempt to set the "
+              "narrative early. A spokesperson declined to comment on pricing, saying only that existing "
+              "contracts would be honoured through the transition period and that no layoffs were planned. "
+              "Regulators in two markets have asked for more detail on how customer data will be migrated."
+          )
+          CN = (
+              "监管部门表示，新规自下月起施行，覆盖范围包括证券公司、基金公司与第三方销售平台，"
+              "要求在产品推介环节明示风险等级并留存记录。多位业内人士认为，短期内第三方销售规模可能下滑，"
+              "但长期有利于把营销拉回持牌渠道。也有中小机构担心合规成本上升，正在评估自有渠道的投放效率。"
+              "公告发布后，相关板块小幅震荡，市场等待实施细则进一步明确。"
+          )
+          big_rows = []
+          for i in range(6):
+              title = ("Company %d rewrites ingestion layer ahead of rival launch" % (i + 1)) if i % 2 == 0 \
+                  else ("第 %d 家机构发布新规征求意见稿" % (i + 1))
+              body = BODY if i % 2 == 0 else CN
+              text = "Item %d:\nTitle: %s\nSource: hackernews\nURL: https://example.com/%d\nContent: %s" % (
+                  i + 1, title, i + 1, body[:700])
+              text += "\nCommunity Comments:\n" + COMMENTS
+              text += "\nDiscussion: https://news.ycombinator.com/item?id=%d" % (4000000 + i)
+              text += "\nEngagement: score: 412, 187 comments"
+              big_rows.append(text)
+          big_payload = "\n\n".join(big_rows)
+          big_user = prompts.BATCH_CONTENT_ANALYSIS_USER.format(items=big_payload)
+          body_big = {"model": "nvidia/nemotron-3-ultra-550b-a55b:free", "temperature": 0.3,
+                      "max_tokens": budget,
+                      "messages": [{"role": "system", "content": prompts.CONTENT_ANALYSIS_SYSTEM},
+                                   {"role": "user", "content": big_user}]}
+          with httpx.Client(timeout=300.0) as c:
+              r2 = c.post("https://api.kilo.ai/api/gateway/chat/completions", json=body_big,
+                          headers={"Content-Type": "application/json", "Authorization": auth})
+          j2 = r2.json()
+          ch2 = (j2.get("choices") or [{}])[0]
+          reply2 = (ch2.get("message") or {}).get("content") or ""
+          parsed2 = AZ.ContentAnalyzer._parse_batch_response(reply2)
+          verdicts2 = []
+          if parsed2 is not None:
+              for obj in parsed2[:8]:
+                  try:
+                      res = AZ.AnalysisResult.model_validate(obj)
+                      verdicts2.append(("VALID", res.score, sorted(obj)))
+                  except Exception as e:
+                      verdicts2.append(("INVALID", str(e)[:200], repr(obj)[:300]))
+
+          blob2 = {
+              "scenario": "production-sized-6",
+              "http": r2.status_code,
+              "items": 6,
+              "prompt_chars": len(big_user),
+              "budget": budget,
+              "finish_reason": ch2.get("finish_reason"),
+              "completion_tokens": (j2.get("usage") or {}).get("completion_tokens"),
+              "payload": big_payload,
+              "reply": reply2,
+              "parsed_count": None if parsed2 is None else len(parsed2),
+              "verdicts": verdicts2,
+          }
+          print("DUMP2_B64_BEGIN")
+          print(base64.b64encode(json.dumps(blob2, ensure_ascii=False).encode("utf-8")).decode("ascii"))
+          print("DUMP2_B64_END")
           PYDUMP
