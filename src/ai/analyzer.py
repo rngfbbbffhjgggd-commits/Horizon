@@ -163,20 +163,35 @@ class ContentAnalyzer:
         )
 
     @staticmethod
-    def _apply_result(item: ContentItem, raw) -> None:
-        """Validate one parsed dict and write it onto the item."""
+    def _validate_result(raw) -> Optional["AnalysisResult"]:
+        """Return a validated AnalysisResult, or None if the object is the wrong shape."""
         try:
-            result = AnalysisResult.model_validate(raw)
+            return AnalysisResult.model_validate(raw)
         except (ValidationError, TypeError):
-            item.ai_score = 0.0
-            item.ai_reason = "Analysis response parse failed"
-            item.ai_summary = item.title
-            item.ai_tags = []
-            return
+            return None
+
+    @staticmethod
+    def _write_result(item: ContentItem, result: "AnalysisResult") -> None:
         item.ai_score = result.score
         item.ai_reason = result.reason
         item.ai_summary = result.summary
         item.ai_tags = result.tags
+
+    @staticmethod
+    def _apply_result(item: ContentItem, raw) -> None:
+        """Validate one parsed dict and write it onto the item."""
+        result = ContentAnalyzer._validate_result(raw)
+        if result is None:
+            # Distinguishable on purpose: "parse failed" used to hide whether the
+            # reply was unparsable or merely the wrong shape. On 2026-10-29 that
+            # silence cost a whole edition -- every item ended up at 0.0 and the
+            # digest shipped empty with nothing in the log to say why.
+            item.ai_score = 0.0
+            item.ai_reason = "Analysis object failed schema validation"
+            item.ai_summary = item.title
+            item.ai_tags = []
+            return
+        ContentAnalyzer._write_result(item, result)
 
     async def analyze_batch(self, items: List[ContentItem]) -> List[ContentItem]:
         """Analyze items with AI, batching several items per request to cut
@@ -235,13 +250,25 @@ class ContentAnalyzer:
         results = await self._try_batch_request(user_prompt)
         if results is not None:
             if len(results) >= len(group):
-                for i, item in enumerate(group):
-                    self._apply_result(item, results[i])
-                return
-            print(
-                f"Warning: batch analysis returned {len(results)} result(s) for "
-                f"{len(group)} items, splitting the group"
-            )
+                wanted = results[: len(group)]
+                validated = [self._validate_result(r) for r in wanted]
+                bad = [(i, r) for i, (res, r) in enumerate(zip(validated, wanted))
+                       if res is None]
+                if not bad:
+                    for i, item in enumerate(group):
+                        self._write_result(item, validated[i])
+                    return
+                idx, raw = bad[0]
+                print(
+                    f"Warning: {len(bad)} of {len(group)} batch object(s) failed schema "
+                    f"validation, splitting the group. first bad object ({idx + 1}): "
+                    f"{str(raw)[:220]!r}"
+                )
+            else:
+                print(
+                    f"Warning: batch analysis returned {len(results)} result(s) for "
+                    f"{len(group)} items, splitting the group"
+                )
 
         if len(group) > 1:
             mid = len(group) // 2
