@@ -61,23 +61,36 @@ class ContentAnalyzer:
     def _parse_batch_response(response: str) -> Optional[List[dict]]:
         """Parse a JSON array of analysis results from a batched response.
 
-        Tries direct parse, fenced code blocks, then the first balanced
-        ``[...]`` region. Returns a list of dicts or None.
+        ONLY a non-empty list of OBJECTS counts (2026-10-29). Before this check
+        any list was accepted, so when the model answered with a single object
+        instead of an array, the balanced-bracket fallback below returned that
+        object's TAG list -- ["US politics", ...] -- as if it were the analyses.
+        The caller then saw a short count (5 for 6, 4 for 6 ...), split the group,
+        and at the last level applied those strings as results: every object
+        failed validation, every score became 0.0, and the edition shipped empty
+        with no diagnostic. A tag list is not a result set, so say so here.
         """
+        def usable(data) -> Optional[List[dict]]:
+            if not isinstance(data, list) or not data:
+                return None
+            if not all(isinstance(o, dict) for o in data):
+                return None
+            return data
+
         text = response.strip()
         try:
-            data = json.loads(text)
-            if isinstance(data, list):
-                return data
+            got = usable(json.loads(text))
+            if got is not None:
+                return got
         except (json.JSONDecodeError, ValueError):
             pass
         for marker in ("```json", "```"):
             if marker in text:
                 try:
                     part = text.split(marker, 1)[1].split("```", 1)[0].strip()
-                    data = json.loads(part)
-                    if isinstance(data, list):
-                        return data
+                    got = usable(json.loads(part))
+                    if got is not None:
+                        return got
                 except (json.JSONDecodeError, ValueError, IndexError):
                     pass
         start = text.find("[")
@@ -90,9 +103,9 @@ class ContentAnalyzer:
                     depth -= 1
                     if depth == 0:
                         try:
-                            data = json.loads(text[start : i + 1])
-                            if isinstance(data, list):
-                                return data
+                            got = usable(json.loads(text[start : i + 1]))
+                            if got is not None:
+                                return got
                         except (json.JSONDecodeError, ValueError):
                             break
         return None
@@ -242,6 +255,15 @@ class ContentAnalyzer:
         six-item batches parsed on 2026-10-28), and the realistic case -- only
         full-size batches failing -- costs 3 calls per group instead of 8.
         """
+        if len(group) == 1:
+            # A one-item "batch" buys nothing: the batch prompt is the one the
+            # model complies with worst (2026-10-29: it answered with a bare
+            # object, whose tag list then got mistaken for results), while the
+            # single-item prompt is the path that produced every usable score on
+            # 10-28. Go straight there instead of spending a call to learn that.
+            await self._analyze_one(group[0])
+            return
+
         payload = "\n\n".join(
             self._format_item_payload(i + 1, item) for i, item in enumerate(group)
         )
@@ -270,24 +292,19 @@ class ContentAnalyzer:
                     f"{len(group)} items, splitting the group"
                 )
 
-        if len(group) > 1:
-            mid = len(group) // 2
-            await self._analyze_group(group[:mid])
-            await self._analyze_group(group[mid:])
-            return
+        mid = len(group) // 2
+        await self._analyze_group(group[:mid])
+        await self._analyze_group(group[mid:])
 
-        print(
-            f"Warning: could not parse batch analysis response for {len(group)} items, "
-            "falling back to per-item analysis"
-        )
-        for item in group:
-            try:
-                await self._analyze_item(item)
-            except Exception as e:
-                print(f"Error analyzing item {item.id}: {e}")
-                item.ai_score = 0.0
-                item.ai_reason = "Analysis failed"
-                item.ai_summary = item.title
+    async def _analyze_one(self, item: ContentItem) -> None:
+        """Analyze a single item through the per-item prompt, never raising."""
+        try:
+            await self._analyze_item(item)
+        except Exception as e:
+            print(f"Error analyzing item {item.id}: {e}")
+            item.ai_score = 0.0
+            item.ai_reason = "Analysis failed"
+            item.ai_summary = item.title
 
     async def _try_batch_request(self, user_prompt: str) -> Optional[List[dict]]:
         """Send the batched request; retry a FAILED CALL once.
