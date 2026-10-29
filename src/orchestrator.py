@@ -162,6 +162,32 @@ def _is_sports_item(item) -> bool:
     # post-enrichment checks have spares to fill in with (2026-09-21).
 _DIGEST_ENRICH_BUFFER = 3
 
+# Refuse to publish an empty edition when the analysed pool was clearly big
+# enough to produce one (2026-10-29). That day 549 items were analysed, every one
+# ended at 0.0 because a batch reply with unvalidated objects was applied
+# silently, and the run published "今日暂无重要动态". Because a post then existed,
+# every later slot skipped the day -- one silent bug cost the whole edition.
+# Publishing nothing is strictly better: the run fails, it is visible in Actions,
+# and the fallback slot can still generate the day.
+_EMPTY_EDITION_MIN_POOL = 100
+
+
+def empty_edition_error(important_items, analyzed_count, threshold,
+                        min_pool=_EMPTY_EDITION_MIN_POOL):
+    """Return a message when a big analysed pool produced no digest at all.
+
+    Deliberately narrow: only the total-collapse case (zero items out of a real
+    pool). A genuinely quiet day yields a small pool and is left alone, and a
+    short-but-nonzero edition stays a judgement call rather than an error.
+    """
+    if important_items or analyzed_count < min_pool:
+        return None
+    return (
+        "Refusing to publish an empty digest: 0 of %d analysed items reached the "
+        "editor (threshold %s). That is a scoring/parsing failure, not a quiet "
+        "news day." % (analyzed_count, threshold)
+    )
+
 # Sources whose per-item fate is printed at the end of a run (2026-10-11).
 # BBC中文: fetched every day, never caught by the rule-based filters (0 of 20 of
 # its current titles match the AI or article regex), yet only 1 of its items
@@ -544,6 +570,14 @@ class HorizonOrchestrator:
             # 7. Generate and save daily summaries for each configured language
             # Use Beijing time (UTC+8) for the summary filename so the date
             # label matches the reader's calendar, not the runner's UTC clock.
+            empty_err = empty_edition_error(
+                important_items, len(prefiltered_items),
+                self.config.filtering.ai_score_threshold,
+            )
+            if empty_err:
+                self.console.print(f"[bold red]❌ {empty_err}[/bold red]\n")
+                raise RuntimeError(empty_err)
+
             today = (datetime.now(timezone.utc) + timedelta(hours=8)).strftime("%Y-%m-%d")
             for lang in self.config.ai.languages:
                 summarizer = DailySummarizer()
