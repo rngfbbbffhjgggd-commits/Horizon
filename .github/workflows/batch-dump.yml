@@ -1,0 +1,125 @@
+name: One-off batch payload dump
+
+# TEMPORARY, removed right after reading. Fetches real feeds, builds the exact
+# six-item analysis payload the digest uses, calls the model with the production
+# settings, and prints the payload plus the raw reply as base64 so nothing is
+# mangled by the log.
+on:
+  workflow_dispatch:
+
+jobs:
+  dump:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: astral-sh/setup-uv@v6
+        with:
+          version: "0.11.26"
+      - name: Install dependencies
+        run: uv sync --extra trafilatura
+      - name: Dump a real payload and reply
+        env:
+          KILO_API_KEY: ${{ secrets.KILO_API_KEY }}
+        run: |
+          uv run python - <<'PYDUMP'
+          import base64, json, os, re, sys
+          from datetime import datetime, timezone
+
+          import feedparser, httpx
+
+          sys.path.insert(0, ".")
+          from src.models import ContentItem
+          from src.ai import analyzer as AZ
+          from src.ai import prompts
+
+          FEEDS = [
+              "https://feeds.arstechnica.com/arstechnica/index",
+              "https://techcrunch.com/feed/",
+              "https://www.36kr.com/feed",
+              "https://feedx.net/rss/bbc.xml",
+          ]
+
+          items = []
+          with httpx.Client(timeout=30.0, follow_redirects=True) as c:
+              for url in FEEDS:
+                  try:
+                      r = c.get(url, headers={"User-Agent": "Mozilla/5.0 HorizonProbe"})
+                      if r.status_code != 200:
+                          print("feed %s -> HTTP %s" % (url, r.status_code))
+                          continue
+                      parsed = feedparser.parse(r.text)
+                  except Exception as e:
+                      print("feed %s -> %s" % (url, type(e).__name__))
+                      continue
+                  print("feed %s -> %d entries" % (url, len(parsed.entries)))
+                  for e in parsed.entries:
+                      body = re.sub(r"<[^>]+>", " ", e.get("summary", "") or e.get("description", ""))
+                      body = re.sub(r"\s+", " ", body).strip()
+                      items.append(ContentItem(
+                          id=(e.get("id") or e.get("link") or "x")[:200],
+                          source_type="rss",
+                          title=(e.get("title") or "")[:300],
+                          url=e.get("link") or "https://example.com",
+                          content=body[:2500],
+                          published_at=datetime.now(timezone.utc),
+                          metadata={},
+                      ))
+                  if len(items) >= 12:
+                      break
+
+          print("collected %d items" % len(items))
+          if len(items) < 3:
+              print("DUMP: NOT_ENOUGH_ITEMS")
+              raise SystemExit(0)
+
+          group = items[:6]
+          an = AZ.ContentAnalyzer.__new__(AZ.ContentAnalyzer)
+          payload = "\n\n".join(an._format_item_payload(i + 1, it) for i, it in enumerate(group))
+          user = prompts.BATCH_CONTENT_ANALYSIS_USER.format(items=payload)
+          budget = AZ.BATCH_SIZE * AZ.BATCH_OUTPUT_TOKENS_PER_ITEM
+
+          body_in = {"model": "nvidia/nemotron-3-ultra-550b-a55b:free", "temperature": 0.3,
+                     "max_tokens": budget,
+                     "messages": [{"role": "system", "content": prompts.CONTENT_ANALYSIS_SYSTEM},
+                                  {"role": "user", "content": user}]}
+          key = os.environ.get("KILO_API_KEY", "").strip()
+          # Use the REAL bearer, exactly like production: the anonymous pool and a signed-in
+          # key may be routed to different backends, which would explain why every local
+          # (anonymous) probe parses cleanly while the production run did not.
+          auth = ("Bearer " + key) if key else ""
+          with httpx.Client(timeout=300.0) as c:
+              r = c.post("https://api.kilo.ai/api/gateway/chat/completions", json=body_in,
+                         headers={"Content-Type": "application/json", "Authorization": auth})
+          ok = r.status_code == 200
+          j = r.json() if ok else {}
+          ch = (j.get("choices") or [{}])[0]
+          reply = (ch.get("message") or {}).get("content") or ""
+          parsed = AZ.ContentAnalyzer._parse_batch_response(reply)
+          verdicts = []
+          if parsed is not None:
+              for obj in parsed[:8]:
+                  try:
+                      res = AZ.AnalysisResult.model_validate(obj)
+                      verdicts.append(("VALID", res.score, sorted(obj)))
+                  except Exception as e:
+                      verdicts.append(("INVALID", str(e)[:200], repr(obj)[:300]))
+
+          blob = {
+              "http": r.status_code if not ok else 200,
+              "items": len(group),
+              "prompt_chars": len(user),
+              "budget": budget,
+              "finish_reason": ch.get("finish_reason"),
+              "completion_tokens": (j.get("usage") or {}).get("completion_tokens"),
+              "payload": payload,
+              "reply": reply,
+              "parsed_count": None if parsed is None else len(parsed),
+              "verdicts": verdicts,
+          }
+          print("DUMP_B64_BEGIN")
+          print(base64.b64encode(json.dumps(blob, ensure_ascii=False).encode("utf-8")).decode("ascii"))
+          print("DUMP_B64_END")
+          PYDUMP
