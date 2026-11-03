@@ -174,6 +174,12 @@ jobs:
           DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
           ZHIPU_API_KEY: ${{ secrets.ZHIPU_API_KEY }}
           KILO_API_KEY: ${{ secrets.KILO_API_KEY }}
+          # 2026-11-03: the free model answers a 6-item analysis request with
+          # ONE object, so batching only multiplied calls; and a 948-item pool
+          # cannot finish inside GitHub's 6-hour job limit. Both knobs are
+          # read by src/ai/analyzer.py and src/orchestrator.py.
+          HORIZON_ANALYSIS_BATCH: "1"
+          HORIZON_MAX_ANALYSIS_ITEMS: "300"
           APIFY_TOKEN: ${{ secrets.APIFY_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
