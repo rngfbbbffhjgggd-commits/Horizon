@@ -1,6 +1,7 @@
 """Main orchestrator coordinating the entire workflow."""
 
 import asyncio
+import os
 import re
 from collections import defaultdict
 from dataclasses import dataclass, field
@@ -170,6 +171,25 @@ _DIGEST_ENRICH_BUFFER = 3
 # Publishing nothing is strictly better: the run fails, it is visible in Actions,
 # and the fallback slot can still generate the day.
 _EMPTY_EDITION_MIN_POOL = 100
+
+
+def cap_analysis_items(items, raw_value):
+    """Trim the AI-analysis pool to HORIZON_MAX_ANALYSIS_ITEMS.
+
+    Returns (items, note). The cap exists because a single analysis call takes
+    ~45s and the pool grew to 948 items on 2026-11-02 -- no configuration
+    finishes that inside GitHub's 6-hour job limit, and three days in a row the
+    run was cancelled mid-analysis and published nothing. 0/unset disables it.
+    """
+    if not raw_value:
+        return items, None
+    raw = str(raw_value).strip()
+    if not raw.isdigit() or int(raw) <= 0 or len(items) <= int(raw):
+        return items, None
+    keep = int(raw)
+    note = (f"✂️ Capped the AI-analysis pool {len(items)} → {keep} items "
+            "(HORIZON_MAX_ANALYSIS_ITEMS) so the run fits its time budget")
+    return items[:keep], note
 
 
 def empty_edition_error(important_items, analyzed_count, threshold,
@@ -439,6 +459,14 @@ class HorizonOrchestrator:
                     f"🔽 Prefiltered {len(merged_items) - len(prefiltered_items)} low-value items "
                     f"→ {len(prefiltered_items)} for AI analysis\n"
                 )
+            # 3c. Hard cap on how many candidates the AI pass may see (2026-11-03).
+            #     See cap_analysis_items() for why; HORIZON_MAX_ANALYSIS_ITEMS
+            #     bounds the work so an edition always ships.
+            prefiltered_items, cap_note = cap_analysis_items(
+                prefiltered_items, os.getenv("HORIZON_MAX_ANALYSIS_ITEMS", "")
+            )
+            if cap_note:
+                print(cap_note)
 
             # 4. Analyze with AI
             analyzed_items = await self._analyze_content(prefiltered_items)
