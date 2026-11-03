@@ -2,6 +2,7 @@
 
 import asyncio
 import json
+import os
 from typing import List, Optional
 from pydantic import BaseModel, Field, ValidationError
 from tenacity import retry, stop_after_attempt, wait_exponential
@@ -206,6 +207,21 @@ class ContentAnalyzer:
             return
         ContentAnalyzer._write_result(item, result)
 
+    def _get_batch_size(self) -> int:
+        """How many items to put in one analysis request.
+
+        HORIZON_ANALYSIS_BATCH=1 switches the pass to plain per-item calls.
+        Needed because the free model stopped honouring the batch prompt: from
+        2026-11-01 on it answered every six-item request with ONE object, so each
+        group was split 6->3->2->1 and re-sent, turning 948 items into thousands
+        of calls and getting the run cancelled at GitHub's 6-hour limit for three
+        days running (2026-11-03).
+        """
+        raw = os.getenv("HORIZON_ANALYSIS_BATCH", "").strip()
+        if raw.isdigit() and int(raw) > 0:
+            return int(raw)
+        return BATCH_SIZE
+
     async def analyze_batch(self, items: List[ContentItem]) -> List[ContentItem]:
         """Analyze items with AI, batching several items per request to cut
         the repeated system-prompt overhead. Falls back to per-item calls
@@ -213,7 +229,8 @@ class ContentAnalyzer:
         """
         throttle_sec = self._get_throttle_sec()
         concurrency = self._get_concurrency()
-        groups = [items[i : i + BATCH_SIZE] for i in range(0, len(items), BATCH_SIZE)]
+        batch_size = self._get_batch_size()
+        groups = [items[i : i + batch_size] for i in range(0, len(items), batch_size)]
         if not groups:
             return items
         semaphore = asyncio.Semaphore(max(1, min(concurrency, len(groups))))
