@@ -41,6 +41,10 @@ on:
 jobs:
   daily-summary:
     runs-on: ubuntu-latest
+    # 2026-11-16: cap the job at 4 hours. The previous three-day outage was
+    # runs cancelled at GitHub's 6-hour default; a 4-hour cap leaves room for
+    # the next slot to retry the same day.
+    timeout-minutes: 240
     permissions:
       contents: write
       # Needed by the fallback guard, which lists this workflow's in-progress
