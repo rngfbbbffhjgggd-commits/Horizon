@@ -1,0 +1,68 @@
+name: One-off fetch originals
+
+# TEMPORARY, removed right after reading: resolves the two Google-News wrappers
+# and prints the publisher article text as base64.
+on:
+  workflow_dispatch:
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: astral-sh/setup-uv@v6
+        with:
+          version: "0.11.26"
+      - name: Install dependencies
+        run: uv sync --extra trafilatura
+      - name: Fetch
+        run: |
+          uv run python - <<'PYFETCH'
+          import base64, json, re, sys
+          import httpx
+
+          URLS = [
+              "https://news.google.com/rss/articles/CBMiuwFBVV95cUxOMkJqT2oyYk82bDFiWGJYTVlhX2hxNWs5NzFWY01GTUZVLV8zbWgycFhsTjhuOEcxUTF4Y1BiTWNxUWp4THZhdjBYVnMxd1lCY0d0YlpIWlltUV9JckxaMG5zSURFaW5VV1hGVnBzcm04TENiQWpjWFVwU211MW9qYTdwbERzX19CQkY4UVNseVFMSERmemJPTGY5bmRScXRmaUNEOGhhbm4yOHVGRmtZLXgyN1VBRnJvVngw?oc=5",
+              "https://news.google.com/rss/articles/CBMia0FVX3lxTE5BRjJGTlVXbmJBQ3E0TmlYRUtNMGFRUFpseURQRTJXQWJycTNnUlIxVmRxYUNScHAzNHh0VGlZZEtoYU1QaXo1YnRhdHdoTjctd0E2dFFMdFQ0VVduVlFNU3RpQkU4Z1poRjc0?oc=5"
+          ]
+
+          HDRS = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+                               "(KHTML, like Gecko) Chrome/131.0 Safari/537.36",
+                  "Accept-Language": "en-US,en;q=0.9"}
+
+          out = []
+          with httpx.Client(timeout=45.0, follow_redirects=True, headers=HDRS) as c:
+              for i, u in enumerate(URLS, 1):
+                  rec = {"n": i, "final_url": "", "status": None, "title": "", "text": "", "err": ""}
+                  try:
+                      r = c.get(u)
+                      rec["status"] = r.status_code
+                      rec["final_url"] = str(r.url)
+                      html = r.text
+                      m = re.search(r"<title[^>]*>(.*?)</title>", html, re.S | re.I)
+                      if m:
+                          rec["title"] = re.sub(r"\s+", " ", m.group(1)).strip()[:300]
+                      try:
+                          import trafilatura
+                          body = trafilatura.extract(html, include_comments=False) or ""
+                      except Exception as e:
+                          body = ""
+                          rec["err"] += " trafilatura:" + type(e).__name__
+                      if not body:
+                          txt = re.sub(r"<script.*?</script>|<style.*?</style>", " ", html, flags=re.S | re.I)
+                          txt = re.sub(r"<[^>]+>", " ", txt)
+                          body = re.sub(r"\s+", " ", txt).strip()[:8000]
+                      rec["text"] = body[:8000]
+                  except Exception as e:
+                      rec["err"] += " " + type(e).__name__ + ": " + str(e)[:200]
+                  out.append(rec)
+
+          print("FETCH_B64_BEGIN")
+          print(base64.b64encode(json.dumps(out, ensure_ascii=False).encode("utf-8")).decode("ascii"))
+          print("FETCH_B64_END")
+          for rec in out:
+              print("item", rec["n"], "status", rec["status"], "len", len(rec["text"]), rec["err"])
+          PYFETCH
