@@ -11,6 +11,7 @@ import re
 import sys
 import os
 from typing import List, Optional
+from urllib.parse import urlparse
 from rich.progress import Progress, SpinnerColumn, BarColumn, TextColumn, MofNCompleteColumn
 from ddgs import DDGS
 from openai import BadRequestError
@@ -46,6 +47,40 @@ def _plain_text(value: str) -> str:
 def _plain_len(value: str) -> int:
     """Length of the readable text, ignoring whitespace."""
     return len(re.sub(r"\s+", "", _plain_text(value)))
+
+
+def _is_navigation_result(url: str) -> bool:
+    """True for results that carry no dated reporting.
+
+    Measured 2026-11-19: an un-timed DuckDuckGo headline search for
+    "Israeli spy chief lobbied joint Iran strikes US visit" returned, in order,
+    Israel - Wikipedia, History of Israel - Wikipedia, the French Wikipedia
+    entry, then three news-site home pages. Feeding those to the writer model is
+    how the 2026-11-19 digest came to describe the 2026 story with a 2024
+    administration, a 2024 election and a 2024 cast of officials: the material
+    it had was an encyclopedia, not the article. With timelimit="m" the same
+    query returned the actual 2026-11-18 report first.
+
+    Encyclopedia entries and outlet home pages are useful for explaining a
+    concept (the concept path keeps them) but useless — and actively misleading —
+    as a substitute for the article itself.
+    """
+    if not url:
+        return True
+    try:
+        parts = urlparse(url)
+    except ValueError:
+        return False
+    host = (parts.netloc or "").lower()
+    path = parts.path or "/"
+    if "wikipedia.org" in host and path.startswith("/wiki/"):
+        return True
+    if host.endswith("news.google.com") or "news.google.com" in host:
+        return True
+    # A home page or a section index: at most one path segment.
+    if path in ("", "/") or path.strip("/").count("/") == 0:
+        return True
+    return False
 
 
 class ContentEnricher:
@@ -117,10 +152,18 @@ class ContentEnricher:
             print(f"🩹 headline search for {item.id}: no query available")
             return ""
         try:
-            results = await self._web_search(query, max_results=5)
+            results = await self._web_search(query, max_results=5, timelimit="m")
         except Exception as e:  # never let a search break the pipeline
             print(f"Warning: headline search failed for {item.id} ({e})")
             return ""
+        # Drop encyclopedia entries and home pages: they are what the 2026-11-19
+        # run turned into "Biden administration" for a Trump-era story.
+        before = len(results or [])
+        results = [r for r in (results or [])
+                   if not _is_navigation_result(str(r.get("url") or ""))]
+        if before and not results:
+            print(f"🩹 headline search for {item.id}: dropped {before} navigation "
+                  f"result(s), no usable material")
         lines = []
         for r in results or []:
             body = str(r.get("body") or "").strip()
@@ -229,23 +272,34 @@ class ContentEnricher:
             ]
             await asyncio.gather(*coros)
 
-    async def _web_search(self, query: str, max_results: int = 5) -> list:
+    async def _web_search(self, query: str, max_results: int = 5,
+                          timelimit: Optional[str] = None) -> list:
         """Search the web for context via DuckDuckGo.
 
         Raised 3 -> 5 results per concept on 2026-09-12: more grounding
         material gives the (small, free) writer model more concrete facts to
         draw on, which is the supply-side fix for thin one-paragraph items.
 
+        `timelimit` (DuckDuckGo's "d"/"w"/"m"/"y") is the fix for the
+        2026-11-19 fact errors: without it the engine returns encyclopedia
+        entries and outlet home pages for an ordinary headline query, and the
+        writer model then narrates a current story with whatever era those
+        pages describe. Callers pass "m" when they want the article itself and
+        "y" when they want to explain a concept.
+
         Returns:
             List of dicts with keys: title, url, body
         """
+        kwargs = {"max_results": max_results}
+        if timelimit:
+            kwargs["timelimit"] = timelimit
         try:
             # Suppress primp "Impersonate ... does not exist" stderr warning
             stderr = sys.stderr
             sys.stderr = open(os.devnull, "w")
             try:
                 ddgs = DDGS()
-                results = await asyncio.to_thread(ddgs.text, query, max_results=max_results)
+                results = await asyncio.to_thread(ddgs.text, query, **kwargs)
             finally:
                 sys.stderr.close()
                 sys.stderr = stderr
@@ -336,7 +390,10 @@ class ContentEnricher:
         all_results = []
         web_sections = []
         for query in queries:
-            results = await self._web_search(query)
+            # "y" one year: a concept explanation may legitimately lean on older
+            # material, unlike the headline rescue above which must land on the
+            # article itself (timelimit="m").
+            results = await self._web_search(query, timelimit="y")
             all_results.extend(results)
             if results:
                 lines = [
