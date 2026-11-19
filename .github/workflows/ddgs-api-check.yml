@@ -1,0 +1,54 @@
+name: One-off DDGS API check
+
+# TEMPORARY, removed right after reading: prints the ddgs version and whether
+# DDGS.text() accepts a time limit on the production runner.
+on:
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: astral-sh/setup-uv@v6
+        with:
+          version: "0.11.26"
+      - name: Install dependencies
+        run: uv sync --extra trafilatura
+      - name: Ask the library
+        run: |
+          uv run python - <<'PYDDGS'
+          import inspect, json
+          import ddgs
+          from ddgs import DDGS
+
+          print("ddgs version :", getattr(ddgs, "__version__", "?"))
+          try:
+              print("text signature:", inspect.signature(DDGS.text))
+          except Exception as e:
+              print("signature failed:", e)
+
+          QUERY = "Israel intelligence chief Washington Iran strike talks"
+
+          def run(label, **kw):
+              try:
+                  r = DDGS().text(QUERY, max_results=6, **kw)
+                  rows = [(x.get("title","")[:70], str(x.get("date") or "no-date")[:10], (x.get("href") or "")[:60]) for x in (r or [])]
+                  print(label, "->", len(rows), "results")
+                  for t, d, u in rows:
+                      print("   ", d, "|", t, "|", u)
+                  return len(rows)
+              except TypeError as e:
+                  print(label, "-> TypeError:", e)
+              except Exception as e:
+                  print(label, "->", type(e).__name__, str(e)[:160])
+              return -1
+
+          n_all = run("no timelimit")
+          n_month = run("timelimit=m", timelimit="m")
+          n_week = run("timelimit=w", timelimit="w")
+          print("SUMMARY no_timelimit=%s month=%s week=%s" % (n_all, n_month, n_week))
+          PYDDGS
