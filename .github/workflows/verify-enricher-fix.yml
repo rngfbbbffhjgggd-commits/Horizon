@@ -1,0 +1,74 @@
+name: One-off verify enricher fix
+
+# TEMPORARY, removed right after reading.
+on:
+  workflow_dispatch:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: astral-sh/setup-uv@v6
+        with:
+          version: "0.11.26"
+      - name: Install dependencies
+        run: uv sync --extra trafilatura
+      - name: Verify
+        run: |
+          uv run python - <<'PYVERIFY'
+          \
+          import asyncio, json, sys
+          from datetime import datetime, timezone
+
+          sys.path.insert(0, ".")
+          from src.ai.enricher import ContentEnricher, _is_navigation_result
+          from src.models import ContentItem, SourceType
+          from ddgs import DDGS
+
+          TITLE = "Israeli spy chief lobbied for joint Iran strikes on US visit"
+
+          async def main():
+              enc = ContentEnricher.__new__(ContentEnricher)
+              item = ContentItem(
+                  id="verify-1119",
+                  title=TITLE,
+                  url="https://news.google.com/rss/articles/CBMiuwFBVV95cUxOMkJqT2oyYk82bDFiWGJYTVlhX2hxNWs5NzFWY01GTUZV",
+                  content="short",
+                  source="Reuters",
+                  source_type=SourceType.RSS,
+                  published_at=datetime.now(timezone.utc),
+                  metadata={"title_zh": TITLE},
+              )
+
+              print("== A. un-timed search (what production used to do) ==")
+              old = DDGS().text(TITLE, max_results=5) or []
+              for r in old:
+                  print("   ", (r.get("title") or "")[:80], "|", (r.get("href") or "")[:70])
+
+              print("== B. the new _search_material() ==")
+              material = await enc._search_material(item)
+              print("   material chars:", len(material))
+              for line in material.splitlines()[:8]:
+                  print("   ", line[:160])
+
+              print("== C. judgement ==")
+              low = material.lower()
+              facts = {
+                  "names the Mossad chief (Gofman)": "gofman" in low,
+                  "mentions the Trump administration": "trump" in low,
+                  "mentions CIA director Ratcliffe": "ratcliffe" in low,
+                  "states 2026": "2026" in low,
+              }
+              for k, v in facts.items():
+                  print("   %-40s %s" % (k, "YES" if v else "no"))
+              print("   %-40s %s" % ("wipe-worthy (empty material)", "yes" if not material.strip() else "no"))
+              print("   %-40s %s" % ("contains a wikipedia URL", "yes" if "wikipedia.org" in low else "no"))
+              ok = facts["names the Mossad chief (Gofman)"] and facts["mentions the Trump administration"]
+              print("VERDICT:", "PASS" if ok else "FAIL")
+
+          asyncio.run(main())
+          PYVERIFY
