@@ -27,8 +27,8 @@ jobs:
           from ddgs import DDGS
 
           QUERIES = [
-              "Israeli spy chief lobbied joint Iran strikes US visit",
-              "\u674e\u5728\u660e \u4e60\u8fd1\u5e73 \u6587\u5316\u4ea4\u6d41 \u9650\u97e9\u4ee4 \u8054\u5408\u65e9\u62a5"
+              "site:zaobao.com \u9650\u97e9\u4ee4 \u674e\u5728\u660e \u4e60\u8fd1\u5e73 \u6587\u5316\u4ea4\u6d41",
+              "\u4e60\u8fd1\u5e73\u4f1a\u674e\u5728\u660e\u63d0\u6587\u5316\u4ea4\u6d41 \u5341\u5e74\u9650\u97e9\u4ee4\u6216\u677e\u7ed1 \u8054\u5408\u65e9\u62a5"
           ]
 
           HDRS = {
@@ -63,7 +63,21 @@ jobs:
           def fetch(url):
               with httpx.Client(timeout=40.0, follow_redirects=True, headers=HDRS) as c:
                   r = c.get(url)
-                  html = r.text
+                  raw = r.content
+                  # Chinese outlets often serve GBK while httpx guesses utf-8; pick whichever
+                  # decodes without replacement characters.
+                  html = None
+                  for enc in ("utf-8", "gb18030", "big5"):
+                      try:
+                          cand = raw.decode(enc)
+                      except UnicodeDecodeError:
+                          continue
+                      if "\ufffd" not in cand:
+                          html = cand
+                          print("  decoded as", enc)
+                          break
+                  if html is None:
+                      html = raw.decode("utf-8", errors="replace")
                   body = ""
                   try:
                       import trafilatura
