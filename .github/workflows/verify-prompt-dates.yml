@@ -80,10 +80,13 @@ jobs:
               print("  head:", body[:180].replace("\n", " "))
               return body
 
-          old_mod = load_prompts("HEAD~2")   # before the prompt fix
+          old_mod = load_prompts("HEAD~3")   # before the prompt fix
           new_mod = load_prompts("HEAD")     # current
           print("old template has {published}:", "{published}" in old_mod.CONTENT_ENRICHMENT_USER)
           print("new template has {published}:", "{published}" in new_mod.CONTENT_ENRICHMENT_USER)
+          if "{published}" in old_mod.CONTENT_ENRICHMENT_USER:
+              print("VERDICT: FAIL - the old revision already contains the fix; wrong ref")
+              raise SystemExit(1)
 
           pub, today = "2026-11-19", "2026-11-20"
           os_, ou = render(old_mod, pub, today)
@@ -98,5 +101,8 @@ jobs:
           print("\n== verdict ==")
           print("  old wrote 2024/2025:", bad(old_body) or "no")
           print("  new wrote 2024/2025:", bad(new_body) or "no")
-          print("VERDICT:", "PASS" if not bad(new_body) else "FAIL")
+          if not old_body.strip() or not new_body.strip():
+              print("VERDICT: FAIL - a call returned empty, nothing was measured")
+          else:
+              print("VERDICT:", "PASS" if not bad(new_body) else "FAIL")
           PYDATES
