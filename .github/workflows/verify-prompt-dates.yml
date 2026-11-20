@@ -72,7 +72,15 @@ jobs:
                              temperature=0.3, max_tokens=1200)
               cl = OpenAIClient(cfg)
               try:
-                  out = asyncio.run(cl.complete(system=system, user=user)) or ""
+                  resp = asyncio.run(cl.client().chat.completions.create(
+                      model=MODEL, temperature=0.3, max_tokens=1600,
+                      messages=[{"role": "system", "content": system},
+                                {"role": "user", "content": user}]))
+                  ch = resp.choices[0]
+                  print("  finish_reason:", ch.finish_reason,
+                        "| usage:", getattr(resp, "usage", None) and
+                        (resp.usage.prompt_tokens, resp.usage.completion_tokens))
+                  out = ch.message.content or ""
               except Exception as e:
                   print(label, "CALL FAILED", type(e).__name__, str(e)[:200])
                   return ""
