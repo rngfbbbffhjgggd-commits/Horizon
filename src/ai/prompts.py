@@ -299,7 +299,7 @@ Field definitions:
 - Any calendar date in your output (a year, a month, a day) MUST appear in the supplied content or web search results. If the material gives no year, write no year.
 - **NEVER convert** a fiscal year, a quarter, a relative expression ("this week", "last month", "recently", "N years ago") or a "since 2022" phrase into a calendar date yourself. Copy the source's own wording: if it says "FY2027 Q2", write "2027 财年第二季度" and stop there.
 - If the material states no date at all, describe the event without one. **A missing date is correct; an invented date is a defect.**
-- Measured failures this rule exists for: on 2026-11-19 an item dated 2026-11-18 was rendered as "2025 年 7 月 29 日", and on 2026-11-20 an item about an FY2027 Q2 earnings call was rendered as "2024 年 11 月 19 日" — the model converted the fiscal quarter using its own memory of an older call.
+- This rule exists because two recent items were published as dated a year or two earlier than their publication date, after the model converted a fiscal quarter using its own memory instead of the material.
 
 Guidelines:
 - EVERY field (except community_discussion when no comments exist) must contain at least one complete sentence — no field may be empty or contain just a phrase
