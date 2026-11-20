@@ -10,6 +10,7 @@ import json
 import re
 import sys
 import os
+from datetime import datetime, timedelta, timezone
 from typing import List, Optional
 from urllib.parse import urlparse
 from rich.progress import Progress, SpinnerColumn, BarColumn, TextColumn, MofNCompleteColumn
@@ -26,6 +27,21 @@ from ..models import ContentItem
 
 _TAG_RE = re.compile(r"<[^>]+>")
 _URL_RE = re.compile(r"https?://\S+")
+_CN_TZ = timezone(timedelta(hours=8))
+
+
+def _cn_date(value) -> str:
+    """Render a timestamp as the Beijing calendar date the digest is dated by.
+
+    The prompt needs an anchor: the writer model is asked for concrete dates,
+    and without knowing which day it is it fills them from its own memory. That
+    is how, on 2026-11-19 and again on 2026-11-20, items dated the day before
+    were described with dates one or two years old.
+    """
+    if isinstance(value, datetime):
+        dt = value if value.tzinfo is not None else value.replace(tzinfo=timezone.utc)
+        return dt.astimezone(_CN_TZ).strftime("%Y-%m-%d")
+    return str(value or "")[:10] or "unknown"
 
 
 def _plain_text(value: str) -> str:
@@ -410,6 +426,8 @@ class ContentEnricher:
         user_prompt = CONTENT_ENRICHMENT_USER.format(
             title=item.title,
             url=str(item.url),
+            published=_cn_date(getattr(item, "published_at", None)),
+            today=_cn_date(datetime.now(timezone.utc)),
             summary=item.ai_summary or item.title,
             score=item.ai_score or 0,
             reason=item.ai_reason or "",
