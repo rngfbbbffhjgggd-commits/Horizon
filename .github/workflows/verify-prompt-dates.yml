@@ -1,0 +1,102 @@
+name: One-off verify prompt dates
+
+# TEMPORARY, removed right after reading.
+on:
+  workflow_dispatch:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 3
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: astral-sh/setup-uv@v6
+        with:
+          version: "0.11.26"
+      - name: Install dependencies
+        run: uv sync --extra trafilatura
+      - name: Compare prompts
+        env:
+          KILO_API_KEY: ${{ secrets.KILO_API_KEY }}
+        run: |
+          uv run python - <<'PYDATES'
+          \
+          import os, re, subprocess, sys, types
+          from datetime import datetime, timezone
+          from openai import OpenAI
+
+          MODEL = "nvidia/nemotron-3-ultra-550b-a55b:free"
+          BASE = "https://api.kilo.ai/api/gateway"
+
+          MATERIAL = (
+              "36氪快讯：11月19日，阿里巴巴发布2027财年第二季度财报。CEO吴泳铭在财报电话会上"
+              "重申2031财年云外部收入1000亿美元、利润率超20%的目标不变。本季度云外部经常性"
+              "收入同比增长67%，经调整EBITA同比增长121%，利润率14.5%；AI相关产品收入"
+              "179.18亿元人民币，占云外部经常性收入49%。"
+          )
+
+          def load_prompts(rev):
+              """Import src/ai/prompts.py as it exists at a given git revision."""
+              src = subprocess.run(["git", "show", "%s:src/ai/prompts.py" % rev],
+                                   capture_output=True, text=True, check=True).stdout
+              mod = types.ModuleType("p_%s" % rev.replace("~", "_").replace(".", "_"))
+              exec(compile(src, "prompts", "exec"), mod.__dict__)
+              return mod
+
+          def render(mod, published, today):
+              user = mod.CONTENT_ENRICHMENT_USER
+              kw = dict(title="阿里巴巴CEO吴泳铭重申2031财年云外部收入1000亿美元目标",
+                        url="https://36kr.com/newsflashes/4076644027290761",
+                        summary="阿里重申2031财年云外部收入1000亿美元目标",
+                        score=7, reason="重大财报指引", tags="Alibaba, Cloud",
+                        content=MATERIAL, comments_section="", web_context="No web search results available.")
+              # Only the new template carries these two fields.
+              if "{published}" in user:
+                  kw["published"] = published
+                  kw["today"] = today
+              return mod.CONTENT_ENRICHMENT_SYSTEM, user.format(**kw)
+
+          client = OpenAI(base_url=BASE, api_key=os.environ.get("KILO_API_KEY") or "x")
+
+          def run(label, system, user):
+              try:
+                  r = client.chat.completions.create(
+                      model=MODEL, temperature=0.3, max_tokens=900,
+                      messages=[{"role": "system", "content": system},
+                                {"role": "user", "content": user}])
+                  out = r.choices[0].message.content or ""
+              except Exception as e:
+                  print(label, "CALL FAILED", type(e).__name__, str(e)[:160])
+                  return ""
+              m = re.search(r'"(?:whats_new_zh)"\s*:\s*"(.+?)"', out, re.S)
+              body = m.group(1) if m else out
+              years = sorted(set(re.findall(r"(20\d\d)\s*年", body)))
+              print("---", label, "---")
+              print("  years mentioned:", years or "none")
+              print("  head:", body[:180].replace("\n", " "))
+              return body
+
+          old_mod = load_prompts("HEAD~2")   # before the prompt fix
+          new_mod = load_prompts("HEAD")     # current
+          print("old template has {published}:", "{published}" in old_mod.CONTENT_ENRICHMENT_USER)
+          print("new template has {published}:", "{published}" in new_mod.CONTENT_ENRICHMENT_USER)
+
+          pub, today = "2026-11-19", "2026-11-20"
+          os_, ou = render(old_mod, pub, today)
+          ns_, nu = render(new_mod, pub, today)
+
+          old_body = run("OLD prompt (no date anchor)", os_, ou)
+          new_body = run("NEW prompt (anchored in 2026)", ns_, nu)
+
+          def bad(text):
+              return [y for y in re.findall(r"(20\d\d)\s*年", text) if y in ("2024", "2025")]
+
+          print("\n== verdict ==")
+          print("  old wrote 2024/2025:", bad(old_body) or "no")
+          print("  new wrote 2024/2025:", bad(new_body) or "no")
+          print("VERDICT:", "PASS" if not bad(new_body) else "FAIL")
+          PYDATES
