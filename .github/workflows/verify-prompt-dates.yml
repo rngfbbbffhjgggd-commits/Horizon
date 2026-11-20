@@ -72,7 +72,9 @@ jobs:
                              temperature=0.3, max_tokens=1200)
               cl = OpenAIClient(cfg)
               try:
-                  resp = asyncio.run(cl.client().chat.completions.create(
+                  from openai import OpenAI
+                  oc = OpenAI(base_url=BASE, api_key=os.environ.get("KILO_API_KEY") or "x")
+                  resp = oc.chat.completions.create(
                       model=MODEL, temperature=0.3, max_tokens=1600,
                       messages=[{"role": "system", "content": system},
                                 {"role": "user", "content": user}]))
