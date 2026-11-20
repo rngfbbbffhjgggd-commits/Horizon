@@ -62,21 +62,24 @@ jobs:
                   kw["today"] = today
               return mod.CONTENT_ENRICHMENT_SYSTEM, user.format(**kw)
 
-          client = OpenAI(base_url=BASE, api_key=os.environ.get("KILO_API_KEY") or "x")
-
           def run(label, system, user):
+              """Use the project's own client so this matches production behaviour."""
+              import asyncio, sys as _s
+              from src.models import AIConfig, AIProvider
+              from src.ai.client import OpenAIClient
+              cfg = AIConfig(provider=AIProvider.OPENAI, model=MODEL, base_url=BASE,
+                             api_key_env="KILO_API_KEY", allow_missing_key=True,
+                             temperature=0.3, max_tokens=1200)
+              cl = OpenAIClient(cfg)
               try:
-                  r = client.chat.completions.create(
-                      model=MODEL, temperature=0.3, max_tokens=900,
-                      messages=[{"role": "system", "content": system},
-                                {"role": "user", "content": user}])
-                  out = r.choices[0].message.content or ""
+                  out = asyncio.run(cl.complete(system=system, user=user)) or ""
               except Exception as e:
-                  print(label, "CALL FAILED", type(e).__name__, str(e)[:160])
+                  print(label, "CALL FAILED", type(e).__name__, str(e)[:200])
                   return ""
+              print("  raw len:", len(out), "| raw head:", out[:120].replace("\n", " "))
               m = re.search(r'"(?:whats_new_zh)"\s*:\s*"(.+?)"', out, re.S)
               body = m.group(1) if m else out
-              years = sorted(set(re.findall(r"(20\d\d)\s*年", body)))
+              years = sorted(set(y for y in re.findall(r"(20\d\d)\s*年", body)))
               print("---", label, "---")
               print("  years mentioned:", years or "none")
               print("  head:", body[:180].replace("\n", " "))
