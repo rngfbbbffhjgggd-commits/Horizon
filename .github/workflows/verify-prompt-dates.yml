@@ -10,7 +10,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 3
+          fetch-depth: 10
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
@@ -26,6 +26,8 @@ jobs:
           uv run python - <<'PYDATES'
           \
           import os, re, subprocess, sys, types
+
+          OLD_REV = "823f5753"
           from datetime import datetime, timezone
           from openai import OpenAI
 
@@ -80,7 +82,7 @@ jobs:
               print("  head:", body[:180].replace("\n", " "))
               return body
 
-          old_mod = load_prompts("HEAD~3")   # before the prompt fix
+          old_mod = load_prompts(OLD_REV)   # 823f5753 = the commit before the prompt fix
           new_mod = load_prompts("HEAD")     # current
           print("old template has {published}:", "{published}" in old_mod.CONTENT_ENRICHMENT_USER)
           print("new template has {published}:", "{published}" in new_mod.CONTENT_ENRICHMENT_USER)
