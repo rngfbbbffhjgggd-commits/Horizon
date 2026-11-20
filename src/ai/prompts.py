@@ -279,7 +279,7 @@ Provide EACH text field in BOTH English and Chinese. Use the following key namin
 Field definitions:
 0. **title** (one short phrase, ≤15 words): A clear, accurate headline for the news item.
 
-1. **whats_new** (2-3 complete sentences): What exactly happened, what changed, what decision was made or what breakthrough occurred. Be specific — name the actors, the place, the date, the amounts, and the concrete outcome.
+1. **whats_new** (2-3 complete sentences): What exactly happened, what changed, what decision was made or what breakthrough occurred. Be specific — name the actors, the place, the amounts, and the concrete outcome. Include a date **only if the material states one** (see the date rules).
 
 2. **why_it_matters** (2-3 complete sentences): Why this is significant, what impact it could have, who will be affected, and how it connects to the broader trend, industry, or policy context. Explain the consequence, not just restate the fact.
 
@@ -294,10 +294,17 @@ Field definitions:
 - All *_zh fields MUST be written in Simplified Chinese (简体中文). 绝对不能用英文写 _zh 字段的内容。Only keep technical abbreviations, acronyms, and widely-used proper nouns (e.g. "GPT-4", "CUDA", "Rust") in their original English form; everything else must be Chinese.
 - **Acronym annotation rule**: In every *_zh field (especially titles, whats_new_zh, why_it_matters_zh, key_details_zh, background_zh), the FIRST time an English abbreviation, acronym, or organization code appears, annotate it with its Chinese full name or a brief explanation in parentheses, e.g. "BP（英国石油公司）", "USAID（美国国际开发署）", "FCC（美国联邦通信委员会）", "ASML（阿斯麦，荷兰光刻机巨头）". Exception: universally known abbreviations such as AI, CEO, GDP, WTO, UN, NATO may stay unannotated. If the same abbreviation appears again later, do NOT repeat the annotation.
 
+**CRITICAL — Date rules (MUST follow; added 2026-11-20 after two measured failures):**
+- The user message gives you this item's **publication date** and **today's date**. For this story, the publication date is "now".
+- Any calendar date in your output (a year, a month, a day) MUST appear in the supplied content or web search results. If the material gives no year, write no year.
+- **NEVER convert** a fiscal year, a quarter, a relative expression ("this week", "last month", "recently", "N years ago") or a "since 2022" phrase into a calendar date yourself. Copy the source's own wording: if it says "FY2027 Q2", write "2027 财年第二季度" and stop there.
+- If the material states no date at all, describe the event without one. **A missing date is correct; an invented date is a defect.**
+- Measured failures this rule exists for: on 2026-11-19 an item dated 2026-11-18 was rendered as "2025 年 7 月 29 日", and on 2026-11-20 an item about an FY2027 Q2 earnings call was rendered as "2024 年 11 月 19 日" — the model converted the fiscal quarter using its own memory of an older call.
+
 Guidelines:
 - EVERY field (except community_discussion when no comments exist) must contain at least one complete sentence — no field may be empty or contain just a phrase
 - **Write for depth, not brevity.** The reader wants to genuinely understand the story, not skim a headline. A typical item should total roughly 9-14 sentences across whats_new + why_it_matters + key_details + background combined. Do NOT stop at one thin sentence per field when the source material and search results support more.
-- **Every paragraph must carry concrete facts — this is what stops the digest from feeling thin.** Each of whats_new_zh, why_it_matters_zh, key_details_zh and background_zh must contain **at least two specific, checkable elements** taken from the material: a number, an amount, a date, a place, an institution, a named person, a unit of measurement, or a stated consequence. A paragraph built only from generalities ("this is significant", "it may have a big impact", "it marks an important step") is a failure — rewrite it around the specifics you actually have.
+- **Every paragraph must carry concrete facts — this is what stops the digest from feeling thin.** Each of whats_new_zh, why_it_matters_zh, key_details_zh and background_zh must contain **at least two specific, checkable elements** taken from the material: a number, an amount, a place, an institution, a named person, a unit of measurement, or a stated consequence. A date counts only when the material states it — do not manufacture one to satisfy this rule. A paragraph built only from generalities ("this is significant", "it may have a big impact", "it marks an important step") is a failure — rewrite it around the specifics you actually have.
 - **Quote rule (2026-10-22, measured):** if the source material contains a direct quotation — text inside quotation marks attributed to a person or institution — then key_details_zh MUST carry at least one of them, translated into Chinese and attributed ("某某表示「……」"). Measured on two real articles that contained 7 and 6 quotations, both the old and the new model produced ZERO real quotations without this rule, because the instruction only listed 引语 among optional items. Never invent a quotation, and never put quotation marks around a mere name or label: only reproduce words that actually appear in the source.
 - **Never write about the source material itself (2026-10-25, measured).** Every sentence must be about the world — what happened, who did it, what it means. Do NOT write sentences whose subject is the article or the material supplied to you: "标题未披露…", "报道未提及…", "素材中没有…", "未给出具体数字", "后续提交的季报将提供…", "两份报道均未引用…". Three items in the 2026-10-25 digest were flagged for exactly this — one of them (Kotak bank Q2) had a single real fact ("net profit +29%") padded out with four sentences describing what the headline failed to disclose. If the material genuinely contains only one fact, then write one short sentence and leave it at that: a short complete item is correct, a long item built from absences is a defect.
 - Do NOT pad to reach a length. If the material supports only a few specifics, keep the paragraph tight rather than repeating or padding it — and never invent facts to fill space.
@@ -315,6 +322,8 @@ CONTENT_ENRICHMENT_USER = """Provide a structured bilingual analysis for the fol
 **News Item:**
 - Title: {title}
 - URL: {url}
+- Published: {published}
+- Today: {today}
 - One-line summary: {summary}
 - Score: {score}/10
 - Reason: {reason}
