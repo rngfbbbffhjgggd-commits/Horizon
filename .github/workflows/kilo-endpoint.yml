@@ -1,0 +1,45 @@
+name: One-off kilo endpoint check
+
+# TEMPORARY, removed right after reading.
+on:
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install httpx
+        run: pip install httpx
+      - name: Compare endpoints
+        env:
+          KILO_API_KEY: ${{ secrets.KILO_API_KEY }}
+        run: |
+          python - <<'PYKILO'
+          \
+          import json, os
+          import httpx
+
+          KEY = os.environ.get("KILO_API_KEY") or ""
+          MODEL = "nvidia/nemotron-3-ultra-550b-a55b:free"
+          H = {"Authorization": "Bearer " + KEY, "Content-Type": "application/json"}
+          BODY = {"model": MODEL, "messages": [{"role": "user", "content": "ping"}], "max_tokens": 6}
+
+          TARGETS = [
+              ("old  api.kilo.ai/api/gateway", "https://api.kilo.ai/api/gateway/chat/completions"),
+              ("new  ai-gateway.kilo.ai/api/v1", "https://ai-gateway.kilo.ai/api/v1/chat/completions"),
+              ("new  no /v1", "https://ai-gateway.kilo.ai/api/chat/completions"),
+              ("models list (old)", "https://api.kilo.ai/api/gateway/models"),
+              ("models list (new)", "https://ai-gateway.kilo.ai/api/v1/models"),
+          ]
+
+          for label, url in TARGETS:
+              try:
+                  if "models" in url:
+                      r = httpx.get(url, headers=H, timeout=40.0)
+                  else:
+                      r = httpx.post(url, headers=H, json=BODY, timeout=60.0)
+                  body = r.text.replace("\n", " ")[:240]
+                  print("%-32s HTTP %-4s %s" % (label, r.status_code, body))
+              except Exception as e:
+                  print("%-32s EXC %s %s" % (label, type(e).__name__, str(e)[:120]))
+          PYKILO
