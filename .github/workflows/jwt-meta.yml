@@ -1,0 +1,58 @@
+name: One-off jwt meta
+
+# TEMPORARY, removed right after reading.
+on:
+  workflow_dispatch:
+
+jobs:
+  meta:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Decode
+        env:
+          KILO_API_KEY: ${{ secrets.KILO_API_KEY }}
+          ZHIPU_API_KEY: ${{ secrets.ZHIPU_API_KEY }}
+        run: |
+          python - <<'PYJWT'
+          \
+          import base64, json, os
+          from datetime import datetime, timezone
+
+          def b64d(seg):
+              seg += "=" * (-len(seg) % 4)
+              return base64.urlsafe_b64decode(seg)
+
+          k = os.environ.get("KILO_API_KEY") or ""
+          print("key length:", len(k))
+          parts = k.split(".")
+          print("segments:", len(parts))
+          if len(parts) != 3:
+              print("not a JWT - cannot read expiry from it")
+          else:
+              try:
+                  payload = json.loads(b64d(parts[1]))
+              except Exception as e:
+                  print("payload decode failed:", type(e).__name__)
+                  payload = {}
+              def show(name):
+                  v = payload.get(name)
+                  if v is None:
+                      print("  %-6s <absent>" % name)
+                  elif isinstance(v, (int, float)):
+                      print("  %-6s %s  (%s)" % (name, v,
+                            datetime.fromtimestamp(v, tz=timezone.utc).strftime("%Y-%m-%d %H:%M:%SZ")))
+                  else:
+                      print("  %-6s %s" % (name, str(v)[:60]))
+              for f in ("iat", "nbf", "exp"):
+                  show(f)
+              print("  claims present:", sorted(payload.keys())[:12])
+              exp = payload.get("exp")
+              if isinstance(exp, (int, float)):
+                  now = datetime.now(timezone.utc).timestamp()
+                  delta = exp - now
+                  print("EXPIRED" if delta < 0 else "VALID",
+                        "- %.1f hours" % (delta / 3600.0))
+
+          z = os.environ.get("ZHIPU_API_KEY") or ""
+          print("\nzhipu key length:", len(z), "| looks like JWT:", z.count(".") == 2)
+          PYJWT
